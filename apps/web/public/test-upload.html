@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Media Upload</title>
+</head>
+<body>
+    <h1>Test Media Upload</h1>
+    
+    <h2>Test 1: Simple File Write Test</h2>
+    <input type="file" id="testFile" />
+    <button onclick="testUpload()">Test Upload</button>
+    <div id="testResult"></div>
+    
+    <hr/>
+    
+    <h2>Test 2: Actual Media Upload</h2>
+    <input type="file" id="mediaFile" />
+    <button onclick="mediaUpload()">Upload to Media Library</button>
+    <div id="mediaResult"></div>
+    
+    <script>
+        async function testUpload() {
+            const file = document.getElementById('testFile').files[0];
+            if (!file) {
+                alert('Please select a file');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch('/api/test-upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                document.getElementById('testResult').innerHTML = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+                
+                if (result.success) {
+                    alert('✅ Test upload successful! File was saved to disk.');
+                } else {
+                    alert('❌ Test upload failed: ' + result.error);
+                }
+            } catch (error) {
+                document.getElementById('testResult').innerHTML = '<pre style="color:red">Error: ' + error.message + '</pre>';
+            }
+        }
+        
+        async function mediaUpload() {
+            const file = document.getElementById('mediaFile').files[0];
+            if (!file) {
+                alert('Please select a file');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('files', file);
+            formData.append('category', 'test');
+            formData.append('tags', 'test,upload');
+            
+            try {
+                const response = await fetch('/api/admin/media', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                document.getElementById('mediaResult').innerHTML = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+                
+                if (result.success) {
+                    alert('✅ Media upload successful!');
+                    console.log('Uploaded media:', result.data);
+                } else {
+                    alert('❌ Media upload failed: ' + result.error);
+                }
+            } catch (error) {
+                document.getElementById('mediaResult').innerHTML = '<pre style="color:red">Error: ' + error.message + '</pre>';
+            }
+        }
+    </script>
+</body>
+</html>
