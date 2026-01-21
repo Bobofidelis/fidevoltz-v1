@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: fidevoltz
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - fidevoltz-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    ports:
+      - '3001:3001'
+    environment:
+      DATABASE_URL: postgres://user:password@postgres:5432/fidevoltz
+      JWT_SECRET: supersecretkey
+      FRONTEND_URL: http://localhost:3000
+    depends_on:
+      - postgres
+    networks:
+      - fidevoltz-network
+    volumes:
+      - ./apps/backend:/app/apps/backend
+      - /app/apps/backend/node_modules
+
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+    ports:
+      - '3000:3000'
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+    depends_on:
+      - backend
+    networks:
+      - fidevoltz-network
+    volumes:
+      - ./apps/frontend:/app/apps/frontend
+      - /app/apps/frontend/node_modules
+
+networks:
+  fidevoltz-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

@@ -1,0 +1,12 @@
+**/node_modules
+**/.next
+**/dist
+.git
+.gitignore
+.env*
+*.log
+coverage
+.DS_Store
+*.pem
+.vscode
+.idea
