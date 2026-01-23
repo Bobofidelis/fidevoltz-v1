@@ -2,6 +2,8 @@ import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { ProductForm } from '@/components/products/product-form';
 
+export const dynamic = 'force-dynamic';
+
 interface EditProductPageProps {
   params: Promise<{ id: string }>;
 }
