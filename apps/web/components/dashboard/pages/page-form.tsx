@@ -43,7 +43,11 @@ export function PageForm({ initialData, mode }: PageFormProps) {
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
     slug: initialData?.slug || '',
-    content: initialData?.content || [] as any[],
+    content: Array.isArray(initialData?.content) 
+      ? initialData?.content 
+      : (initialData?.content && typeof initialData.content === 'object' && (initialData.content as any).type === 'doc')
+        ? [{ type: 'text', content: initialData.content }]
+        : [] as any[],
     isPublished: initialData?.isPublished ?? true,
     seoTitle: initialData?.seoTitle || '',
     seoDesc: initialData?.seoDesc || '',

@@ -61,7 +61,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             email: user.email,
             name: user.name || null,
             role: user.role,
+            email: user.email,
+            name: user.name || null,
+            role: user.role,
             avatar: user.avatar || null,
+            image: user.avatar || null, // Ensure standard field is also set
           } as any;
         } catch (error) {
           console.error("❌ Auth error:", error);
@@ -93,6 +97,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           token.id = updatedUser.id;
           token.role = updatedUser.role as Role;
           token.image = updatedUser.avatar;
+          token.avatar = updatedUser.avatar; // Update this too
           token.name = updatedUser.name;
         }
       }
@@ -101,8 +106,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         console.log("🎫 JWT callback - Adding user to token:", user.email);
         token.id = user.id;
         token.role = user.role as Role;
-        token.image = user.image;
+        token.image = user.image || (user as any).avatar; // Handle both
+        token.avatar = (user as any).avatar || user.image;
       }
+      return token;
       return token;
     },
     async session({ session, token }) {
@@ -111,6 +118,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.id = token.id as string;
         session.user.role = token.role as Role;
         session.user.image = token.image as string | null;
+        (session.user as any).avatar = token.avatar as string | null; // Pass to client
         session.user.name = token.name as string | null;
       }
       console.log("✅ Session created with role:", session.user.role);
