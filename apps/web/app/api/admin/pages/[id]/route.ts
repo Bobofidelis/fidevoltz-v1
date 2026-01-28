@@ -59,10 +59,7 @@ export async function PATCH(
       );
     }
 
-    console.log('[API] Update page - Session User:', JSON.stringify(session.user));
-
     const body = await request.json();
-    console.log('[API] Update page body:', JSON.stringify(body, null, 2));
     const { title, slug, content, isPublished, seoTitle, seoDesc } = body;
 
     // Check if slug is taken by another page (if slug is being updated)
@@ -119,12 +116,15 @@ export async function PATCH(
   } catch (error: any) {
     console.error('[API] Update page error:', error);
     
+    if (error.code === 'P2025') {
+      return NextResponse.json<ApiResponse>(
+        { success: false, error: 'Page not found' },
+        { status: 404 }
+      );
+    }
+
     return NextResponse.json<ApiResponse>(
-      { 
-        success: false, 
-        error: error.message || 'Failed to update page',
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined 
-      },
+      { success: false, error: error.message || 'Failed to update page' },
       { status: 500 }
     );
   }
