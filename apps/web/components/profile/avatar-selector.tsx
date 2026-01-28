@@ -15,8 +15,11 @@ import {
   type AvatarStyle 
 } from "@/lib/utils/avatar-presets";
 import { useUpdateAvatar } from "@/lib/hooks/use-profile";
-import { Upload, Check, Shuffle, Sparkles } from "lucide-react";
+import { useMediaUpload } from "@/lib/hooks/use-media";
+import { Upload, Check, Shuffle, Sparkles, Image as ImageIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
+import { MediaGrid } from "@/components/media/MediaGrid";
 
 interface AvatarSelectorProps {
   currentAvatar?: string | null;
@@ -27,7 +30,28 @@ export function AvatarSelector({ currentAvatar, userEmail }: AvatarSelectorProps
   const [selectedAvatar, setSelectedAvatar] = useState(currentAvatar || "");
   const [selectedStyle, setSelectedStyle] = useState<AvatarStyle>("avataaars");
   const [selectedBg, setSelectedBg] = useState("b6e3f4");
+  const [isDragging, setIsDragging] = useState(false);
+  
   const updateAvatar = useUpdateAvatar();
+  const uploadMutation = useMediaUpload();
+  
+  const handleFileUpload = async (file: File) => {
+    try {
+      const result = await uploadMutation.mutateAsync({
+        files: [file],
+        folder: "avatars",
+      });
+      
+      if (result.success && result.media?.[0]?.url) {
+        const uploadedUrl = result.media[0].url;
+        setSelectedAvatar(uploadedUrl);
+      } else {
+        throw new Error(result.error || "Failed to get upload URL");
+      }
+    } catch (error) {
+      console.error("Upload failed:", error);
+    }
+  };
   
   const presetAvatars = generatePresetAvatars(userEmail, 24);
 
@@ -103,11 +127,28 @@ export function AvatarSelector({ currentAvatar, userEmail }: AvatarSelectorProps
         </div>
 
         <Tabs defaultValue="presets" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="presets">Presets</TabsTrigger>
             <TabsTrigger value="custom">Custom</TabsTrigger>
             <TabsTrigger value="upload">Upload</TabsTrigger>
+            <TabsTrigger value="library">Library</TabsTrigger>
           </TabsList>
+
+          {/* Media Library */}
+          <TabsContent value="library" className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+            <div className="py-2">
+              <h4 className="font-medium mb-3 flex items-center gap-2 sticky top-0 bg-white z-10 py-2">
+                <ImageIcon className="h-4 w-4 text-blue-600" />
+                Select from your media library
+              </h4>
+              <MediaGrid 
+                mediaType="IMAGE"
+                selectable
+                onMediaClick={(media) => setSelectedAvatar(media.secureUrl || media.url)}
+                selectedIds={[]} // We don't need persistent selection here since we update state on click
+              />
+            </div>
+          </TabsContent>
 
           {/* Preset Avatars */}
           <TabsContent value="presets" className="space-y-4">
@@ -193,28 +234,72 @@ export function AvatarSelector({ currentAvatar, userEmail }: AvatarSelectorProps
 
           {/* Upload Custom Image */}
           <TabsContent value="upload" className="space-y-4">
-            <div className="border-2 border-dashed rounded-lg p-8 text-center bg-slate-50">
-              <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <div 
+              onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+              onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
+              onDrop={(e) => {
+                e.preventDefault();
+                setIsDragging(false);
+                const file = e.dataTransfer.files?.[0];
+                if (file) handleFileUpload(file);
+              }}
+              className={cn(
+                "border-2 border-dashed rounded-lg p-8 text-center transition-all cursor-pointer",
+                isDragging ? "border-blue-600 bg-blue-50" : "border-slate-200 bg-slate-50 hover:border-slate-300"
+              )}
+              onClick={() => document.getElementById('avatar-upload')?.click()}
+            >
+              <Upload className={cn(
+                "h-12 w-12 mx-auto mb-4 transition-colors",
+                isDragging ? "text-blue-600" : "text-muted-foreground"
+              )} />
               <h4 className="font-medium mb-2">Upload Your Own Image</h4>
               <p className="text-sm text-muted-foreground mb-4">
-                To use a custom image, upload it to an image hosting service (like Imgur, Cloudinary, or your own server) and paste the URL below.
+                Drag and drop or click to select a profile picture
               </p>
-              <div className="space-y-3">
+              
+              <input
+                id="avatar-upload"
+                type="file"
+                className="hidden"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleFileUpload(file);
+                }}
+              />
+
+              {uploadMutation.isPending && (
+                <div className="mt-4 space-y-2">
+                  <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+                    <div className="h-full bg-blue-600 animate-pulse w-full"></div>
+                  </div>
+                  <p className="text-xs text-blue-600 font-medium interior-shadow">Uploading to Cloudinary...</p>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-3">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Sparkles className="h-4 w-4 text-slate-400" />
+                </div>
                 <input
                   type="url"
-                  placeholder="https://example.com/your-avatar.jpg"
-                  className="w-full px-4 py-2 border rounded-md"
+                  placeholder="Or paste an image URL directly..."
+                  className="w-full pl-10 pr-4 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  value={selectedAvatar.startsWith('http') && !selectedAvatar.includes('res.cloudinary.com') ? selectedAvatar : ''}
                   onChange={(e) => {
                     const url = e.target.value;
-                    if (url && url.startsWith('http')) {
+                    if (url) {
                       setSelectedAvatar(url);
                     }
                   }}
                 />
-                <p className="text-xs text-muted-foreground">
-                  💡 Tip: Use services like <a href="https://imgur.com" target="_blank" className="text-blue-600 hover:underline">Imgur</a> or <a href="https://cloudinary.com" target="_blank" className="text-blue-600 hover:underline">Cloudinary</a> for free image hosting
-                </p>
               </div>
+              <p className="text-xs text-muted-foreground text-center">
+                Supported formats: JPG, PNG, WEBP, GIF (Max 10MB)
+              </p>
             </div>
           </TabsContent>
         </Tabs>
