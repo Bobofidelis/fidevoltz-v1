@@ -61,9 +61,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             email: user.email,
             name: user.name || null,
             role: user.role,
-            email: user.email,
-            name: user.name || null,
-            role: user.role,
             avatar: user.avatar || null,
             image: user.avatar || null, // Ensure standard field is also set
           } as any;
@@ -109,7 +106,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.image = user.image || (user as any).avatar; // Handle both
         token.avatar = (user as any).avatar || user.image;
       }
-      return token;
       return token;
     },
     async session({ session, token }) {
