@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Zap } from "lucide-react";
 import { SocialMediaLinks } from "./social-media-links";
