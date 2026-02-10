@@ -1,6 +1,6 @@
 "use client";
 
-import { usePublicSiteSettings } from "@/lib/hooks/use-public-settings";
+import { usePublicSettings } from "@/lib/hooks/use-public-settings";
 import { Facebook, Twitter, Instagram, Linkedin, Youtube, MessageCircle } from "lucide-react";
 import Link from "next/link";
 
@@ -11,7 +11,7 @@ interface SocialMediaLinksProps {
 }
 
 export function SocialMediaLinks({ className = "", iconSize = 20, showLabels = false }: SocialMediaLinksProps) {
-  const { data: siteSettings } = usePublicSiteSettings('social');
+  const { data: siteSettings } = usePublicSettings('social');
 
   if (!siteSettings?.grouped?.social) {
     return null;
