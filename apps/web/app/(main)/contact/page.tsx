@@ -295,7 +295,7 @@ function ContactForm() {
                   required
                 />
               </div>
-              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
                 <Cpu className="mr-2 h-4 w-4" /> {isSubmitting ? "Sending..." : "Request Quote"}
               </Button>
             </form>
@@ -411,25 +411,25 @@ export default function ContactPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <Mail className="h-5 w-5 text-blue-600 mt-1" />
+                  <Mail className="h-5 w-5 text-primary mt-1" />
                   <div>
                     <p className="font-medium text-slate-900">Email</p>
-                    <a href={`mailto:${siteSettings?.grouped?.contact?.['contact.email'] || 'hello@fidevoltz.com'}`} className="text-slate-600 hover:text-blue-600">
+                    <a href={`mailto:${siteSettings?.grouped?.contact?.['contact.email'] || 'hello@fidevoltz.com'}`} className="text-slate-600 hover:text-primary">
                       {siteSettings?.grouped?.contact?.['contact.email'] || 'hello@fidevoltz.com'}
                     </a>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <Phone className="h-5 w-5 text-blue-600 mt-1" />
+                  <Phone className="h-5 w-5 text-primary mt-1" />
                   <div>
                     <p className="font-medium text-slate-900">Phone</p>
-                    <a href={`tel:${siteSettings?.grouped?.contact?.['contact.phone'] || '+1 (234) 567-890'}`} className="text-slate-600 hover:text-blue-600">
+                    <a href={`tel:${siteSettings?.grouped?.contact?.['contact.phone'] || '+1 (234) 567-890'}`} className="text-slate-600 hover:text-primary">
                       {siteSettings?.grouped?.contact?.['contact.phone'] || '+1 (234) 567-890'}
                     </a>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <MapPin className="h-5 w-5 text-blue-600 mt-1" />
+                  <MapPin className="h-5 w-5 text-primary mt-1" />
                   <div>
                     <p className="font-medium text-slate-900">Office</p>
                     <p className="text-slate-600">
@@ -440,7 +440,7 @@ export default function ContactPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-blue-600 to-purple-600">
+            <Card className="bg-gradient-to-br from-primary to-purple-600">
               <CardHeader>
                 <CardTitle className="text-white">Join Our Community</CardTitle>
                 <CardDescription className="text-blue-100">
