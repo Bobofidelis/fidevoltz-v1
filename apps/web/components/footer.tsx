@@ -48,7 +48,7 @@ export function Footer() {
               {logo ? (
                 <img src={logo} alt={siteName} className="h-8 w-auto" />
               ) : (
-                <div className="h-8 w-8 rounded-lg bg-slate-900 flex items-center justify-center">
+                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
                   <Zap className="h-5 w-5 text-white" />
                 </div>
               )}

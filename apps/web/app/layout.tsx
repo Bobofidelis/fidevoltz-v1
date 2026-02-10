@@ -8,6 +8,7 @@ import { Providers } from "@/components/providers";
 // const inter = Inter({ subsets: ["latin"] });
 
 import { prisma } from "@/lib/prisma";
+import { hexToHsl } from "@/lib/utils";
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
@@ -42,13 +43,34 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  let branding: any = {};
+  try {
+    const settings = await prisma.siteSettings.findMany({
+      where: { category: 'branding' },
+    });
+    branding = settings.reduce((acc: any, s) => {
+      acc[s.key] = s.value;
+      return acc;
+    }, {});
+  } catch (e) {}
+
+  const primaryColor = branding['branding.primaryColor'] || "#3B82F6";
+  const primaryHsl = hexToHsl(primaryColor);
+
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <style dangerouslySetInnerHTML={{ __html: `
+          :root {
+            --primary: ${primaryHsl};
+          }
+        `}} />
+      </head>
       <body className="font-sans antialiased" suppressHydrationWarning>
         <Providers>
           <ThemeProvider

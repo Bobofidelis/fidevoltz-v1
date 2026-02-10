@@ -97,7 +97,7 @@ export function DashboardSidebar({ className, onNavClick }: DashboardSidebarProp
           {logo ? (
             <img src={logo} alt={siteName} className="h-8 w-auto rounded" />
           ) : (
-            <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center">
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
               <Zap className="h-5 w-5 text-white" />
             </div>
           )}
@@ -117,7 +117,7 @@ export function DashboardSidebar({ className, onNavClick }: DashboardSidebarProp
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                   isActive
-                    ? "bg-blue-600 text-white"
+                    ? "bg-primary text-white"
                     : "text-slate-400 hover:bg-slate-800 hover:text-white"
                 )}
               >
