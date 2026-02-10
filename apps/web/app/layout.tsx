@@ -7,10 +7,40 @@ import { Providers } from "@/components/providers";
 
 // const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: "FideVoltz - Electronics Tutorials & Store",
-  description: "Learn electronics and buy components.",
-};
+import { prisma } from "@/lib/prisma";
+
+export async function generateMetadata(): Promise<Metadata> {
+  try {
+    const settings = await prisma.siteSettings.findMany({
+      where: { category: 'branding' },
+    });
+    
+    const branding = settings.reduce((acc: any, s) => {
+      acc[s.key] = s.value;
+      return acc;
+    }, {});
+    
+    const siteName = branding['branding.siteName'] || "FideVoltz";
+    const tagline = branding['branding.tagline'] || "Electronics Tutorials & Store";
+    const favicon = branding['branding.favicon'] || "/favicon.ico";
+    
+    return {
+      title: {
+        default: `${siteName} - ${tagline}`,
+        template: `%s | ${siteName}`,
+      },
+      description: tagline,
+      icons: {
+        icon: favicon,
+      },
+    };
+  } catch (error) {
+    return {
+      title: "FideVoltz - Electronics Tutorials & Store",
+      description: "Learn electronics and buy components.",
+    };
+  }
+}
 
 export default function RootLayout({
   children,

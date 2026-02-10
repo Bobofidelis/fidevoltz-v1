@@ -7,6 +7,7 @@ import { ShoppingCart, Menu, Zap, User, LogOut, LayoutDashboard, Settings, Packa
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cart-store";
 import { useSession, signOut } from "next-auth/react";
+import { usePublicSettings } from "@/lib/hooks/use-public-settings";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,14 +37,24 @@ export function Navbar() {
   const user = session?.user;
   const cartCount = items.reduce((acc, item) => acc + item.quantity, 0);
 
+  // Dynamic branding
+  const { data: settingsData } = usePublicSettings("branding");
+  const branding = settingsData?.grouped?.branding || {};
+  const siteName = branding["branding.siteName"] || "FideVoltz";
+  const logo = branding["branding.logo"];
+
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         <Link href="/" className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-slate-900 flex items-center justify-center">
-            <Zap className="h-5 w-5 text-white" />
-          </div>
-          <span className="text-xl font-bold text-slate-900">FideVoltz</span>
+          {logo ? (
+            <img src={logo} alt={siteName} className="h-8 w-auto" />
+          ) : (
+            <div className="h-8 w-8 rounded-lg bg-slate-900 flex items-center justify-center">
+              <Zap className="h-5 w-5 text-white" />
+            </div>
+          )}
+          <span className="text-xl font-bold text-slate-900">{siteName}</span>
         </Link>
 
         <div className="hidden md:flex items-center gap-8">
@@ -190,10 +201,14 @@ export function Navbar() {
               <SheetContent side="left">
                 <SheetHeader>
                   <SheetTitle className="text-left flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-lg bg-slate-900 flex items-center justify-center">
-                      <Zap className="h-5 w-5 text-white" />
-                    </div>
-                    FideVoltz
+                    {logo ? (
+                      <img src={logo} alt={siteName} className="h-8 w-auto" />
+                    ) : (
+                      <div className="h-8 w-8 rounded-lg bg-slate-900 flex items-center justify-center">
+                        <Zap className="h-5 w-5 text-white" />
+                      </div>
+                    )}
+                    {siteName}
                   </SheetTitle>
                 </SheetHeader>
                 <div className="flex flex-col gap-6 mt-8">

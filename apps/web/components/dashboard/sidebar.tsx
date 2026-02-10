@@ -27,8 +27,10 @@ import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/auth-store";
 import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
+import { usePublicSettings } from "@/lib/hooks/use-public-settings";
 
 const sidebarItems = [
+// ... (rest of sidebarItems unchanged)
   // Common items for all roles
   { icon: LayoutDashboard, label: "Overview", href: "/dashboard/overview", roles: ["ADMIN", "EDITOR", "USER"] },
   { icon: User, label: "Profile", href: "/dashboard/profile", roles: ["ADMIN", "EDITOR", "USER"] },
@@ -77,6 +79,12 @@ export function DashboardSidebar({ className, onNavClick }: DashboardSidebarProp
     signOut({ callbackUrl: "/" });
   };
 
+  // Dynamic branding
+  const { data: settingsData } = usePublicSettings("branding");
+  const branding = settingsData?.grouped?.branding || {};
+  const siteName = branding["branding.siteName"] || "FideVoltz";
+  const logo = branding["branding.logo"];
+
   // Filter sidebar items based on user role
   const visibleItems = sidebarItems.filter(item => 
     user && item.roles.includes(user.role)
@@ -86,10 +94,14 @@ export function DashboardSidebar({ className, onNavClick }: DashboardSidebarProp
     <aside className={cn("hidden w-64 flex-col border-r bg-slate-900 text-white md:flex", className)}>
       <div className="flex h-16 items-center px-6 border-b border-slate-800">
         <Link href="/" className="flex items-center gap-2" onClick={onNavClick}>
-          <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center">
-            <Zap className="h-5 w-5 text-white" />
-          </div>
-          <span className="text-xl font-bold">FideVoltz</span>
+          {logo ? (
+            <img src={logo} alt={siteName} className="h-8 w-auto rounded" />
+          ) : (
+            <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center">
+              <Zap className="h-5 w-5 text-white" />
+            </div>
+          )}
+          <span className="text-xl font-bold">{siteName}</span>
         </Link>
       </div>
       
