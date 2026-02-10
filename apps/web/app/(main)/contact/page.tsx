@@ -11,7 +11,7 @@ import { Mail, MapPin, Phone, Send, MessageSquare, Cpu, Handshake } from "lucide
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { usePublicSiteSettings } from "@/lib/hooks/use-public-settings";
+import { usePublicSettings } from "@/lib/hooks/use-public-settings";
 import { SocialMediaLinks } from "@/components/social-media-links";
 
 function ContactForm() {
@@ -387,7 +387,7 @@ function ContactForm() {
 
 export default function ContactPage() {
   // Fetch site settings for contact info
-  const { data: siteSettings } = usePublicSiteSettings('contact');
+  const { data: siteSettings } = usePublicSettings('contact');
   
   return (
     <div className="min-h-screen bg-slate-50 py-12 md:py-20">
