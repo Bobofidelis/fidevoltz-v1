@@ -5,6 +5,30 @@ import type { RegisterDto, ApiResponse, User } from '@fidevoltz/types';
 
 export async function POST(request: NextRequest) {
   try {
+    // Check registration settings
+    const settings = await prisma.siteSettings.findMany({
+      where: {
+        key: {
+          in: ['general.allowRegistration', 'general.requireEmailVerification']
+        }
+      }
+    });
+
+    const settingsMap = settings.reduce((acc: any, s) => {
+      acc[s.key] = s.value;
+      return acc;
+    }, {});
+
+    const allowRegistration = settingsMap['general.allowRegistration'] !== false && settingsMap['general.allowRegistration'] !== 'false';
+    const requireEmailVerification = settingsMap['general.requireEmailVerification'] === true || settingsMap['general.requireEmailVerification'] === 'true';
+
+    if (!allowRegistration) {
+      return NextResponse.json<ApiResponse>(
+        { success: false, error: 'Registration is currently disabled' },
+        { status: 403 }
+      );
+    }
+
     const body: RegisterDto = await request.json();
     const { email, password, name } = body;
 
@@ -55,6 +79,7 @@ export async function POST(request: NextRequest) {
         passwordHash,
         name: name || null,
         role: 'USER',
+        status: requireEmailVerification ? 'pending_verification' : 'active',
       },
       select: {
         id: true,

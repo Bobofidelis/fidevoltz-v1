@@ -1,11 +1,28 @@
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
+import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
-export default function MainLayout({
+export default async function MainLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await auth();
+  const isAdmin = session?.user?.role === "ADMIN";
+
+  // Check maintenance mode
+  const maintenanceSetting = await prisma.siteSettings.findUnique({
+    where: { key: "general.maintenanceMode" },
+  });
+
+  const isMaintenanceMode = maintenanceSetting?.value === true || maintenanceSetting?.value === "true";
+
+  if (isMaintenanceMode && !isAdmin) {
+    redirect("/maintenance");
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />

@@ -42,6 +42,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             return null;
           }
 
+          if (user.isBanned) {
+            console.log("❌ Auth: User is banned:", user.email);
+            throw new Error("Your account has been banned.");
+          }
+
+          if (user.status === 'pending_verification') {
+            console.log("❌ Auth: Email not verified:", user.email);
+            throw new Error("Please verify your email before logging in.");
+          }
+
+          if (user.status !== 'active') {
+            console.log("❌ Auth: Account is not active:", user.email);
+            throw new Error("Your account is currently inactive.");
+          }
+
           console.log("✅ Auth: User found:", user.email, "Role:", user.role);
 
           const isPasswordValid = await compare(
