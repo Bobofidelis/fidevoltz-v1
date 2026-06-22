@@ -3,7 +3,10 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Share2, ShoppingCart, Download, ExternalLink } from "lucide-react";
+import { ShoppingCart, Download } from "lucide-react";
+import { ShareBlock } from "@/components/projects/ShareBlock";
+import { AdSlot } from "@/components/ads/AdSlot";
+import { useEffect, useState } from "react";
 
 interface ProjectSidebarProps {
   project: any;
@@ -12,6 +15,11 @@ interface ProjectSidebarProps {
 export function ProjectSidebar({ project }: ProjectSidebarProps) {
   const components = project.components || [];
   const attachments = project.attachments || [];
+  const [pageUrl, setPageUrl] = useState("");
+
+  useEffect(() => {
+    setPageUrl(window.location.href);
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -34,13 +42,20 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
                 </li>
               ))}
             </ul>
-            {/* Future: Add to Cart functionality if products linked */}
-            {/* <Button className="w-full bg-blue-600 hover:bg-blue-700">
-              Buy Components Kit
-            </Button> */}
           </CardContent>
         </Card>
       )}
+
+      {/* Randomised Sidebar Ad (automated) */}
+      <Card className="overflow-hidden border-slate-200">
+        <CardContent className="p-0">
+          <AdSlot 
+            page={`projects/${project.slug}`} 
+            zone="SIDEBAR_RIGHT" 
+            className="w-full"
+          />
+        </CardContent>
+      </Card>
 
       {/* Attachments & Files */}
       {attachments.length > 0 && (
@@ -86,14 +101,16 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
         </CardContent>
       </Card>
 
-      {/* Share */}
-      <Button className="w-full" variant="outline" onClick={() => {
-         navigator.clipboard.writeText(window.location.href);
-         // You might want to add a toast here ideally
-      }}>
-        <Share2 className="h-4 w-4 mr-2" />
-        Share Project
-      </Button>
+      {/* Social Share Block */}
+      <Card>
+        <CardContent className="p-4">
+          <ShareBlock 
+            url={pageUrl || `https://fidevoltz.com/projects/${project.slug}`} 
+            title={project.title} 
+            variant="grid"
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

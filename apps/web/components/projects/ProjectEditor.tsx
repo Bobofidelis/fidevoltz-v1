@@ -16,7 +16,8 @@ import {
   X,
   FileText,
   Search,
-  ShoppingCart
+  ShoppingCart,
+  Package
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,7 +36,7 @@ interface ProjectEditorProps {
 }
 
 
-type BlockType = "text" | "image" | "video" | "code" | "heading";
+type BlockType = "text" | "image" | "video" | "code" | "heading" | "project_kit" | "bom" | "ad";
 
 interface Block {
   id: string;
@@ -87,7 +88,7 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
     const newBlock: Block = {
       id: crypto.randomUUID(),
       type,
-      content: type === "text" ? "" : type === "heading" ? { text: "", level: "h2" } : type === "code" ? { code: "", language: "javascript" } : type === "image" ? { url: "", alt: "" } : { url: "" }
+      content: type === "text" ? "" : type === "heading" ? { text: "", level: "h2" } : type === "code" ? { code: "", language: "javascript" } : type === "image" ? { url: "", alt: "" } : type === "project_kit" ? { title: "", description: "", includes: "", guarantee: "", buttonText: "", productLink: "" } : type === "bom" ? { title: "", items: [] } : type === "ad" ? { zone: "CONTENT_MIDDLE" } : { url: "" }
     };
     setBlocks([...blocks, newBlock]);
   };
@@ -359,6 +360,123 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                         />
                       </div>
                     )}
+
+                    {block.type === "project_kit" && (
+                      <div className="space-y-4 bg-slate-50 p-4 rounded-lg border border-slate-200">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Kit Title</Label>
+                            <Input placeholder="e.g. 📦 THE FIDEVOLTZ PROJECT KIT" value={block.content.title} onChange={(e) => updateBlock(block.id, { ...block.content, title: e.target.value })} />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Product Link</Label>
+                            <Input placeholder="e.g. /store/product/123" value={block.content.productLink} onChange={(e) => updateBlock(block.id, { ...block.content, productLink: e.target.value })} />
+                          </div>
+                          <div className="space-y-2 col-span-2">
+                            <Label>Description</Label>
+                            <Textarea placeholder="Skip the hassle..." value={block.content.description} onChange={(e) => updateBlock(block.id, { ...block.content, description: e.target.value })} />
+                          </div>
+                          <div className="space-y-2 col-span-2">
+                            <Label>Includes (Components list)</Label>
+                            <Input placeholder="Includes pre-tested Arduino Uno..." value={block.content.includes} onChange={(e) => updateBlock(block.id, { ...block.content, includes: e.target.value })} />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Guarantee Text</Label>
+                            <Input placeholder="Guaranteed to work..." value={block.content.guarantee} onChange={(e) => updateBlock(block.id, { ...block.content, guarantee: e.target.value })} />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Button Text</Label>
+                            <Input placeholder="Buy the Complete Kit - $45.00" value={block.content.buttonText} onChange={(e) => updateBlock(block.id, { ...block.content, buttonText: e.target.value })} />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {block.type === "bom" && (
+                      <div className="space-y-4 bg-slate-50 p-4 rounded-lg border border-slate-200">
+                        <div className="space-y-2">
+                          <Label>Table Title</Label>
+                          <Input placeholder="Hardware Requirements & Bill of Materials" value={block.content.title} onChange={(e) => updateBlock(block.id, { ...block.content, title: e.target.value })} />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>BOM Items</Label>
+                          <div className="space-y-3">
+                            {block.content.items?.map((item: any, i: number) => (
+                              <div key={i} className="flex gap-2 items-start bg-white p-3 border rounded shadow-sm">
+                                <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 flex-1">
+                                  <Input placeholder="Component Name" value={item.name || ""} onChange={(e) => {
+                                    const newItems = [...(block.content.items || [])];
+                                    newItems[i].name = e.target.value;
+                                    updateBlock(block.id, { ...block.content, items: newItems });
+                                  }} />
+                                  <Input placeholder="Quantity" value={item.quantity || ""} onChange={(e) => {
+                                    const newItems = [...(block.content.items || [])];
+                                    newItems[i].quantity = e.target.value;
+                                    updateBlock(block.id, { ...block.content, items: newItems });
+                                  }} />
+                                  <Input placeholder="Specs/Notes" value={item.specs || ""} onChange={(e) => {
+                                    const newItems = [...(block.content.items || [])];
+                                    newItems[i].specs = e.target.value;
+                                    updateBlock(block.id, { ...block.content, items: newItems });
+                                  }} />
+                                  <Input placeholder="Link Text" value={item.linkText || ""} onChange={(e) => {
+                                    const newItems = [...(block.content.items || [])];
+                                    newItems[i].linkText = e.target.value;
+                                    updateBlock(block.id, { ...block.content, items: newItems });
+                                  }} />
+                                  <Input placeholder="Product Link (URL)" value={item.productLink || ""} onChange={(e) => {
+                                    const newItems = [...(block.content.items || [])];
+                                    newItems[i].productLink = e.target.value;
+                                    updateBlock(block.id, { ...block.content, items: newItems });
+                                  }} />
+                                </div>
+                                <Button type="button" variant="ghost" size="icon" className="text-red-500 mt-1" onClick={() => {
+                                  const newItems = [...block.content.items];
+                                  newItems.splice(i, 1);
+                                  updateBlock(block.id, { ...block.content, items: newItems });
+                                }}>
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                            <Button type="button" variant="outline" size="sm" onClick={() => {
+                              const newItems = [...(block.content.items || []), { name: "", quantity: "1", specs: "", linkText: "Buy", productLink: "" }];
+                              updateBlock(block.id, { ...block.content, items: newItems });
+                            }}>
+                              <Plus className="h-4 w-4 mr-2" /> Add Item
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {block.type === "ad" && (
+                      <div className="space-y-3 bg-orange-50 border border-orange-200 p-4 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <span className="bg-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded">AD</span>
+                          <p className="text-sm font-medium text-orange-800">Advertisement Block</p>
+                        </div>
+                        <p className="text-xs text-orange-700">
+                          This will automatically display an active ad from your Ads Manager. No manual input needed — ads are pulled based on the zone and page.
+                        </p>
+                        <div className="space-y-2">
+                          <Label className="text-orange-900">Ad Zone</Label>
+                          <Select value={block.content.zone || "CONTENT_MIDDLE"} onValueChange={(val) => updateBlock(block.id, { ...block.content, zone: val })}>
+                            <SelectTrigger className="w-[220px]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="CONTENT_TOP">Content Top</SelectItem>
+                              <SelectItem value="CONTENT_MIDDLE">Content Middle</SelectItem>
+                              <SelectItem value="CONTENT_BOTTOM">Content Bottom</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <p className="text-xs text-orange-600 italic">
+                          💡 Manage active ads under Dashboard → SEO & Ads → Ads Manager
+                        </p>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -378,6 +496,15 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                 </Button>
                 <Button type="button" variant="outline" onClick={() => addBlock("video")} className="gap-2">
                   <Video className="h-4 w-4" /> Add Video
+                </Button>
+                <Button type="button" variant="outline" onClick={() => addBlock("project_kit")} className="gap-2">
+                  <Package className="h-4 w-4" /> Add Project Kit
+                </Button>
+                <Button type="button" variant="outline" onClick={() => addBlock("bom")} className="gap-2">
+                  <ShoppingCart className="h-4 w-4" /> Add BOM Table
+                </Button>
+                <Button type="button" variant="outline" onClick={() => addBlock("ad")} className="gap-2 border-orange-300 text-orange-700 hover:bg-orange-50">
+                  <span className="text-xs font-bold">AD</span> Insert Ad Slot
                 </Button>
               </div>
             </CardContent>

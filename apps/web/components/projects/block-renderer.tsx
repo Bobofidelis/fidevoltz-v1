@@ -1,9 +1,11 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, Package, ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { AdSlot } from "@/components/ads/AdSlot";
 
 interface Block {
   id: string;
@@ -13,9 +15,10 @@ interface Block {
 
 interface BlockRendererProps {
   blocks: Block[];
+  slug?: string;
 }
 
-export function BlockRenderer({ blocks }: BlockRendererProps) {
+export function BlockRenderer({ blocks, slug }: BlockRendererProps) {
   if (!blocks || !Array.isArray(blocks)) {
     return null;
   }
@@ -24,14 +27,14 @@ export function BlockRenderer({ blocks }: BlockRendererProps) {
     <div className="space-y-8 text-lg leading-relaxed text-slate-700">
       {blocks.map((block) => (
         <div key={block.id}>
-          {renderBlock(block)}
+          {renderBlock(block, slug)}
         </div>
       ))}
     </div>
   );
 }
 
-function renderBlock(block: Block) {
+function renderBlock(block: Block, slug?: string) {
   switch (block.type) {
     case "text":
       return (
@@ -53,6 +56,7 @@ function renderBlock(block: Block) {
       );
     
     case "image":
+      if (!block.content.url) return null;
       return (
         <figure className="my-8">
           <img 
@@ -98,6 +102,106 @@ function renderBlock(block: Block) {
     case "code":
       return <CodeBlock language={block.content.language} code={block.content.code} />;
       
+    case "project_kit":
+      return (
+        <div className="my-10 bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 shadow-xl border border-blue-500/30 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 -mt-10 -mr-10 text-blue-500/10 group-hover:text-blue-500/20 transition-colors duration-500">
+            <Package className="w-64 h-64" />
+          </div>
+          <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center md:items-start">
+            <div className="flex-shrink-0 bg-blue-600 rounded-2xl p-4 shadow-lg shadow-blue-900/50">
+              <Package className="w-12 h-12 text-white" />
+            </div>
+            <div className="flex-1 space-y-4">
+              <h3 className="text-2xl font-bold text-white tracking-tight">
+                {block.content.title || "📦 THE FIDEVOLTZ PROJECT KIT"}
+              </h3>
+              <p className="text-blue-100/80 leading-relaxed text-lg">
+                {block.content.description || "Skip the hassle of hunting for compatible parts and dealing with dead components. Get everything you need to build this exact project in one box."}
+              </p>
+              
+              <div className="bg-slate-900/50 rounded-xl p-4 border border-slate-700/50">
+                <p className="text-slate-300">
+                  <strong className="text-white">Includes:</strong> {block.content.includes || "All necessary components pre-tested."}
+                </p>
+              </div>
+              
+              <p className="text-sm font-medium text-blue-300 flex items-center gap-2">
+                <Check className="w-4 h-4" /> {block.content.guarantee || "Guaranteed to work with the code below."}
+              </p>
+            </div>
+          </div>
+          <div className="relative z-10 mt-8 pt-8 border-t border-slate-700/50 flex justify-center md:justify-end">
+            <Link href={block.content.productLink || "#"}>
+              <Button size="lg" className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-8 shadow-lg shadow-blue-900/50 h-14 text-lg w-full md:w-auto">
+                <ShoppingCart className="mr-3 w-5 h-5" />
+                {block.content.buttonText || "Buy the Complete Kit"}
+              </Button>
+            </Link>
+          </div>
+        </div>
+      );
+
+    case "bom":
+      return (
+        <div className="my-12">
+          <h2 className="text-3xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+            <ShoppingCart className="w-8 h-8 text-blue-600" />
+            {block.content.title || "Hardware Requirements & Bill of Materials"}
+          </h2>
+          <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-sm bg-white">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th className="px-6 py-4 font-semibold text-slate-900">Component</th>
+                  <th className="px-6 py-4 font-semibold text-slate-900">Quantity</th>
+                  <th className="px-6 py-4 font-semibold text-slate-900">Specs / Notes</th>
+                  <th className="px-6 py-4 font-semibold text-slate-900 text-right">FideVoltz Store</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {block.content.items && Array.isArray(block.content.items) ? (
+                  block.content.items.map((item: any, idx: number) => (
+                    <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-6 py-4 font-medium text-slate-900">{item.name}</td>
+                      <td className="px-6 py-4 text-slate-600">
+                        <span className="bg-slate-100 text-slate-800 px-2 py-1 rounded-md text-xs font-bold">
+                          {item.quantity}x
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-slate-600">{item.specs}</td>
+                      <td className="px-6 py-4 text-right">
+                        {item.productLink ? (
+                          <Link href={item.productLink}>
+                            <Button size="sm" variant="outline" className="border-blue-200 text-blue-700 hover:bg-blue-50">
+                              {item.linkText || "Buy Item"}
+                            </Button>
+                          </Link>
+                        ) : (
+                          <span className="text-slate-400 text-xs uppercase tracking-wider">Supplied</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-8 text-center text-slate-500">No components listed.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      );
+
+    case "ad":
+      if (!slug) return null; // We need the page slug to fetch targeted ads
+      return (
+        <div className="my-8">
+          <AdSlot page={`projects/${slug}`} zone={block.content.zone || "CONTENT_MIDDLE"} className="w-full" />
+        </div>
+      );
+
     default:
       return null;
   }
