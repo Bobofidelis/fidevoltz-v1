@@ -36,7 +36,7 @@ interface ProjectEditorProps {
 }
 
 
-type BlockType = "text" | "image" | "video" | "code" | "heading" | "project_kit" | "bom" | "ad";
+type BlockType = "text" | "markdown" | "image" | "video" | "youtube" | "code" | "heading" | "project_kit" | "bom" | "ad" | "alert" | "campaign_data";
 
 interface Block {
   id: string;
@@ -88,7 +88,17 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
     const newBlock: Block = {
       id: crypto.randomUUID(),
       type,
-      content: type === "text" ? "" : type === "heading" ? { text: "", level: "h2" } : type === "code" ? { code: "", language: "javascript" } : type === "image" ? { url: "", alt: "" } : type === "project_kit" ? { title: "", description: "", includes: "", guarantee: "", buttonText: "", productLink: "" } : type === "bom" ? { title: "", items: [] } : type === "ad" ? { zone: "CONTENT_MIDDLE" } : { url: "" }
+      content: type === "text" || type === "markdown" ? "" 
+             : type === "heading" ? { text: "", level: "h2" } 
+             : type === "code" ? { code: "", language: "javascript" } 
+             : type === "image" ? { url: "", alt: "" } 
+             : type === "project_kit" ? { title: "", description: "", includes: "", guarantee: "", buttonText: "", productLink: "" } 
+             : type === "bom" ? { title: "", items: [] } 
+             : type === "ad" ? { zone: "CONTENT_MIDDLE" } 
+             : type === "alert" ? { title: "", text: "", type: "info" }
+             : type === "youtube" ? { url: "" }
+             : type === "campaign_data" ? { metaTitle: "", metaDescription: "", tags: "", youtubeTitle: "", youtubeDescription: "", youtubeScript: "", instagramPost: "", twitterPost: "", linkedinPost: "", facebookPost: "" }
+             : { url: "" }
     };
     setBlocks([...blocks, newBlock]);
   };
@@ -233,6 +243,7 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
         <TabsList>
           <TabsTrigger value="content">Content</TabsTrigger>
           <TabsTrigger value="settings">Settings & Metadata</TabsTrigger>
+          <TabsTrigger value="campaign">SEO & Campaigns</TabsTrigger>
           <TabsTrigger value="components">Components & Attachments</TabsTrigger>
         </TabsList>
 
@@ -272,6 +283,18 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                         placeholder="Write your content here..."
                         className="min-h-[100px]"
                       />
+                    )}
+
+                    {block.type === "markdown" && (
+                      <div className="space-y-2 border rounded-md p-2 bg-slate-50/50">
+                        <Label className="text-xs text-muted-foreground mb-1 block">Markdown Support: Use **bold**, *italic*, - lists, and # headers</Label>
+                        <Textarea 
+                          value={block.content} 
+                          onChange={(e) => updateBlock(block.id, e.target.value)}
+                          placeholder="# Your Title&#10;- Item 1&#10;- Item 2"
+                          className="min-h-[150px] font-mono text-sm"
+                        />
+                      </div>
                     )}
 
                     {block.type === "heading" && (
@@ -352,12 +375,64 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
 
                     {block.type === "video" && (
                       <div className="space-y-2">
-                        <Label>YouTube URL</Label>
+                        <Label>Direct Video URL (MP4)</Label>
                         <Input 
-                          placeholder="https://youtube.com/watch?v=..."
+                          placeholder="https://example.com/video.mp4"
                           value={block.content.url}
                           onChange={(e) => updateBlock(block.id, { ...block.content, url: e.target.value })}
                         />
+                      </div>
+                    )}
+
+                    {block.type === "youtube" && (
+                      <div className="space-y-2 bg-red-50/50 p-4 border border-red-100 rounded-lg">
+                        <Label className="text-red-800">YouTube Video URL</Label>
+                        <Input 
+                          placeholder="https://www.youtube.com/watch?v=..."
+                          value={block.content.url}
+                          onChange={(e) => updateBlock(block.id, { ...block.content, url: e.target.value })}
+                          className="border-red-200"
+                        />
+                      </div>
+                    )}
+
+                    {block.type === "alert" && (
+                      <div className="space-y-4 bg-blue-50/50 p-4 border border-blue-100 rounded-lg">
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="col-span-1 space-y-2">
+                            <Label>Alert Type</Label>
+                            <Select 
+                              value={block.content.type || "info"} 
+                              onValueChange={(val) => updateBlock(block.id, { ...block.content, type: val })}
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="info">Info (Blue)</SelectItem>
+                                <SelectItem value="warning">Warning (Yellow)</SelectItem>
+                                <SelectItem value="tip">Tip (Green)</SelectItem>
+                                <SelectItem value="danger">Danger (Red)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="col-span-2 space-y-2">
+                            <Label>Title (Optional)</Label>
+                            <Input 
+                              placeholder="Important Note:"
+                              value={block.content.title}
+                              onChange={(e) => updateBlock(block.id, { ...block.content, title: e.target.value })}
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Alert Text</Label>
+                          <Textarea 
+                            placeholder="Enter the alert content here..."
+                            value={block.content.text}
+                            onChange={(e) => updateBlock(block.id, { ...block.content, text: e.target.value })}
+                          />
+                        </div>
                       </div>
                     )}
 
@@ -488,14 +563,20 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                 <Button type="button" variant="outline" onClick={() => addBlock("text")} className="gap-2">
                   <FileText className="h-4 w-4" /> Add Text
                 </Button>
+                <Button type="button" variant="outline" onClick={() => addBlock("markdown")} className="gap-2">
+                  <FileText className="h-4 w-4" /> Add Markdown
+                </Button>
                 <Button type="button" variant="outline" onClick={() => addBlock("image")} className="gap-2">
                   <ImageIcon className="h-4 w-4" /> Add Image
                 </Button>
                 <Button type="button" variant="outline" onClick={() => addBlock("code")} className="gap-2">
                   <Code className="h-4 w-4" /> Add Code
                 </Button>
-                <Button type="button" variant="outline" onClick={() => addBlock("video")} className="gap-2">
-                  <Video className="h-4 w-4" /> Add Video
+                <Button type="button" variant="outline" onClick={() => addBlock("youtube")} className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50">
+                  <Video className="h-4 w-4" /> Add YouTube
+                </Button>
+                <Button type="button" variant="outline" onClick={() => addBlock("alert")} className="gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50">
+                  <span className="font-bold text-lg leading-none">!</span> Add Alert
                 </Button>
                 <Button type="button" variant="outline" onClick={() => addBlock("project_kit")} className="gap-2">
                   <Package className="h-4 w-4" /> Add Project Kit
@@ -507,6 +588,92 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                   <span className="text-xs font-bold">AD</span> Insert Ad Slot
                 </Button>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="campaign" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>SEO & Social Campaigns</CardTitle>
+              <CardDescription>
+                Manage your YouTube scripts, social media drafts, and SEO meta tags here. 
+                This data is securely saved with your project but will never appear on the public tutorial page.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {blocks.findIndex(b => b.type === "campaign_data") === -1 ? (
+                <div className="text-center py-12 border-2 border-dashed rounded-lg">
+                  <p className="text-muted-foreground mb-4">You haven't initialized a Campaign Data block for this project yet.</p>
+                  <Button type="button" onClick={() => addBlock("campaign_data")}>
+                    Initialize Campaign Storage
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-8">
+                  {blocks.filter(b => b.type === "campaign_data").map((block) => (
+                    <div key={block.id} className="space-y-8">
+                      <div className="space-y-4">
+                        <h3 className="font-semibold text-lg border-b pb-2">Search Engine Optimization</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Meta Title</Label>
+                            <Input value={block.content.metaTitle || ""} onChange={(e) => updateBlock(block.id, { ...block.content, metaTitle: e.target.value })} placeholder="Optimal SEO Title" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>SEO Tags / Keywords (comma separated)</Label>
+                            <Input value={block.content.tags || ""} onChange={(e) => updateBlock(block.id, { ...block.content, tags: e.target.value })} placeholder="Arduino, VVVF, Elevator" />
+                          </div>
+                          <div className="space-y-2 md:col-span-2">
+                            <Label>Meta Description (150-160 characters)</Label>
+                            <Textarea value={block.content.metaDescription || ""} onChange={(e) => updateBlock(block.id, { ...block.content, metaDescription: e.target.value })} placeholder="Brief description for search engines..." />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <h3 className="font-semibold text-lg border-b pb-2 text-red-600">YouTube Integration</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>YouTube Video Title</Label>
+                            <Input value={block.content.youtubeTitle || ""} onChange={(e) => updateBlock(block.id, { ...block.content, youtubeTitle: e.target.value })} placeholder="Catchy Video Title" />
+                          </div>
+                          <div className="space-y-2 md:col-span-2">
+                            <Label>YouTube Description</Label>
+                            <Textarea value={block.content.youtubeDescription || ""} onChange={(e) => updateBlock(block.id, { ...block.content, youtubeDescription: e.target.value })} placeholder="Video description with links..." className="min-h-[100px]" />
+                          </div>
+                          <div className="space-y-2 md:col-span-2">
+                            <Label>Full Video Script</Label>
+                            <Textarea value={block.content.youtubeScript || ""} onChange={(e) => updateBlock(block.id, { ...block.content, youtubeScript: e.target.value })} placeholder="[INTRO] Hey everyone..." className="min-h-[200px]" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <h3 className="font-semibold text-lg border-b pb-2 text-blue-600">Social Media Drafts</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Instagram Post</Label>
+                            <Textarea value={block.content.instagramPost || ""} onChange={(e) => updateBlock(block.id, { ...block.content, instagramPost: e.target.value })} placeholder="Instagram caption..." className="min-h-[120px]" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Twitter (X) Post</Label>
+                            <Textarea value={block.content.twitterPost || ""} onChange={(e) => updateBlock(block.id, { ...block.content, twitterPost: e.target.value })} placeholder="Short tweet..." className="min-h-[120px]" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>LinkedIn Post</Label>
+                            <Textarea value={block.content.linkedinPost || ""} onChange={(e) => updateBlock(block.id, { ...block.content, linkedinPost: e.target.value })} placeholder="Professional summary..." className="min-h-[120px]" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Facebook Post</Label>
+                            <Textarea value={block.content.facebookPost || ""} onChange={(e) => updateBlock(block.id, { ...block.content, facebookPost: e.target.value })} placeholder="Facebook announcement..." className="min-h-[120px]" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

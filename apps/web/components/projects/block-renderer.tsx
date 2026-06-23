@@ -1,11 +1,24 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Copy, Check, Package, ShoppingCart } from "lucide-react";
+import { Copy, Check, Package, ShoppingCart, Info, AlertTriangle, Lightbulb, ShieldAlert } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { AdSlot } from "@/components/ads/AdSlot";
+
+function parseBasicMarkdown(text: string) {
+  if (!text) return "";
+  return text
+    .replace(/^### (.*$)/gim, '<h3 class="text-xl font-bold mt-6 mb-2">$1</h3>')
+    .replace(/^## (.*$)/gim, '<h2 class="text-2xl font-bold mt-8 mb-4 text-slate-900">$1</h2>')
+    .replace(/^# (.*$)/gim, '<h1 class="text-3xl font-extrabold mt-10 mb-6 text-slate-900">$1</h1>')
+    .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/gim, '<em>$1</em>')
+    .replace(/^\d+\.\s+(.*$)/gim, '<li class="ml-6 list-decimal">$1</li>')
+    .replace(/^- (.*$)/gim, '<li class="ml-6 list-disc">$1</li>')
+    .replace(/\n/g, '<br/>');
+}
 
 interface Block {
   id: string;
@@ -42,6 +55,38 @@ function renderBlock(block: Block, slug?: string) {
           className="prose prose-slate max-w-none"
           dangerouslySetInnerHTML={{ __html: block.content.toString().replace(/\n/g, "<br/>") }} 
         />
+      );
+
+    case "markdown":
+      return (
+        <div 
+          className="prose prose-slate max-w-none space-y-2 text-slate-700 leading-relaxed"
+          dangerouslySetInnerHTML={{ __html: parseBasicMarkdown(block.content) }} 
+        />
+      );
+
+    case "alert":
+      const { type, title, text } = block.content;
+      const alertStyles = {
+        info: "bg-blue-50 border-blue-200 text-blue-900",
+        warning: "bg-yellow-50 border-yellow-200 text-yellow-900",
+        tip: "bg-emerald-50 border-emerald-200 text-emerald-900",
+        danger: "bg-red-50 border-red-200 text-red-900"
+      };
+      
+      const Icon = type === "warning" ? AlertTriangle : type === "tip" ? Lightbulb : type === "danger" ? ShieldAlert : Info;
+      const IconColor = type === "warning" ? "text-yellow-600" : type === "tip" ? "text-emerald-600" : type === "danger" ? "text-red-600" : "text-blue-600";
+
+      return (
+        <div className={cn("my-8 p-6 rounded-xl border flex gap-4 items-start shadow-sm", alertStyles[type as keyof typeof alertStyles] || alertStyles.info)}>
+          <div className="mt-1">
+            <Icon className={cn("w-6 h-6", IconColor)} />
+          </div>
+          <div className="flex-1 space-y-2">
+            {title && <h4 className="font-bold text-lg">{title}</h4>}
+            <div dangerouslySetInnerHTML={{ __html: text ? text.replace(/\n/g, "<br/>") : "" }} />
+          </div>
+        </div>
       );
 
     case "heading":
@@ -92,6 +137,23 @@ function renderBlock(block: Block, slug?: string) {
             height="100%"
             src={`https://www.youtube.com/embed/${videoId}`}
             title="YouTube video player"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="border-none"
+          />
+        </div>
+      );
+      
+    case "youtube":
+      const ytId = block.content.url ? block.content.url.split("v=")[1]?.split("&")[0] || block.content.url.split("youtu.be/")[1] : null;
+      if (!ytId) return null;
+      return (
+        <div className="aspect-video w-full my-8 rounded-xl overflow-hidden shadow-2xl border border-red-500/20 bg-slate-900">
+          <iframe
+            width="100%"
+            height="100%"
+            src={`https://www.youtube.com/embed/${ytId}`}
+            title="YouTube video tutorial"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
             className="border-none"
@@ -201,6 +263,10 @@ function renderBlock(block: Block, slug?: string) {
           <AdSlot page={`projects/${slug}`} zone={block.content.zone || "CONTENT_MIDDLE"} className="w-full" />
         </div>
       );
+
+    case "campaign_data":
+      // Completely hide this block on the public frontend. It's only for the dashboard.
+      return null;
 
     default:
       return null;
