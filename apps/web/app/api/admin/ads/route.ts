@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
         name,
         type: type || 'CUSTOM',
         format,
-        status: status || 'DRAFT',
+        status: status || 'ACTIVE',
         title,
         description,
         imageUrl,
@@ -149,63 +149,32 @@ export async function POST(request: NextRequest) {
         googleAdId,
         googleAdSlot,
         createdBy: session.user.id,
-        placements: placements && placements.length > 0 ? {
-          create: placements.map((p: any) => ({
-            page: p.page,
-            zone: p.zone as any, // Cast to AdZone enum
-            isActive: p.isActive !== false,
-          })),
-        } : undefined,
+        // Use user-specified placements; if none provided, create a sensible default
+        placements: {
+          create: placements && placements.length > 0
+            ? placements.map((p: any) => ({
+                page: p.page,
+                zone: p.zone as any,
+                isActive: p.isActive !== false,
+              }))
+            : [
+                // Default: show on all project pages in content middle
+                { page: 'projects', zone: 'CONTENT_MIDDLE' as any, isActive: true },
+              ],
+        },
       },
       include: {
         creator: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
+          select: { id: true, name: true, email: true },
         },
         placements: true,
       },
     });
 
-    // Auto-create default placements based on format
-    const defaultPlacements: { page: string; zone: string }[] = [];
-    
-    switch (format) {
-      case 'BANNER':
-        defaultPlacements.push({ page: 'home', zone: 'HEADER' });
-        break;
-      case 'SIDEBAR':
-        defaultPlacements.push({ page: 'home', zone: 'SIDEBAR_RIGHT' });
-        break;
-      case 'POPUP':
-        defaultPlacements.push({ page: 'home', zone: 'POPUP' });
-        break;
-      case 'INLINE':
-        defaultPlacements.push({ page: 'home', zone: 'CONTENT_MIDDLE' });
-        break;
-      default:
-        defaultPlacements.push({ page: 'home', zone: 'CONTENT_TOP' });
-    }
-
-    // Create placements
-    if (defaultPlacements.length > 0) {
-      await prisma.adPlacement.createMany({
-        data: defaultPlacements.map((placement, index) => ({
-          advertisementId: ad.id,
-          page: placement.page,
-          zone: placement.zone as any,
-          position: index,
-          isActive: true,
-        })),
-      });
-    }
-
     return NextResponse.json<ApiResponse>({
       success: true,
       data: ad,
-      message: 'Advertisement created successfully with default placements',
+      message: `Advertisement created successfully! It is now ${status || 'ACTIVE'} and targeting ${(placements && placements.length > 0) ? placements.length : 1} placement(s).`,
     });
   } catch (error: any) {
     console.error('[ADMIN ADS API] Create ad error:', error);

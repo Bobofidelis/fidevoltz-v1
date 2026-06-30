@@ -10,15 +10,26 @@ export async function GET(request: NextRequest) {
 
     console.log('[ADS API] Fetching ads for page:', page);
 
+    // Build a list of page slugs to match against.
+    // e.g., for page='projects/my-article-slug', we match placements on:
+    // 'projects/my-article-slug', 'projects', and 'all'
+    const pageVariants = [page, 'all'];
+    // Add parent path segment(s) so a placement on 'projects' matches 'projects/any-slug'
+    const segments = page.split('/');
+    if (segments.length > 1) {
+      // Add intermediate path segments like 'projects' for 'projects/slug'
+      for (let i = 1; i < segments.length; i++) {
+        pageVariants.push(segments.slice(0, i).join('/'));
+      }
+    }
+
     // Get all ACTIVE ads with placements for the specified page
     const ads = await prisma.advertisement.findMany({
       where: {
         status: 'ACTIVE',
         placements: {
           some: {
-            page: {
-              in: [page, 'all'], // Match specific page or 'all' pages
-            },
+            page: { in: pageVariants },
             isActive: true,
           },
         },
@@ -26,9 +37,7 @@ export async function GET(request: NextRequest) {
       include: {
         placements: {
           where: {
-            page: {
-              in: [page, 'all'],
-            },
+            page: { in: pageVariants },
             isActive: true,
           },
         },
@@ -38,7 +47,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    console.log(`[ADS API] Found ${ads.length} active ads`);
+    console.log(`[ADS API] Found ${ads.length} active ads for page variants: ${pageVariants.join(', ')}`);
 
     return NextResponse.json<ApiResponse>({
       success: true,

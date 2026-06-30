@@ -16,13 +16,32 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const startDate = searchParams.get('startDate') ? new Date(searchParams.get('startDate')!) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    const endDate = searchParams.get('endDate') ? new Date(searchParams.get('endDate')!) : new Date();
+    const startDateParam = searchParams.get('startDate');
+    const endDateParam = searchParams.get('endDate');
+    
+    let dateFilter: any = {};
+    if (startDateParam && startDateParam !== 'undefined') {
+      dateFilter.gte = new Date(startDateParam);
+    }
+    if (endDateParam && endDateParam !== 'undefined') {
+      dateFilter.lte = new Date(endDateParam);
+    }
+    
+    // Default to last 30 days only if both are missing and it's not explicitly 'all'
+    if (!startDateParam && !endDateParam) {
+       dateFilter = { 
+         gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+         lte: new Date()
+       };
+    }
+    
+    // Create the full where clause for date filtering
+    const dateWhere = Object.keys(dateFilter).length > 0 ? { createdAt: dateFilter } : {};
 
     // Get all completed orders in date range
     const orders = await prisma.order.findMany({
       where: {
-        createdAt: { gte: startDate, lte: endDate },
+        ...dateWhere,
         status: { in: ['COMPLETED', 'PROCESSING', 'SHIPPED'] },
       },
       include: {
@@ -79,6 +98,9 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => b.profit - a.profit)
       .slice(0, 10);
 
+    const queryStartDate = dateFilter.gte || new Date(0);
+    const queryEndDate = dateFilter.lte || new Date();
+
     // Profit trend (daily)
     const profitTrend = await prisma.$queryRaw`
       SELECT 
@@ -88,7 +110,7 @@ export async function GET(request: NextRequest) {
       FROM "Order" o
       JOIN "OrderItem" oi ON oi."orderId" = o.id
       LEFT JOIN "Product" p ON p.id = oi."productId"
-      WHERE o."createdAt" >= ${startDate} AND o."createdAt" <= ${endDate}
+      WHERE o."createdAt" >= ${queryStartDate} AND o."createdAt" <= ${queryEndDate}
         AND o."status" IN ('COMPLETED', 'PROCESSING', 'SHIPPED')
       GROUP BY DATE(o."createdAt")
       ORDER BY date ASC

@@ -30,7 +30,7 @@ export default function CreateAdPage() {
     name: "",
     type: "CUSTOM",
     format: "BANNER",
-    status: "DRAFT",
+    status: "ACTIVE",
     title: "",
     description: "",
     imageUrl: "",
@@ -51,13 +51,8 @@ export default function CreateAdPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (placements.length === 0) {
-      toast.error('Please add at least one placement for your ad');
-      return;
-    }
-
     createAd.mutate({ ...formData, placements }, {
-      onSuccess: (data) => {
+      onSuccess: () => {
         router.push('/dashboard/seo-ads/ads');
       },
     });

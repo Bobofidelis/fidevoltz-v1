@@ -27,8 +27,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MediaPicker } from "@/components/media/MediaPicker";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { toast } from "sonner";
 
 interface ProjectEditorProps {
@@ -277,11 +279,10 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
 
 
                     {block.type === "text" && (
-                      <Textarea 
-                        value={block.content} 
-                        onChange={(e) => updateBlock(block.id, e.target.value)}
-                        placeholder="Write your content here..."
-                        className="min-h-[100px]"
+                      <RichTextEditor 
+                        content={block.content.toString()}
+                        onChange={(val) => updateBlock(block.id, val)}
+                        className="w-full"
                       />
                     )}
 
@@ -526,30 +527,44 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                     )}
 
                     {block.type === "ad" && (
-                      <div className="space-y-3 bg-orange-50 border border-orange-200 p-4 rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <span className="bg-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded">AD</span>
-                          <p className="text-sm font-medium text-orange-800">Advertisement Block</p>
+                      <div className="space-y-4 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 p-5 rounded-xl shadow-sm relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-10">
+                          <ShoppingCart className="w-24 h-24 text-orange-500" />
                         </div>
-                        <p className="text-xs text-orange-700">
-                          This will automatically display an active ad from your Ads Manager. No manual input needed — ads are pulled based on the zone and page.
-                        </p>
-                        <div className="space-y-2">
-                          <Label className="text-orange-900">Ad Zone</Label>
-                          <Select value={block.content.zone || "CONTENT_MIDDLE"} onValueChange={(val) => updateBlock(block.id, { ...block.content, zone: val })}>
-                            <SelectTrigger className="w-[220px]">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="CONTENT_TOP">Content Top</SelectItem>
-                              <SelectItem value="CONTENT_MIDDLE">Content Middle</SelectItem>
-                              <SelectItem value="CONTENT_BOTTOM">Content Bottom</SelectItem>
-                            </SelectContent>
-                          </Select>
+                        <div className="flex items-center gap-3 relative z-10">
+                          <div className="bg-orange-500 text-white rounded-md p-2 shadow-sm">
+                            <Package className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <h4 className="text-base font-bold text-orange-900">Advertisement Slot</h4>
+                            <p className="text-xs text-orange-700 max-w-[80%]">
+                              Ads will automatically populate here from your SEO & Ads Manager based on the zone selected.
+                            </p>
+                          </div>
                         </div>
-                        <p className="text-xs text-orange-600 italic">
-                          💡 Manage active ads under Dashboard → SEO & Ads → Ads Manager
-                        </p>
+                        
+                        <div className="bg-white/60 p-4 rounded-lg border border-orange-100 relative z-10 mt-2">
+                          <div className="space-y-3">
+                            <Label className="text-orange-900 font-semibold flex items-center gap-2">
+                              Select Display Zone <span className="text-red-500">*</span>
+                            </Label>
+                            <Select value={block.content.zone || "CONTENT_MIDDLE"} onValueChange={(val) => updateBlock(block.id, { ...block.content, zone: val })}>
+                              <SelectTrigger className="w-full md:w-[300px] bg-white border-orange-200 focus:ring-orange-500">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="CONTENT_TOP">Top of Content</SelectItem>
+                                <SelectItem value="CONTENT_MIDDLE">Middle of Content</SelectItem>
+                                <SelectItem value="CONTENT_BOTTOM">Bottom of Content</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center relative z-10">
+                           <p className="text-xs text-orange-600/80 italic flex items-center gap-1">
+                            <span>💡</span> Manage ad creatives in your <a href="/dashboard/seo" className="underline font-semibold" target="_blank" rel="noreferrer">Ads Manager</a>
+                          </p>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -613,63 +628,88 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                 <div className="space-y-8">
                   {blocks.filter(b => b.type === "campaign_data").map((block) => (
                     <div key={block.id} className="space-y-8">
-                      <div className="space-y-4">
-                        <h3 className="font-semibold text-lg border-b pb-2">Search Engine Optimization</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label>Meta Title</Label>
-                            <Input value={block.content.metaTitle || ""} onChange={(e) => updateBlock(block.id, { ...block.content, metaTitle: e.target.value })} placeholder="Optimal SEO Title" />
-                          </div>
-                          <div className="space-y-2">
-                            <Label>SEO Tags / Keywords (comma separated)</Label>
-                            <Input value={block.content.tags || ""} onChange={(e) => updateBlock(block.id, { ...block.content, tags: e.target.value })} placeholder="Arduino, VVVF, Elevator" />
-                          </div>
-                          <div className="space-y-2 md:col-span-2">
-                            <Label>Meta Description (150-160 characters)</Label>
-                            <Textarea value={block.content.metaDescription || ""} onChange={(e) => updateBlock(block.id, { ...block.content, metaDescription: e.target.value })} placeholder="Brief description for search engines..." />
-                          </div>
-                        </div>
-                      </div>
+                      <Accordion type="single" collapsible className="w-full bg-white border rounded-lg">
+                        
+                        <AccordionItem value="seo" className="px-4">
+                          <AccordionTrigger className="hover:no-underline py-4">
+                            <div className="flex items-center gap-2">
+                              <Search className="w-5 h-5 text-indigo-500" />
+                              <span className="font-semibold text-lg text-slate-800">Search Engine Optimization</span>
+                            </div>
+                          </AccordionTrigger>
+                          <AccordionContent className="pb-6 pt-2 space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label className="text-slate-700">Meta Title</Label>
+                                <Input className="bg-slate-50" value={block.content.metaTitle || ""} onChange={(e) => updateBlock(block.id, { ...block.content, metaTitle: e.target.value })} placeholder="Optimal SEO Title" />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-slate-700">SEO Tags / Keywords</Label>
+                                <Input className="bg-slate-50" value={block.content.tags || ""} onChange={(e) => updateBlock(block.id, { ...block.content, tags: e.target.value })} placeholder="Arduino, VVVF, Elevator" />
+                              </div>
+                              <div className="space-y-2 md:col-span-2">
+                                <Label className="text-slate-700">Meta Description (150-160 chars)</Label>
+                                <Textarea className="bg-slate-50" value={block.content.metaDescription || ""} onChange={(e) => updateBlock(block.id, { ...block.content, metaDescription: e.target.value })} placeholder="Brief description for search engines..." />
+                              </div>
+                            </div>
+                          </AccordionContent>
+                        </AccordionItem>
 
-                      <div className="space-y-4">
-                        <h3 className="font-semibold text-lg border-b pb-2 text-red-600">YouTube Integration</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label>YouTube Video Title</Label>
-                            <Input value={block.content.youtubeTitle || ""} onChange={(e) => updateBlock(block.id, { ...block.content, youtubeTitle: e.target.value })} placeholder="Catchy Video Title" />
-                          </div>
-                          <div className="space-y-2 md:col-span-2">
-                            <Label>YouTube Description</Label>
-                            <Textarea value={block.content.youtubeDescription || ""} onChange={(e) => updateBlock(block.id, { ...block.content, youtubeDescription: e.target.value })} placeholder="Video description with links..." className="min-h-[100px]" />
-                          </div>
-                          <div className="space-y-2 md:col-span-2">
-                            <Label>Full Video Script</Label>
-                            <Textarea value={block.content.youtubeScript || ""} onChange={(e) => updateBlock(block.id, { ...block.content, youtubeScript: e.target.value })} placeholder="[INTRO] Hey everyone..." className="min-h-[200px]" />
-                          </div>
-                        </div>
-                      </div>
+                        <AccordionItem value="youtube" className="px-4">
+                          <AccordionTrigger className="hover:no-underline py-4">
+                            <div className="flex items-center gap-2">
+                              <Video className="w-5 h-5 text-red-500" />
+                              <span className="font-semibold text-lg text-slate-800">YouTube Integration</span>
+                            </div>
+                          </AccordionTrigger>
+                          <AccordionContent className="pb-6 pt-2 space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label className="text-slate-700">Video Title</Label>
+                                <Input className="bg-red-50/50 border-red-100 focus-visible:ring-red-400" value={block.content.youtubeTitle || ""} onChange={(e) => updateBlock(block.id, { ...block.content, youtubeTitle: e.target.value })} placeholder="Catchy Video Title" />
+                              </div>
+                              <div className="space-y-2 md:col-span-2">
+                                <Label className="text-slate-700">Video Description</Label>
+                                <Textarea className="bg-red-50/50 border-red-100 focus-visible:ring-red-400 min-h-[100px]" value={block.content.youtubeDescription || ""} onChange={(e) => updateBlock(block.id, { ...block.content, youtubeDescription: e.target.value })} placeholder="Video description with links..." />
+                              </div>
+                              <div className="space-y-2 md:col-span-2">
+                                <Label className="text-slate-700">Full Video Script</Label>
+                                <Textarea className="bg-red-50/50 border-red-100 focus-visible:ring-red-400 min-h-[200px]" value={block.content.youtubeScript || ""} onChange={(e) => updateBlock(block.id, { ...block.content, youtubeScript: e.target.value })} placeholder="[INTRO] Hey everyone..." />
+                              </div>
+                            </div>
+                          </AccordionContent>
+                        </AccordionItem>
 
-                      <div className="space-y-4">
-                        <h3 className="font-semibold text-lg border-b pb-2 text-blue-600">Social Media Drafts</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div className="space-y-2">
-                            <Label>Instagram Post</Label>
-                            <Textarea value={block.content.instagramPost || ""} onChange={(e) => updateBlock(block.id, { ...block.content, instagramPost: e.target.value })} placeholder="Instagram caption..." className="min-h-[120px]" />
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Twitter (X) Post</Label>
-                            <Textarea value={block.content.twitterPost || ""} onChange={(e) => updateBlock(block.id, { ...block.content, twitterPost: e.target.value })} placeholder="Short tweet..." className="min-h-[120px]" />
-                          </div>
-                          <div className="space-y-2">
-                            <Label>LinkedIn Post</Label>
-                            <Textarea value={block.content.linkedinPost || ""} onChange={(e) => updateBlock(block.id, { ...block.content, linkedinPost: e.target.value })} placeholder="Professional summary..." className="min-h-[120px]" />
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Facebook Post</Label>
-                            <Textarea value={block.content.facebookPost || ""} onChange={(e) => updateBlock(block.id, { ...block.content, facebookPost: e.target.value })} placeholder="Facebook announcement..." className="min-h-[120px]" />
-                          </div>
-                        </div>
-                      </div>
+                        <AccordionItem value="social" className="px-4 border-b-0">
+                          <AccordionTrigger className="hover:no-underline py-4">
+                            <div className="flex items-center gap-2">
+                              <FileText className="w-5 h-5 text-blue-500" />
+                              <span className="font-semibold text-lg text-slate-800">Social Media Drafts</span>
+                            </div>
+                          </AccordionTrigger>
+                          <AccordionContent className="pb-6 pt-2 space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              <div className="space-y-2">
+                                <Label className="text-pink-600 font-semibold">Instagram Post</Label>
+                                <Textarea className="bg-pink-50/30 border-pink-100 focus-visible:ring-pink-400 min-h-[120px]" value={block.content.instagramPost || ""} onChange={(e) => updateBlock(block.id, { ...block.content, instagramPost: e.target.value })} placeholder="Instagram caption..." />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-blue-500 font-semibold">Twitter (X) Post</Label>
+                                <Textarea className="bg-blue-50/30 border-blue-100 focus-visible:ring-blue-400 min-h-[120px]" value={block.content.twitterPost || ""} onChange={(e) => updateBlock(block.id, { ...block.content, twitterPost: e.target.value })} placeholder="Short tweet..." />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-blue-700 font-semibold">LinkedIn Post</Label>
+                                <Textarea className="bg-blue-50/30 border-blue-100 focus-visible:ring-blue-600 min-h-[120px]" value={block.content.linkedinPost || ""} onChange={(e) => updateBlock(block.id, { ...block.content, linkedinPost: e.target.value })} placeholder="Professional summary..." />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-blue-600 font-semibold">Facebook Post</Label>
+                                <Textarea className="bg-blue-50/30 border-blue-100 focus-visible:ring-blue-500 min-h-[120px]" value={block.content.facebookPost || ""} onChange={(e) => updateBlock(block.id, { ...block.content, facebookPost: e.target.value })} placeholder="Facebook announcement..." />
+                              </div>
+                            </div>
+                          </AccordionContent>
+                        </AccordionItem>
+                        
+                      </Accordion>
                     </div>
                   ))}
                 </div>

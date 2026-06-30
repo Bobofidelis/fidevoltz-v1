@@ -22,10 +22,14 @@ import { StatCardSkeleton, ChartSkeleton, TableSkeleton } from "@/components/das
 import { format } from "date-fns";
 
 export default function AnalyticsPage() {
-  const [dateRange, setDateRange] = useState("7d");
+  const [dateRange, setDateRange] = useState("all");
   
   // Calculate dates based on range
   const getDateRange = () => {
+    if (dateRange === "all") {
+      return { start: undefined, end: undefined };
+    }
+    
     const end = new Date();
     const start = new Date();
     switch (dateRange) {
@@ -143,6 +147,7 @@ export default function AnalyticsPage() {
               <SelectItem value="30d">Last 30 days</SelectItem>
               <SelectItem value="90d">Last 3 months</SelectItem>
               <SelectItem value="1y">Last year</SelectItem>
+              <SelectItem value="all">All Time</SelectItem>
             </SelectContent>
           </Select>
           <Button variant="outline">

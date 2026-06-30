@@ -16,8 +16,30 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const startDate = searchParams.get('startDate') ? new Date(searchParams.get('startDate')!) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    const endDate = searchParams.get('endDate') ? new Date(searchParams.get('endDate')!) : new Date();
+    const startDateParam = searchParams.get('startDate');
+    const endDateParam = searchParams.get('endDate');
+    
+    let dateFilter: any = {};
+    if (startDateParam && startDateParam !== 'undefined') {
+      dateFilter.gte = new Date(startDateParam);
+    }
+    if (endDateParam && endDateParam !== 'undefined') {
+      dateFilter.lte = new Date(endDateParam);
+    }
+    
+    // Default to last 30 days only if both are missing and it's not explicitly 'all'
+    if (!startDateParam && !endDateParam) {
+       dateFilter = { 
+         gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+         lte: new Date()
+       };
+    }
+    
+    // Create the full where clause for date filtering
+    const dateWhere = Object.keys(dateFilter).length > 0 ? { createdAt: dateFilter } : {};
+    
+    const queryStartDate = dateFilter.gte || new Date(0);
+    const queryEndDate = dateFilter.lte || new Date();
 
     // Run queries in parallel
     const [
@@ -33,7 +55,7 @@ export async function GET(request: NextRequest) {
 
       // New users in period
       prisma.user.count({
-        where: { createdAt: { gte: startDate, lte: endDate } },
+        where: dateWhere,
       }).catch(() => 0),
 
       // Users by role
@@ -48,7 +70,7 @@ export async function GET(request: NextRequest) {
           "createdAt"::date as date,
           COUNT(id)::int as new_users
         FROM "User"
-        WHERE "createdAt" >= ${startDate} AND "createdAt" <= ${endDate}
+        WHERE "createdAt" >= ${queryStartDate} AND "createdAt" <= ${queryEndDate}
         GROUP BY "createdAt"::date
         ORDER BY date ASC
       `.catch((e) => {
@@ -74,7 +96,7 @@ export async function GET(request: NextRequest) {
           COUNT(o.id)::int as order_count
         FROM "User" u
         LEFT JOIN "Order" o ON o."userId" = u.id
-        WHERE u."createdAt" >= ${startDate} AND u."createdAt" <= ${endDate}
+        WHERE u."createdAt" >= ${queryStartDate} AND u."createdAt" <= ${queryEndDate}
         GROUP BY u.id, u.name, u.email, u."createdAt", u."lastLoginAt"
         ORDER BY order_count DESC
         LIMIT 10
@@ -87,7 +109,7 @@ export async function GET(request: NextRequest) {
       FROM (
         SELECT "userId", COUNT(id) as order_count
         FROM "Order"
-        WHERE "createdAt" >= ${startDate} AND "createdAt" <= ${endDate}
+        WHERE "createdAt" >= ${queryStartDate} AND "createdAt" <= ${queryEndDate}
         GROUP BY "userId"
         HAVING COUNT(id) >= 2
       ) as repeat_customers
