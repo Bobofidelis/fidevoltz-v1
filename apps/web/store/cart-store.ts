@@ -29,6 +29,17 @@ interface CartState {
   getTotal: () => number;
   isInCart: (productId: string) => boolean;
   getItemQuantity: (productId: string) => number;
+  
+  // Selection
+  selectedItems: string[]; // Array of productIds
+  toggleItemSelection: (productId: string) => void;
+  selectAllItems: () => void;
+  clearSelection: () => void;
+  removeSelectedItems: () => void;
+  getSelectedSubtotal: () => number;
+  getSelectedTax: () => number;
+  getSelectedShipping: () => number;
+  getSelectedTotal: () => number;
 }
 
 const TAX_RATE = 0.08; // 8% tax
@@ -39,6 +50,7 @@ export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
+      selectedItems: [],
       
       addItem: (product, quantity = 1) => {
         const items = get().items;
@@ -75,7 +87,10 @@ export const useCartStore = create<CartState>()(
       },
       
       removeItem: (productId) =>
-        set({ items: get().items.filter((i) => i.productId !== productId) }),
+        set({ 
+          items: get().items.filter((i) => i.productId !== productId),
+          selectedItems: get().selectedItems.filter(id => id !== productId)
+        }),
       
       updateQuantity: (productId, quantity) => {
         const item = get().items.find((i) => i.productId === productId);
@@ -115,7 +130,7 @@ export const useCartStore = create<CartState>()(
         }
       },
       
-      clearCart: () => set({ items: [] }),
+      clearCart: () => set({ items: [], selectedItems: [] }),
       
       getItemCount: () =>
         get().items.reduce((acc, item) => acc + item.quantity, 0),
@@ -140,6 +155,50 @@ export const useCartStore = create<CartState>()(
         const item = get().items.find((i) => i.productId === productId);
         return item ? item.quantity : 0;
       },
+      
+      toggleItemSelection: (productId) => {
+        const selected = get().selectedItems;
+        if (selected.includes(productId)) {
+          set({ selectedItems: selected.filter(id => id !== productId) });
+        } else {
+          set({ selectedItems: [...selected, productId] });
+        }
+      },
+      
+      selectAllItems: () => {
+        const allIds = get().items.map(item => item.productId);
+        set({ selectedItems: allIds });
+      },
+      
+      clearSelection: () => {
+        set({ selectedItems: [] });
+      },
+      
+      removeSelectedItems: () => {
+        const { items, selectedItems } = get();
+        set({
+          items: items.filter(item => !selectedItems.includes(item.productId)),
+          selectedItems: []
+        });
+      },
+      
+      getSelectedSubtotal: () => {
+        const { items, selectedItems } = get();
+        return items
+          .filter(item => selectedItems.includes(item.productId))
+          .reduce((acc, item) => acc + item.price * item.quantity, 0);
+      },
+      
+      getSelectedTax: () => get().getSelectedSubtotal() * TAX_RATE,
+      
+      getSelectedShipping: () => {
+        const subtotal = get().getSelectedSubtotal();
+        if (subtotal === 0) return 0;
+        return subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
+      },
+      
+      getSelectedTotal: () =>
+        get().getSelectedSubtotal() + get().getSelectedTax() + get().getSelectedShipping(),
     }),
     {
       name: 'cart-storage',

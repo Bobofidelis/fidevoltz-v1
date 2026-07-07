@@ -53,6 +53,7 @@ model User {
   ticketMessages             TicketMessage[]     @relation("TicketMessages")
   activities                 UserActivity[]
   settings                   UserSettings?
+  addresses                  UserAddress[]       @relation("UserAddresses")
 
   @@index([createdAt])
   @@index([lastLoginAt])
@@ -601,6 +602,40 @@ model UserSettings {
   user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+model UserAddress {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  address   String
+  city      String
+  state     String
+  country   String   @default("Nigeria")
+  zipCode   String?
+  phone     String
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation("UserAddresses", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isDefault])
+}
+
+model PaymentGateway {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   @unique // e.g. "paystack", "flutterwave", "stripe", "manual"
+  description String?
+  publicKey   String?
+  secretKey   String?
+  webhookKey  String?
+  isActive    Boolean  @default(false)
+  isTestMode  Boolean  @default(true)
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model SiteSettings {

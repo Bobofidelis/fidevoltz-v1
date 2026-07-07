@@ -21,7 +21,8 @@ import {
   Globe,
   Image,
   User,
-  Mail
+  Mail,
+  CreditCard
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/auth-store";
@@ -59,6 +60,7 @@ const sidebarItems = [
   { icon: Mail, label: "Contact Submissions", href: "/dashboard/contact-submissions", roles: ["ADMIN"] },
   { icon: Globe, label: "SEO & Ads", href: "/dashboard/seo", roles: ["ADMIN"] },
   { icon: BarChart3, label: "Analytics", href: "/dashboard/analytics", roles: ["ADMIN"] },
+  { icon: CreditCard, label: "Payment Methods", href: "/dashboard/payments", roles: ["ADMIN"] },
   
   // Settings at the bottom for all roles
   { icon: Settings, label: "Settings", href: "/dashboard/settings", roles: ["ADMIN", "EDITOR", "USER"] },

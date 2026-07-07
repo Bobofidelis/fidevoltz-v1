@@ -189,7 +189,7 @@ export default function OverviewPage() {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Link href="/dashboard/products/new">
+        <Link href="/dashboard/projects/add">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">

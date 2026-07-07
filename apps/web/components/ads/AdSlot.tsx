@@ -47,7 +47,7 @@ export function AdSlot({ page, zone, className = "" }: AdSlotProps) {
       ) : (
         // Standard image + text ad
         <div
-          className="ad-container cursor-pointer rounded-xl overflow-hidden border border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all duration-200 bg-white"
+          className="ad-container max-w-2xl mx-auto cursor-pointer rounded-xl overflow-hidden border border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all duration-200 bg-white"
           onClick={handleClick}
           role="button"
           tabIndex={0}
@@ -58,7 +58,7 @@ export function AdSlot({ page, zone, className = "" }: AdSlotProps) {
             <img
               src={ad.imageUrl}
               alt={ad.title || "Advertisement"}
-              className="w-full h-auto object-cover"
+              className="w-full max-h-[300px] object-cover"
               loading="lazy"
             />
           )}

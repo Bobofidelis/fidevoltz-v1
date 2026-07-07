@@ -26,8 +26,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 import { MediaPicker } from "@/components/media/MediaPicker";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
+import { ProductLinkPicker } from "@/components/projects/product-link-picker";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -500,11 +502,14 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                                     newItems[i].linkText = e.target.value;
                                     updateBlock(block.id, { ...block.content, items: newItems });
                                   }} />
-                                  <Input placeholder="Product Link (URL)" value={item.productLink || ""} onChange={(e) => {
-                                    const newItems = [...(block.content.items || [])];
-                                    newItems[i].productLink = e.target.value;
-                                    updateBlock(block.id, { ...block.content, items: newItems });
-                                  }} />
+                                  <ProductLinkPicker 
+                                    value={item.productLink || ""} 
+                                    onChange={(val) => {
+                                      const newItems = [...(block.content.items || [])];
+                                      newItems[i].productLink = val;
+                                      updateBlock(block.id, { ...block.content, items: newItems });
+                                    }} 
+                                  />
                                 </div>
                                 <Button type="button" variant="ghost" size="icon" className="text-red-500 mt-1" onClick={() => {
                                   const newItems = [...block.content.items];
