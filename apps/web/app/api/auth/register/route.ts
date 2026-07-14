@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
         passwordHash,
         name: name || null,
         role: 'USER',
-        status: requireEmailVerification ? 'pending_verification' : 'active',
+        status: 'active', // Temporarily bypass email verification until set up
       },
       select: {
         id: true,

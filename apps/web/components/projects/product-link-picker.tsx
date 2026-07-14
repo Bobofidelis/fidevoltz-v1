@@ -34,7 +34,7 @@ export function ProductLinkPicker({ value, onChange, placeholder = "Product Link
     const searchProducts = async () => {
       setIsLoading(true);
       try {
-        const res = await fetch(`/api/products?q=${encodeURIComponent(debouncedQuery)}&limit=5`);
+        const res = await fetch(`/api/products?search=${encodeURIComponent(debouncedQuery)}&limit=5`);
         const data = await res.json();
         if (data.success) {
           setResults(data.data);

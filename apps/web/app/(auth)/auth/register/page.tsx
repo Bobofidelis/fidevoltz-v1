@@ -7,24 +7,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
+import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 function RegisterPageContent() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const login = useAuthStore((state) => state.login);
-  const user = useAuthStore((state) => state.user);
   const router = useRouter();
   const searchParams = useSearchParams();
   const returnUrl = searchParams.get("returnUrl") || "/";
-
-  useEffect(() => {
-    if (user) {
-      router.push(returnUrl);
-    }
-  }, [user, router, returnUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,13 +34,23 @@ function RegisterPageContent() {
 
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.message || 'Registration failed');
+        throw new Error(error.error || error.message || 'Registration failed');
       }
 
-      const data = await res.json();
-      login(data.user, data.access_token);
-      toast.success('Registration successful! Check your email for a welcome message.');
-      router.push(returnUrl);
+      // Automatically sign in the user after registration
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        throw new Error("Registration succeeded but auto-login failed.");
+      }
+
+      toast.success('Registration successful!');
+      router.push(returnUrl && returnUrl !== "/" ? returnUrl : "/dashboard/overview");
+      router.refresh();
     } catch (error: any) {
       console.error(error);
       toast.error(error.message || 'Registration failed. Please try again.');
@@ -95,16 +100,29 @@ function RegisterPageContent() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="new-password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="h-11"
-            />
+            <div className="relative">
+              <Input
+                id="password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                autoComplete="new-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="h-11 pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+              >
+                {showPassword ? (
+                  <EyeOff className="h-5 w-5" />
+                ) : (
+                  <Eye className="h-5 w-5" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
