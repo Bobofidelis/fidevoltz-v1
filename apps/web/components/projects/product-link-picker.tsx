@@ -37,7 +37,9 @@ export function ProductLinkPicker({ value, onChange, placeholder = "Product Link
         const res = await fetch(`/api/products?search=${encodeURIComponent(debouncedQuery)}&limit=5`);
         const data = await res.json();
         if (data.success) {
-          setResults(data.data);
+          // The API returns { data: { data: [...], pagination: {...} } }
+          const items = Array.isArray(data.data) ? data.data : (data.data?.data || []);
+          setResults(items);
         }
       } catch (e) {
         console.error("Search failed", e);
