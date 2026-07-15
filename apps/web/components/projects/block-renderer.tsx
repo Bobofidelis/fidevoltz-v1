@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { AdSlot } from "@/components/ads/AdSlot";
+import { AddToCartBOMButton } from "./AddToCartBOMButton";
 
 function parseBasicMarkdown(text: string) {
   if (!text) return "";
@@ -234,11 +235,7 @@ function renderBlock(block: Block, slug?: string) {
                       <td className="px-6 py-4 text-slate-600">{item.specs}</td>
                       <td className="px-6 py-4 text-right">
                         {item.productLink ? (
-                          <Link href={item.productLink}>
-                            <Button size="sm" variant="outline" className="border-blue-200 text-blue-700 hover:bg-blue-50">
-                              {item.linkText || "Buy Item"}
-                            </Button>
-                          </Link>
+                          <AddToCartBOMButton item={item} />
                         ) : (
                           <span className="text-slate-400 text-xs uppercase tracking-wider">Supplied</span>
                         )}

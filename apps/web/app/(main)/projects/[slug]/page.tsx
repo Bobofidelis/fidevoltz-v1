@@ -10,6 +10,7 @@ import { CommentSection } from "@/components/comments/CommentSection";
 import { ShareBlock } from "@/components/projects/ShareBlock";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
+import { AdSlot } from "@/components/ads/AdSlot";
 
 // Fetch project from DB
 async function getProject(slugOrId: string) {
@@ -160,6 +161,8 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
       {/* Content */}
       <section className="py-12">
         <div className="container px-4 md:px-6">
+          <AdSlot page={`projects/${project.slug}`} zone="HEADER" className="mb-8" />
+          
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-8">
@@ -171,9 +174,15 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                   </div>
                )}
 
+               {/* Content Top Ad */}
+               <AdSlot page={`projects/${project.slug}`} zone="CONTENT_TOP" className="w-full" />
+
               <div className="bg-white rounded-xl p-8 shadow-sm border border-slate-100">
                  <BlockRenderer blocks={blocks} slug={project.slug} />
               </div>
+
+              {/* Content Bottom Ad */}
+              <AdSlot page={`projects/${project.slug}`} zone="CONTENT_BOTTOM" className="w-full" />
 
               {/* Inline Share block at end of article */}
               <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">

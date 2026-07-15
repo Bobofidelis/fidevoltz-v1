@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
-import { useAuthStore } from "@/store/auth-store";
+import { useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

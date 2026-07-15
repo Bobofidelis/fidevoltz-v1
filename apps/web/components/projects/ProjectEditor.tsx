@@ -504,9 +504,17 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                                   }} />
                                   <ProductLinkPicker 
                                     value={item.productLink || ""} 
-                                    onChange={(val) => {
+                                    onChange={(val, product) => {
                                       const newItems = [...(block.content.items || [])];
                                       newItems[i].productLink = val;
+                                      if (product) {
+                                        newItems[i].productId = product.id;
+                                        newItems[i].productName = product.name;
+                                        newItems[i].productPrice = product.price;
+                                        newItems[i].productImage = product.image;
+                                        newItems[i].productSlug = product.slug;
+                                        newItems[i].productStock = product.stock;
+                                      }
                                       updateBlock(block.id, { ...block.content, items: newItems });
                                     }} 
                                   />
@@ -819,7 +827,7 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                 </div>
                 <Dialog open={isComponentDialogOpen} onOpenChange={setIsComponentDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button variant="outline" className="gap-2">
+                    <Button type="button" variant="outline" className="gap-2">
                       <Plus className="h-4 w-4" /> Add Component
                     </Button>
                   </DialogTrigger>
@@ -849,7 +857,7 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                                 <div className="text-xs text-muted-foreground">${Number(product.price).toFixed(2)}</div>
                               </div>
                             </div>
-                            <Button size="sm" onClick={() => addComponent(product)}>Add</Button>
+                            <Button type="button" size="sm" onClick={() => addComponent(product)}>Add</Button>
                           </div>
                         ))}
                         {productSearch.length > 1 && searchResults.length === 0 && (
@@ -892,7 +900,7 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                             onChange={(e) => updateComponentQuantity(index, parseInt(e.target.value))}
                           />
                         </div>
-                        <Button variant="ghost" size="icon" className="text-red-500" onClick={() => removeComponent(index)}>
+                        <Button type="button" variant="ghost" size="icon" className="text-red-500" onClick={() => removeComponent(index)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -945,7 +953,7 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                        <FileText className="h-4 w-4 text-muted-foreground" />
                        <a href={att.url} target="_blank" className="text-sm hover:underline text-blue-600">{att.name || att.url}</a>
                      </div>
-                     <Button variant="ghost" size="icon" className="text-red-500" onClick={() => removeAttachment(index)}>
+                     <Button type="button" variant="ghost" size="icon" className="text-red-500" onClick={() => removeAttachment(index)}>
                        <Trash2 className="h-4 w-4" />
                      </Button>
                    </div>

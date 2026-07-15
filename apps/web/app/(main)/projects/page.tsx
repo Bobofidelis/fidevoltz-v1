@@ -8,6 +8,7 @@ import { Clock, TrendingUp, ArrowRight, Search, Calendar, Sparkles } from "lucid
 import { prisma } from "@/lib/prisma";
 import { FadeIn } from "@/components/ui/motion";
 import { ProjectSearch } from "@/components/projects/project-search";
+import { AdSlot } from "@/components/ads/AdSlot";
 
 
 interface ProjectsPageProps {
@@ -96,6 +97,9 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
            {/* Main Content (3 Columns) */}
            <div className="lg:col-span-3 space-y-16">
               
+              {/* Content Top Ad */}
+              <AdSlot page="projects" zone="CONTENT_TOP" className="w-full" />
+
               {/* Latest Projects Section (Hidden when searching) */}
               {!query && page === 1 && latestProjects.length > 0 && (
                 <section className="space-y-6">

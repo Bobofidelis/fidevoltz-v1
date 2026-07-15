@@ -13,7 +13,7 @@ import { useDebounce } from "@/lib/hooks/use-debounce";
 
 interface ProductLinkPickerProps {
   value: string;
-  onChange: (value: string) => void;
+  onChange: (value: string, product?: any) => void;
   placeholder?: string;
 }
 
@@ -54,7 +54,7 @@ export function ProductLinkPicker({ value, onChange, placeholder = "Product Link
   const handleSelect = (product: any) => {
     // Generate the store link for this product
     const url = `/store/product/${product.slug || product.id}`;
-    onChange(url);
+    onChange(url, product);
     setOpen(false);
   };
 
@@ -69,6 +69,7 @@ export function ProductLinkPicker({ value, onChange, placeholder = "Product Link
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button 
+            type="button"
             variant="ghost" 
             size="icon" 
             className="absolute right-0 h-full text-blue-600 hover:text-blue-700 hover:bg-blue-50"
@@ -100,6 +101,7 @@ export function ProductLinkPicker({ value, onChange, placeholder = "Product Link
               <div className="space-y-1">
                 {results.map((product) => (
                   <button
+                    type="button"
                     key={product.id}
                     onClick={() => handleSelect(product)}
                     className="w-full text-left px-2 py-2 text-sm hover:bg-slate-100 rounded-md flex items-start gap-2 transition-colors"
