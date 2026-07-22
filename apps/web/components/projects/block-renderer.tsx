@@ -102,16 +102,30 @@ function renderBlock(block: Block, slug?: string) {
       );
     
     case "image":
-      if (!block.content.url) return null;
+      const urls = block.content.urls || (block.content.url ? [block.content.url] : []);
+      if (urls.length === 0) return null;
+      
+      const sizeClass = {
+        small: "max-w-md mx-auto",
+        large: "max-w-5xl mx-auto",
+        full: "w-full",
+        default: "w-full"
+      }[block.content.size as string] || "w-full";
+
       return (
-        <figure className="my-8">
-          <img 
-            src={block.content.url} 
-            alt={block.content.alt || "Project Image"} 
-            className="w-full rounded-xl shadow-lg border border-slate-200"
-          />
+        <figure className={`my-8 ${sizeClass}`}>
+          <div className={block.content.layout === 'grid' && urls.length > 1 ? "grid grid-cols-2 md:grid-cols-3 gap-4" : "space-y-4"}>
+            {urls.map((u: string, idx: number) => (
+              <img 
+                key={idx}
+                src={u} 
+                alt={block.content.alt || "Project Image"} 
+                className="w-full h-auto rounded-xl shadow-lg border border-slate-200 object-cover"
+              />
+            ))}
+          </div>
           {block.content.alt && (
-            <figcaption className="text-center text-sm text-slate-500 mt-2 italic">
+            <figcaption className="text-center text-sm text-slate-500 mt-4 italic">
               {block.content.alt}
             </figcaption>
           )}
@@ -119,9 +133,10 @@ function renderBlock(block: Block, slug?: string) {
       );
     
     case "video":
+      if (!block.content.url) return null;
+      
       // Extract Video ID from YouTube URL
       const getYoutubeId = (url: string) => {
-        if (!url) return null;
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
         const match = url.match(regExp);
         return (match && match[2].length === 11) ? match[2] : null;
@@ -129,7 +144,14 @@ function renderBlock(block: Block, slug?: string) {
       
       const videoId = getYoutubeId(block.content.url);
       
-      if (!videoId) return null;
+      if (!videoId) {
+        // Fallback to native video if not a YouTube URL
+        return (
+          <div className="aspect-video w-full my-8 rounded-xl overflow-hidden shadow-lg border border-slate-200 bg-slate-900">
+            <video src={block.content.url} controls className="w-full h-full object-contain" />
+          </div>
+        );
+      }
 
       return (
         <div className="aspect-video w-full my-8 rounded-xl overflow-hidden shadow-lg border border-slate-200 bg-slate-100">

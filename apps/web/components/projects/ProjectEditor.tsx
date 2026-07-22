@@ -17,7 +17,8 @@ import {
   FileText,
   Search,
   ShoppingCart,
-  Package
+  Package,
+  Upload
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -222,16 +223,10 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div className="space-x-2">
-          <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
-          <Button type="submit" disabled={loading}>
-            {loading ? "Saving..." : initialData ? "Update Project" : "Create Project"}
-          </Button>
-        </div>
+      <div className="fixed bottom-6 right-6 md:right-8 z-50 flex flex-col md:flex-row items-end md:items-center gap-4 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-2xl border border-slate-200">
         <div className="flex items-center gap-2">
           <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-[140px] bg-white">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -240,6 +235,12 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
               <SelectItem value="ARCHIVED">Archived</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
+          <Button type="submit" disabled={loading} className="shadow-lg hover:shadow-xl transition-shadow">
+            {loading ? "Saving..." : initialData ? "Update Project" : "Create Project"}
+          </Button>
         </div>
       </div>
 
@@ -351,39 +352,195 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
 
                     {block.type === "image" && (
                       <div className="space-y-4">
-                         <MediaPicker
+                        {/* Media Picker trigger + preview */}
+                        <MediaPicker
                           mediaType="IMAGE"
+                          multiple={true}
                           onChange={(media: any) => {
-                            if (media) updateBlock(block.id, { ...block.content, url: media.secureUrl || media.url });
+                            if (media) {
+                              const mediaArray = Array.isArray(media) ? media : [media];
+                              const newUrls = mediaArray.map((m: any) => m.secureUrl || m.url);
+                              const existingUrls = block.content.urls || (block.content.url ? [block.content.url] : []);
+                              updateBlock(block.id, { 
+                                ...block.content, 
+                                urls: [...existingUrls, ...newUrls],
+                                url: undefined
+                              });
+                            }
                           }}
                         >
-                          <div className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:bg-accent/50">
-                            {block.content.url ? (
-                              <img src={block.content.url} alt="Block image" className="max-h-[300px] mx-auto rounded-md" />
-                            ) : (
-                              <div className="py-8">
-                                <ImageIcon className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                                <span className="text-sm text-muted-foreground">Select Image</span>
-                              </div>
-                            )}
+                          <div className="border-2 border-dashed border-slate-300 rounded-xl hover:border-blue-400 hover:bg-blue-50/30 transition-all cursor-pointer group">
+                            {(() => {
+                              const urls = block.content.urls?.length > 0 
+                                ? block.content.urls 
+                                : (block.content.url ? [block.content.url] : []);
+                              const cols = block.content.columns || 3;
+                              const ratio = block.content.aspectRatio || 'auto';
+                              const ratioClass = { square: 'aspect-square', portrait: 'aspect-[3/4]', landscape: 'aspect-[4/3]', wide: 'aspect-video', auto: 'max-h-[200px]' }[ratio] || 'max-h-[200px]';
+                              const gridClass = { 2: 'grid-cols-2', 3: 'grid-cols-3', 4: 'grid-cols-4' }[cols as 2 | 3 | 4] || 'grid-cols-3';
+                              
+                              if (urls.length > 0) {
+                                return (
+                                  <div className={`p-3 ${urls.length > 1 ? `grid ${gridClass} gap-2` : ''}`}>
+                                    {urls.map((u: string, idx: number) => (
+                                      <div key={idx} className="relative group/img">
+                                        <img 
+                                          src={u} 
+                                          alt={`Image ${idx + 1}`} 
+                                          className={`w-full object-cover rounded-lg ${ratioClass}`} 
+                                        />
+                                        <button
+                                          type="button"
+                                          className="absolute top-1 right-1 w-5 h-5 rounded bg-red-500 text-white opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center shadow"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            const newUrls = [...urls];
+                                            newUrls.splice(idx, 1);
+                                            updateBlock(block.id, { ...block.content, urls: newUrls, url: undefined });
+                                          }}
+                                        >
+                                          <X className="h-3 w-3" />
+                                        </button>
+                                      </div>
+                                    ))}
+                                    <div className="border-2 border-dashed border-slate-300 rounded-lg flex flex-col items-center justify-center gap-1 text-slate-400 group-hover:text-blue-500 group-hover:border-blue-300 transition-colors min-h-[80px]">
+                                      <Plus className="h-5 w-5" />
+                                      <span className="text-xs font-medium">Add</span>
+                                    </div>
+                                  </div>
+                                );
+                              }
+                              return (
+                                <div className="py-10 flex flex-col items-center gap-3">
+                                  <div className="w-14 h-14 rounded-2xl bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center transition-colors">
+                                    <ImageIcon className="h-7 w-7 text-slate-400 group-hover:text-blue-500 transition-colors" />
+                                  </div>
+                                  <div className="text-center">
+                                    <p className="font-semibold text-slate-700 group-hover:text-blue-700 transition-colors">Click to select images</p>
+                                    <p className="text-xs text-slate-400 mt-1">Supports multiple selection for galleries</p>
+                                  </div>
+                                </div>
+                              );
+                            })()}
                           </div>
                         </MediaPicker>
+
+                        {/* Image Controls */}
+                        <div className="bg-slate-50 rounded-xl border border-slate-200 p-4 space-y-4">
+                          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Display Settings</p>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            {/* Layout */}
+                            <div className="space-y-1.5">
+                              <Label className="text-xs">Layout</Label>
+                              <Select 
+                                value={block.content.layout || "single"} 
+                                onValueChange={(val) => updateBlock(block.id, { ...block.content, layout: val })}
+                              >
+                                <SelectTrigger className="h-8 text-xs bg-white"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="single">Single / Stack</SelectItem>
+                                  <SelectItem value="grid">Grid Gallery</SelectItem>
+                                  <SelectItem value="masonry">Masonry</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+
+                            {/* Columns — only show if grid */}
+                            {(block.content.layout === 'grid' || block.content.layout === 'masonry') && (
+                              <div className="space-y-1.5">
+                                <Label className="text-xs">Columns</Label>
+                                <Select 
+                                  value={String(block.content.columns || 3)} 
+                                  onValueChange={(val) => updateBlock(block.id, { ...block.content, columns: parseInt(val) })}
+                                >
+                                  <SelectTrigger className="h-8 text-xs bg-white"><SelectValue /></SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="2">2 Columns</SelectItem>
+                                    <SelectItem value="3">3 Columns</SelectItem>
+                                    <SelectItem value="4">4 Columns</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            )}
+
+                            {/* Aspect Ratio */}
+                            <div className="space-y-1.5">
+                              <Label className="text-xs">Aspect Ratio</Label>
+                              <Select 
+                                value={block.content.aspectRatio || "auto"} 
+                                onValueChange={(val) => updateBlock(block.id, { ...block.content, aspectRatio: val })}
+                              >
+                                <SelectTrigger className="h-8 text-xs bg-white"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="auto">Auto (original)</SelectItem>
+                                  <SelectItem value="square">Square (1:1)</SelectItem>
+                                  <SelectItem value="landscape">Landscape (4:3)</SelectItem>
+                                  <SelectItem value="wide">Wide (16:9)</SelectItem>
+                                  <SelectItem value="portrait">Portrait (3:4)</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+
+                            {/* Width / Size */}
+                            <div className="space-y-1.5">
+                              <Label className="text-xs">Width</Label>
+                              <Select 
+                                value={block.content.size || "default"} 
+                                onValueChange={(val) => updateBlock(block.id, { ...block.content, size: val })}
+                              >
+                                <SelectTrigger className="h-8 text-xs bg-white"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="xs">Extra Small</SelectItem>
+                                  <SelectItem value="small">Small (384px)</SelectItem>
+                                  <SelectItem value="default">Medium (640px)</SelectItem>
+                                  <SelectItem value="large">Large (896px)</SelectItem>
+                                  <SelectItem value="xl">Extra Large (1152px)</SelectItem>
+                                  <SelectItem value="full">Full Width</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                        </div>
+
                         <Input 
-                          placeholder="Image caption / Alt text"
-                          value={block.content.alt}
+                          placeholder="Caption / Alt text (for accessibility and SEO)"
+                          value={block.content.alt || ''}
                           onChange={(e) => updateBlock(block.id, { ...block.content, alt: e.target.value })}
                         />
                       </div>
                     )}
 
                     {block.type === "video" && (
-                      <div className="space-y-2">
-                        <Label>Direct Video URL (MP4)</Label>
-                        <Input 
-                          placeholder="https://example.com/video.mp4"
-                          value={block.content.url}
-                          onChange={(e) => updateBlock(block.id, { ...block.content, url: e.target.value })}
-                        />
+                      <div className="space-y-4">
+                        <MediaPicker
+                          mediaType="VIDEO"
+                          onChange={(media: any) => {
+                            if (media) updateBlock(block.id, { ...block.content, url: media.secureUrl || media.url });
+                          }}
+                        >
+                          <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 hover:bg-slate-50 transition-colors cursor-pointer text-center group">
+                            {block.content.url ? (
+                              <div className="space-y-2">
+                                <video src={block.content.url} className="max-h-[200px] mx-auto rounded" controls />
+                                <div className="text-sm text-blue-600 font-medium group-hover:underline">Replace Video</div>
+                              </div>
+                            ) : (
+                              <div className="flex flex-col items-center gap-2">
+                                <Upload className="w-8 h-8 text-slate-400 group-hover:text-blue-500 transition-colors" />
+                                <span className="font-medium text-slate-700">Click to upload or select a video</span>
+                                <span className="text-xs text-slate-500">Supports MP4, WebM, OGG</span>
+                              </div>
+                            )}
+                          </div>
+                        </MediaPicker>
+                        <div className="space-y-2">
+                          <Label>Direct Video URL</Label>
+                          <Input 
+                            placeholder="https://example.com/video.mp4"
+                            value={block.content.url}
+                            onChange={(e) => updateBlock(block.id, { ...block.content, url: e.target.value })}
+                          />
+                        </div>
                       </div>
                     )}
 
@@ -602,6 +759,9 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                 </Button>
                 <Button type="button" variant="outline" onClick={() => addBlock("youtube")} className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50">
                   <Video className="h-4 w-4" /> Add YouTube
+                </Button>
+                <Button type="button" variant="outline" onClick={() => addBlock("video")} className="gap-2 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50">
+                  <Upload className="h-4 w-4" /> Add Video
                 </Button>
                 <Button type="button" variant="outline" onClick={() => addBlock("alert")} className="gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50">
                   <span className="font-bold text-lg leading-none">!</span> Add Alert

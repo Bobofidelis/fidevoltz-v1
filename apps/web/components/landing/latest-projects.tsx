@@ -25,6 +25,7 @@ export async function LatestProjects() {
       : 'Explore this project to learn more',
     image: p.featuredImage || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800',
     category: p.category || 'Tutorial',
+    difficulty: p.difficulty || 'Beginner',
     readTime: '5 min read',
     date: new Date(p.createdAt).toLocaleDateString('en-US', { 
       month: 'short', 
@@ -92,13 +93,14 @@ export async function LatestProjects() {
                     </div>
                   </div>
 
-                  {/* Difficulty Badge */}
-                   {/* Note: Difficulty field might need to be fetched if available in schema */}
-                  <div className="absolute top-4 right-4">
-                    <div className="px-3 py-1 rounded-full bg-slate-900/80 backdrop-blur-sm">
-                      <span className="text-xs font-semibold text-white">Intermediate</span>
+                  {/* Difficulty Badge (Only show if different from category) */}
+                  {project.difficulty && project.difficulty.toLowerCase() !== project.category.toLowerCase() && (
+                    <div className="absolute top-4 right-4">
+                      <div className="px-3 py-1 rounded-full bg-slate-900/80 backdrop-blur-sm">
+                        <span className="text-xs font-semibold text-white">{project.difficulty}</span>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 <CardContent className="p-6 flex flex-col flex-1">

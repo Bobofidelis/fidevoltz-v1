@@ -120,62 +120,65 @@ export function MediaPicker({
             </AlertDescription>
           </Alert>
         ) : (
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="upload" className="flex items-center gap-2">
-                <Upload className="w-4 h-4" />
-                Upload New
-              </TabsTrigger>
-              <TabsTrigger value="library" className="flex items-center gap-2">
-                {mediaType === 'VIDEO' ? (
-                  <Video className="w-4 h-4" />
-                ) : mediaType === 'DOCUMENT' ? (
-                  <FileText className="w-4 h-4" />
-                ) : (
-                  <ImageIcon className="w-4 h-4" />
-                )}
-                Select Existing
-              </TabsTrigger>
-            </TabsList>
+          <>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="upload" className="flex items-center gap-2">
+                  <Upload className="w-4 h-4" />
+                  Upload New
+                </TabsTrigger>
+                <TabsTrigger value="library" className="flex items-center gap-2">
+                  {mediaType === 'VIDEO' ? (
+                    <Video className="w-4 h-4" />
+                  ) : mediaType === 'DOCUMENT' ? (
+                    <FileText className="w-4 h-4" />
+                  ) : (
+                    <ImageIcon className="w-4 h-4" />
+                  )}
+                  Select Existing
+                </TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="upload" className="flex-1 overflow-auto mt-4">
-              <MediaUpload
-                mediaType={mediaType}
-                multiple={multiple}
-                onSuccess={handleUploadSuccess}
-              />
-            </TabsContent>
-
-            <TabsContent value="library" className="flex-1 overflow-auto mt-4">
-              <div className="space-y-4">
-                <MediaGrid
+              <TabsContent value="upload" className="flex-1 overflow-auto mt-4">
+                <MediaUpload
                   mediaType={mediaType}
-                  selectedIds={selectedMedia.map((m) => m.id)}
-                  onMediaClick={handleMediaClick}
-                  selectable
+                  multiple={multiple}
+                  onSuccess={handleUploadSuccess}
                 />
+              </TabsContent>
 
-                {selectedMedia.length > 0 && (
-                  <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-                    <span className="text-sm text-muted-foreground">
-                      {selectedMedia.length} {multiple ? 'items' : 'item'} selected
-                    </span>
-                    <div className="flex gap-2">
-                      <Button variant="outline" onClick={() => setSelectedMedia([])}>
-                        Clear
-                      </Button>
-                      <Button onClick={handleSelect}>
-                        Select {multiple && selectedMedia.length > 1 ? `${selectedMedia.length} items` : ''}
-                      </Button>
-                    </div>
-                  </div>
-                )}
+              <TabsContent value="library" className="flex-1 overflow-auto mt-4">
+                <div className="space-y-4">
+                  <MediaGrid
+                    mediaType={mediaType}
+                    selectedIds={selectedMedia.map((m) => m.id)}
+                    onMediaClick={handleMediaClick}
+                    selectable
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
+
+            {/* Sticky Footer for Selection Actions */}
+            {activeTab === 'library' && selectedMedia.length > 0 && (
+              <div className="flex items-center justify-between p-4 bg-muted rounded-lg border-t mt-4 shrink-0">
+                <span className="text-sm text-muted-foreground">
+                  {selectedMedia.length} {multiple ? 'items' : 'item'} selected
+                </span>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => setSelectedMedia([])}>
+                    Clear
+                  </Button>
+                  <Button onClick={handleSelect}>
+                    Select {multiple && selectedMedia.length > 1 ? `${selectedMedia.length} items` : ''}
+                  </Button>
+                </div>
               </div>
-            </TabsContent>
-          </Tabs>
+            )}
+          </>
         )}
       </DialogContent>
-      </Dialog>
+    </Dialog>
     </>
   );
 }

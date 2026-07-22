@@ -1,4 +1,4 @@
-
+import { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -57,6 +57,46 @@ async function getRelatedProjects(category: string, excludeId: string) {
       excerpt: true,
     },
   });
+}
+
+// Generate Metadata for SEO
+export async function generateMetadata(
+  props: { params: Promise<{ slug: string }> },
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const { slug } = await props.params;
+  const project = await getProject(slug);
+  
+  if (!project) return {};
+
+  let metaTitle = project.title;
+  let metaDescription = project.excerpt || "";
+  let keywords: string[] = [];
+
+  // Extract SEO from campaign_data block
+  const blocks = (project.content as any[]) || [];
+  const campaignBlock = blocks.find((b) => b.type === "campaign_data");
+  
+  if (campaignBlock?.content) {
+    if (campaignBlock.content.metaTitle) metaTitle = campaignBlock.content.metaTitle;
+    if (campaignBlock.content.metaDescription) metaDescription = campaignBlock.content.metaDescription;
+    if (campaignBlock.content.tags) {
+      keywords = campaignBlock.content.tags.split(",").map((t: string) => t.trim());
+    }
+  }
+
+  const images = project.featuredImage ? [project.featuredImage] : [];
+
+  return {
+    title: metaTitle,
+    description: metaDescription,
+    keywords,
+    openGraph: {
+      title: metaTitle,
+      description: metaDescription,
+      images,
+    },
+  };
 }
 
 
@@ -183,6 +223,27 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
               {/* Content Bottom Ad */}
               <AdSlot page={`projects/${project.slug}`} zone="CONTENT_BOTTOM" className="w-full" />
+
+              {/* Tags Section */}
+              {(() => {
+                const campaignBlock = blocks.find((b: any) => b.type === "campaign_data");
+                const tagsStr = campaignBlock?.content?.tags;
+                if (!tagsStr) return null;
+                const tags = tagsStr.split(",").map((t: string) => t.trim()).filter(Boolean);
+                if (tags.length === 0) return null;
+                return (
+                  <div className="flex flex-wrap gap-2 py-4 border-t border-slate-100">
+                    <span className="text-sm font-semibold text-slate-500 flex items-center mr-2">Tags:</span>
+                    {tags.map((tag: string) => (
+                      <Link key={tag} href={`/projects?tag=${encodeURIComponent(tag)}`}>
+                        <Badge variant="secondary" className="hover:bg-blue-100 hover:text-blue-700 transition-colors cursor-pointer">
+                          #{tag}
+                        </Badge>
+                      </Link>
+                    ))}
+                  </div>
+                );
+              })()}
 
               {/* Inline Share block at end of article */}
               <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">

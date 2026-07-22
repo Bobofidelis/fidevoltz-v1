@@ -89,7 +89,7 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
                 </span>
               </div>
               <div className="flex items-center gap-1">
-                <Button 
+                <Button type="button" 
                   variant="ghost" 
                   size="icon" 
                   className="h-8 w-8"
@@ -98,7 +98,7 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
                 >
                   <ChevronUp className="h-4 w-4" />
                 </Button>
-                <Button 
+                <Button type="button" 
                   variant="ghost" 
                   size="icon" 
                   className="h-8 w-8"
@@ -107,7 +107,7 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
                 >
                   <ChevronDown className="h-4 w-4" />
                 </Button>
-                <Button 
+                <Button type="button" 
                   variant="ghost" 
                   size="icon" 
                   className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
@@ -115,7 +115,7 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
-                <Button 
+                <Button type="button" 
                   variant="ghost" 
                   size="icon" 
                   className="h-8 w-8"
@@ -189,7 +189,7 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
                           <CardContent className="p-4 space-y-4">
                             <div className="flex justify-between items-center mb-2">
                               <span className="text-xs font-bold text-slate-500 uppercase tracking-tighter">Item {itemIndex + 1}</span>
-                              <Button 
+                              <Button type="button" 
                                 variant="ghost" 
                                 size="sm" 
                                 className="h-7 px-2 text-red-500 hover:text-red-700"
@@ -252,7 +252,7 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
                           </CardContent>
                         </Card>
                       ))}
-                      <Button 
+                      <Button type="button" 
                         variant="outline" 
                         size="sm" 
                         className="w-full border-dashed"
@@ -284,7 +284,7 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
                               }}
                             />
                           </div>
-                          <Button 
+                          <Button type="button" 
                             variant="ghost" 
                             size="sm" 
                             className="text-red-500 hover:text-red-700"
@@ -301,7 +301,7 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
                           <Label className="text-xs font-bold uppercase text-slate-500">Questions & Answers</Label>
                           {cat.questions?.map((q: any, qIndex: number) => (
                             <div key={qIndex} className="space-y-3 bg-white p-4 rounded-lg border border-slate-200 shadow-sm relative group">
-                              <Button 
+                              <Button type="button" 
                                 variant="ghost" 
                                 size="sm" 
                                 className="absolute -top-2 -right-2 h-7 w-7 rounded-full bg-white border shadow-sm text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -344,7 +344,7 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
                               </div>
                             </div>
                           ))}
-                          <Button 
+                          <Button type="button" 
                             variant="outline" 
                             size="sm" 
                             className="w-full text-xs font-medium h-8 bg-white border-dashed"
@@ -360,7 +360,7 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
                         </div>
                       </div>
                     ))}
-                    <Button 
+                    <Button type="button" 
                       variant="outline" 
                       className="w-full border-dashed py-6 flex flex-col gap-2"
                       onClick={() => {
@@ -405,10 +405,10 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           {BLOCK_TYPES.map((bt) => (
-            <Button 
+            <Button
               key={bt.type}
-              type="button" 
-              variant="outline" 
+              type="button"
+              variant="outline"
               className="flex flex-col h-auto py-4 gap-2 border-dashed hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 transition-all"
               onClick={() => addBlock(bt.type)}
             >

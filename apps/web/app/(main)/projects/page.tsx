@@ -16,6 +16,7 @@ interface ProjectsPageProps {
     q?: string;
     category?: string;
     page?: string;
+    tag?: string;
   }>;
 }
 
@@ -44,6 +45,29 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
 
   if (category && category !== "All") {
     where.category = category;
+  }
+
+  // Handle tag filtering by fetching matching IDs first if tag is present
+  // Since content is a JSON array, Prisma filtering is complex. 
+  // We'll fetch all PUBLISHED projects and filter their content array in memory for the tag, 
+  // then restrict the main query to those IDs.
+  const { tag } = await searchParams;
+  if (tag) {
+    const allPublished = await prisma.projectPost.findMany({
+      where: { status: "PUBLISHED" },
+      select: { id: true, content: true }
+    });
+    
+    const matchingIds = allPublished.filter(p => {
+      if (!p.content) return false;
+      const blocks = p.content as any[];
+      const campaignBlock = blocks.find(b => b.type === "campaign_data");
+      if (!campaignBlock?.content?.tags) return false;
+      const tags = campaignBlock.content.tags.toLowerCase().split(",").map((t: string) => t.trim());
+      return tags.includes(tag.toLowerCase());
+    }).map(p => p.id);
+    
+    where.id = { in: matchingIds };
   }
 
   // Fetch Data
