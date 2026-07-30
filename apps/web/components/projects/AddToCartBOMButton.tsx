@@ -34,10 +34,19 @@ export function AddToCartBOMButton({ item }: AddToCartBOMButtonProps) {
     setLoading(true);
     try {
       const slug = item.productLink.split("/").pop();
-      const res = await fetch(`/api/products/${slug}`);
+      const res = await fetch(`/api/products?search=${encodeURIComponent(slug)}`);
       const data = await res.json();
-      if (data.success && data.data) {
-        addItem(data.data, 1);
+      if (data.success && data.data?.data?.length > 0) {
+        // Find exact match by slug if possible, otherwise take the first
+        const matchedProduct = data.data.data.find((p: any) => p.slug === slug) || data.data.data[0];
+        addItem({
+          id: matchedProduct.id,
+          name: matchedProduct.name,
+          price: matchedProduct.price,
+          image: matchedProduct.image,
+          slug: matchedProduct.slug,
+          stock: matchedProduct.stock ?? 99,
+        } as any, 1);
         toast.success("Added to cart");
       } else {
         // Fallback: just open the link if we can't add directly
