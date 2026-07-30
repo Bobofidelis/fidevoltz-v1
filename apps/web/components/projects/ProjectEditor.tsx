@@ -23,6 +23,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { SortableBlockItem } from "./SortableBlockItem";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -89,23 +92,47 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
   };
 
   // Block Helpers
-  const addBlock = (type: BlockType) => {
+  const addBlock = (type: BlockType, insertIndex?: number) => {
     const newBlock: Block = {
       id: crypto.randomUUID(),
       type,
-      content: type === "text" || type === "markdown" ? "" 
+      content: type === "bom" ? { title: "Hardware Requirements", items: [] } : type === "project_kit" ? { title: "📦 THE FIDEVOLTZ PROJECT KIT", productLink: "" } : type === "image" ? { url: "", layout: "single", size: "default", aspectRatio: "auto", columns: 3 } : type === "ad" ? { zone: "CONTENT_MIDDLE" } : type === "text" || type === "markdown" ? "" 
              : type === "heading" ? { text: "", level: "h2" } 
              : type === "code" ? { code: "", language: "javascript" } 
-             : type === "image" ? { url: "", alt: "" } 
-             : type === "project_kit" ? { title: "", description: "", includes: "", guarantee: "", buttonText: "", productLink: "" } 
-             : type === "bom" ? { title: "", items: [] } 
-             : type === "ad" ? { zone: "CONTENT_MIDDLE" } 
              : type === "alert" ? { title: "", text: "", type: "info" }
              : type === "youtube" ? { url: "" }
              : type === "campaign_data" ? { metaTitle: "", metaDescription: "", tags: "", youtubeTitle: "", youtubeDescription: "", youtubeScript: "", instagramPost: "", twitterPost: "", linkedinPost: "", facebookPost: "" }
              : { url: "" }
     };
-    setBlocks([...blocks, newBlock]);
+    if (typeof insertIndex === 'number') {
+      const newBlocks = [...blocks];
+      newBlocks.splice(insertIndex, 0, newBlock);
+      setBlocks(newBlocks);
+    } else {
+      setBlocks([...blocks, newBlock]);
+    }
+  };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setBlocks((items) => {
+        const oldIndex = items.findIndex((i) => i.id === active.id);
+        const newIndex = items.findIndex((i) => i.id === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
   };
 
   const removeBlock = (id: string) => {
@@ -259,26 +286,43 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
               <CardDescription>Build your tutorial content with blocks</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="space-y-4">
-                {blocks.map((block, index) => (
-                  <div key={block.id} className="group relative border rounded-lg p-4 bg-card hover:border-primary/50 transition-colors">
-                    <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                      <Button type="button" variant="ghost" size="icon" onClick={() => moveBlock(index, "up")} disabled={index === 0}>
-                        <ArrowUp className="h-4 w-4" />
-                      </Button>
-                      <Button type="button" variant="ghost" size="icon" onClick={() => moveBlock(index, "down")} disabled={index === blocks.length - 1}>
-                        <ArrowDown className="h-4 w-4" />
-                      </Button>
-                      <Button type="button" variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={() => removeBlock(block.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <SortableContext items={blocks.map(b => b.id)} strategy={verticalListSortingStrategy}>
+                  <div className="space-y-4">
+                    {blocks.map((block, index) => (
+                      <div key={block.id} className="relative">
+                        {/* Insert Block Above Row */}
+                        <div className="relative group/add my-2 flex justify-center opacity-0 hover:opacity-100 transition-opacity">
+                          <div className="absolute top-1/2 left-0 w-full h-px bg-primary/20 -z-10" />
+                          <Select onValueChange={(val: any) => addBlock(val, index)} value="">
+                            <SelectTrigger className="w-[140px] bg-white h-8 text-xs border-primary/20 hover:border-primary/50 rounded-full shadow-sm focus:ring-0">
+                              <div className="flex items-center gap-1 font-medium text-primary"><Plus className="w-3 h-3"/> Insert Block</div>
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="heading">Heading</SelectItem>
+                              <SelectItem value="text">Text</SelectItem>
+                              <SelectItem value="markdown">Markdown</SelectItem>
+                              <SelectItem value="image">Image</SelectItem>
+                              <SelectItem value="code">Code</SelectItem>
+                              <SelectItem value="youtube">YouTube</SelectItem>
+                              <SelectItem value="video">Video</SelectItem>
+                              <SelectItem value="alert">Alert</SelectItem>
+                              <SelectItem value="project_kit">Project Kit</SelectItem>
+                              <SelectItem value="bom">BOM Table</SelectItem>
+                              <SelectItem value="ad">Ad Slot</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
 
-                    <div className="mb-2">
-                      <Badge variant="outline" className="uppercase text-[10px] tracking-wider">
-                        {block.type} Block
-                      </Badge>
-                    </div>
+                        <SortableBlockItem
+                          id={block.id}
+                          type={block.type}
+                          index={index}
+                          total={blocks.length}
+                          onMoveUp={() => moveBlock(index, "up")}
+                          onMoveDown={() => moveBlock(index, "down")}
+                          onRemove={() => removeBlock(block.id)}
+                        >
 
 
                     {block.type === "text" && (
@@ -737,13 +781,16 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                             <span>💡</span> Manage ad creatives in your <a href="/dashboard/seo" className="underline font-semibold" target="_blank" rel="noreferrer">Ads Manager</a>
                           </p>
                         </div>
-                      </div>
-                    )}
+                        </div>
+                      )}
+                    </SortableBlockItem>
                   </div>
                 ))}
               </div>
+            </SortableContext>
+          </DndContext>
 
-              <div className="flex flex-wrap gap-2 pt-4 border-t">
+          <div className="flex flex-wrap gap-2 pt-4 border-t">
                 <Button type="button" variant="outline" onClick={() => addBlock("heading")} className="gap-2">
                   <Type className="h-4 w-4" /> Add Heading
                 </Button>
