@@ -374,20 +374,22 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                               const urls = block.content.urls?.length > 0 
                                 ? block.content.urls 
                                 : (block.content.url ? [block.content.url] : []);
-                              const cols = block.content.columns || 3;
-                              const ratio = block.content.aspectRatio || 'auto';
-                              const ratioClass = { square: 'aspect-square', portrait: 'aspect-[3/4]', landscape: 'aspect-[4/3]', wide: 'aspect-video', auto: 'max-h-[200px]' }[ratio] || 'max-h-[200px]';
-                              const gridClass = { 2: 'grid-cols-2', 3: 'grid-cols-3', 4: 'grid-cols-4' }[cols as 2 | 3 | 4] || 'grid-cols-3';
+                              const cols = (block.content.columns || 3) as 2 | 3 | 4;
+                              const ratio = (block.content.aspectRatio || 'auto') as 'square' | 'portrait' | 'landscape' | 'wide' | 'auto';
+                              const ratioClass: Record<'square'|'portrait'|'landscape'|'wide'|'auto', string> = { square: 'aspect-square', portrait: 'aspect-[3/4]', landscape: 'aspect-[4/3]', wide: 'aspect-video', auto: 'max-h-[200px]' };
+                              const gridClass: Record<2|3|4, string> = { 2: 'grid-cols-2', 3: 'grid-cols-3', 4: 'grid-cols-4' };
+                              const imgRatioClass = ratioClass[ratio] || 'max-h-[200px]';
+                              const imgGridClass = gridClass[cols] || 'grid-cols-3';
                               
                               if (urls.length > 0) {
                                 return (
-                                  <div className={`p-3 ${urls.length > 1 ? `grid ${gridClass} gap-2` : ''}`}>
+                                  <div className={`p-3 ${urls.length > 1 ? `grid ${imgGridClass} gap-2` : ''}`}>
                                     {urls.map((u: string, idx: number) => (
                                       <div key={idx} className="relative group/img">
                                         <img 
                                           src={u} 
                                           alt={`Image ${idx + 1}`} 
-                                          className={`w-full object-cover rounded-lg ${ratioClass}`} 
+                                          className={`w-full object-cover rounded-lg ${imgRatioClass}`} 
                                         />
                                         <button
                                           type="button"

@@ -101,26 +101,49 @@ function renderBlock(block: Block, slug?: string) {
         </Tag>
       );
     
-    case "image":
+    case "image": {
       const urls = block.content.urls || (block.content.url ? [block.content.url] : []);
       if (urls.length === 0) return null;
-      
-      const sizeClass = {
-        small: "max-w-md mx-auto",
-        large: "max-w-5xl mx-auto",
+
+      const sizeClasses: Record<string, string> = {
+        xs: "max-w-xs mx-auto",
+        small: "max-w-sm mx-auto",
+        default: "max-w-2xl mx-auto",
+        large: "max-w-4xl mx-auto",
+        xl: "max-w-6xl mx-auto",
         full: "w-full",
-        default: "w-full"
-      }[block.content.size as string] || "w-full";
+      };
+      const sizeClass = sizeClasses[block.content.size as string] || "w-full";
+
+      const aspectRatioClasses: Record<string, string> = {
+        square: "aspect-square",
+        portrait: "aspect-[3/4]",
+        landscape: "aspect-[4/3]",
+        wide: "aspect-video",
+        auto: "h-auto",
+      };
+      const imgClass = aspectRatioClasses[(block.content.aspectRatio as string) || "auto"] || "h-auto";
+
+      const cols = (block.content.columns || 3) as 2 | 3 | 4;
+      const gridColClasses: Record<2|3|4, string> = { 2: "grid-cols-2", 3: "grid-cols-2 md:grid-cols-3", 4: "grid-cols-2 md:grid-cols-4" };
+      const layout = block.content.layout || "single";
+
+      const containerClass =
+        layout === "grid" && urls.length > 1
+          ? `grid ${gridColClasses[cols]} gap-3 md:gap-4`
+          : layout === "masonry" && urls.length > 1
+          ? `columns-2 ${cols >= 3 ? "md:columns-3" : ""} ${cols >= 4 ? "lg:columns-4" : ""} gap-3`
+          : "space-y-4";
 
       return (
         <figure className={`my-8 ${sizeClass}`}>
-          <div className={block.content.layout === 'grid' && urls.length > 1 ? "grid grid-cols-2 md:grid-cols-3 gap-4" : "space-y-4"}>
+          <div className={containerClass}>
             {urls.map((u: string, idx: number) => (
-              <img 
+              <img
                 key={idx}
-                src={u} 
-                alt={block.content.alt || "Project Image"} 
-                className="w-full h-auto rounded-xl shadow-lg border border-slate-200 object-cover"
+                src={u}
+                alt={block.content.alt || `Project Image ${idx + 1}`}
+                className={`w-full object-cover rounded-xl shadow-md border border-slate-100 ${imgClass} ${layout === "masonry" ? "mb-3 break-inside-avoid" : ""}`}
               />
             ))}
           </div>
@@ -131,6 +154,7 @@ function renderBlock(block: Block, slug?: string) {
           )}
         </figure>
       );
+    }
     
     case "video":
       if (!block.content.url) return null;
