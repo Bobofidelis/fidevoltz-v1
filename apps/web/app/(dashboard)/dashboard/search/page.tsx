@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,6 @@ function SearchPageContent() {
   const [isLoading, setIsLoading] = useState(false);
 
   // Fetch results when searchQuery changes
-  import { useEffect } from "react";
   
   useEffect(() => {
     if (!searchQuery || searchQuery.length < 2) {
