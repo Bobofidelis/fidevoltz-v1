@@ -181,6 +181,146 @@ function SupportForm() {
   );
 }
 
+function ContactForm() {
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: ''
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const res = await fetch('/api/email/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setSuccess(true);
+        toast.success("Message sent successfully!");
+        setFormData({ name: '', email: '', subject: '', message: '' });
+      } else {
+        toast.error(data.error || "Failed to send message");
+      }
+    } catch (err) {
+      toast.error("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (success) {
+    return (
+      <Card className="border-green-100 bg-green-50/30">
+        <CardContent className="p-12 text-center space-y-4">
+          <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircle2 className="h-8 w-8" />
+          </div>
+          <CardTitle className="text-2xl font-bold text-green-900">Message Sent!</CardTitle>
+          <CardDescription className="text-green-700 max-w-sm mx-auto">
+            Thanks for reaching out! Our team will get back to you at <strong>{formData.email}</strong> shortly.
+          </CardDescription>
+          <Button 
+            variant="outline" 
+            className="mt-6 border-green-200 hover:bg-green-100 text-green-700"
+            onClick={() => setSuccess(false)}
+          >
+            Send Another Message
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="border-slate-200 shadow-xl overflow-hidden">
+      <CardHeader className="bg-slate-900 text-white p-8">
+        <CardTitle className="text-2xl font-bold">Contact Us</CardTitle>
+        <CardDescription className="text-slate-400">
+          Have a question or want to work together? Drop us a message.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="p-8">
+        <form onSubmit={handleSubmit} className="space-y-6 text-left">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="contactName">Your Name</Label>
+              <Input 
+                id="contactName"
+                placeholder="John Doe"
+                required
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="contactEmail">Email Address</Label>
+              <Input 
+                id="contactEmail"
+                type="email"
+                placeholder="your@email.com"
+                required
+                value={formData.email}
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
+              />
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="contactSubject">Subject</Label>
+            <Input 
+              id="contactSubject"
+              placeholder="What is this regarding?"
+              required
+              value={formData.subject}
+              onChange={(e) => setFormData({...formData, subject: e.target.value})}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="contactMessage">Message</Label>
+            <Textarea 
+              id="contactMessage"
+              placeholder="How can we help you?"
+              required
+              rows={5}
+              value={formData.message}
+              onChange={(e) => setFormData({...formData, message: e.target.value})}
+            />
+          </div>
+
+          <Button 
+            type="submit" 
+            className="w-full h-12 text-base font-bold bg-blue-600 hover:bg-blue-700 text-white"
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Sending...
+              </>
+            ) : (
+              <>
+                <Send className="mr-2 h-5 w-5" />
+                Send Message
+              </>
+            )}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
 function FAQItem({ question, answer }: { question: string; answer: string }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -295,6 +435,15 @@ export function PageRenderer({ content }: PageRendererProps) {
                 <section key={index} className="py-20 bg-slate-50">
                   <div className="container px-4 md:px-6 max-w-3xl mx-auto">
                     <SupportForm />
+                  </div>
+                </section>
+              );
+            }
+            if (block.formType === 'contact') {
+              return (
+                <section key={index} className="py-20 bg-slate-50">
+                  <div className="container px-4 md:px-6 max-w-3xl mx-auto">
+                    <ContactForm />
                   </div>
                 </section>
               );

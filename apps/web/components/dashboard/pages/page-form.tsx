@@ -89,8 +89,8 @@ export function PageForm({ initialData, mode }: PageFormProps) {
   });
 
   const handleSave = () => {
-    if (!formData.title || !formData.slug || !formData.content || (Array.isArray(formData.content) && formData.content.length === 0)) {
-      toast.error('Please fill in all required fields and add at least one block');
+    if (!formData.title || !formData.slug) {
+      toast.error('Please fill in all required fields');
       return;
     }
     mutation.mutate(formData);

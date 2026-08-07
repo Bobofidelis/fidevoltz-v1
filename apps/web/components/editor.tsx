@@ -1,11 +1,14 @@
 "use client";
 
 import { useEditor, EditorContent } from '@tiptap/react';
+import { Extension } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Underline from '@tiptap/extension-underline';
 import Image from '@tiptap/extension-image';
+import TextStyle from '@tiptap/extension-text-style';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Bold,
   Italic,
@@ -30,6 +33,51 @@ interface EditorProps {
   className?: string;
 }
 
+const FontSize = Extension.create({
+  name: 'fontSize',
+  addOptions() {
+    return {
+      types: ['textStyle'],
+    }
+  },
+  addGlobalAttributes() {
+    return [
+      {
+        types: this.options.types,
+        attributes: {
+          fontSize: {
+            default: null,
+            parseHTML: element => element.style.fontSize?.replace(/['"]+/g, ''),
+            renderHTML: attributes => {
+              if (!attributes.fontSize) {
+                return {}
+              }
+              return {
+                style: `font-size: ${attributes.fontSize}`,
+              }
+            },
+          },
+        },
+      },
+    ]
+  },
+  addCommands() {
+    return {
+      setFontSize: (fontSize: string) => ({ chain }: any) => {
+        return chain()
+          .setMark('textStyle', { fontSize })
+          .run()
+      },
+      unsetFontSize: () => ({ chain }: any) => {
+        return chain()
+          .setMark('textStyle', { fontSize: null })
+          .removeEmptyTextStyle()
+          .run()
+      },
+    }
+  },
+});
+
 export function Editor({ value, onChange, className }: EditorProps) {
   const editor = useEditor({
     extensions: [
@@ -46,6 +94,8 @@ export function Editor({ value, onChange, className }: EditorProps) {
           class: 'rounded-lg border border-slate-200 max-w-full h-auto my-4',
         },
       }),
+      TextStyle,
+      FontSize,
     ],
     content: value,
     editorProps: {
@@ -123,6 +173,27 @@ export function Editor({ value, onChange, className }: EditorProps) {
           <UnderlineIcon className="h-4 w-4" />
         </Button>
         
+        <div className="w-px h-6 bg-slate-300 mx-1 self-center" />
+
+        <Select 
+          value={editor.getAttributes('textStyle').fontSize || 'default'} 
+          onValueChange={(val) => {
+            if (val === 'default') (editor.chain().focus() as any).unsetFontSize().run();
+            else (editor.chain().focus() as any).setFontSize(val).run();
+          }}
+        >
+          <SelectTrigger className="w-[90px] h-8 text-xs border-slate-200 focus:ring-0">
+            <SelectValue placeholder="Size" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="default">Normal</SelectItem>
+            <SelectItem value="12px">Small</SelectItem>
+            <SelectItem value="20px">Large</SelectItem>
+            <SelectItem value="24px">Huge</SelectItem>
+            <SelectItem value="32px">Massive</SelectItem>
+          </SelectContent>
+        </Select>
+
         <div className="w-px h-6 bg-slate-300 mx-1 self-center" />
 
         <Button

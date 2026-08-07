@@ -10,6 +10,7 @@ import { useState } from "react";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { MediaPicker } from "@/components/media-picker";
 
 interface Block {
   type: string;
@@ -150,12 +151,17 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
                         onChange={(e) => updateBlock(index, { badge: e.target.value })} 
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label>Background Image URL</Label>
-                      <Input 
-                        value={block.backgroundImage} 
-                        onChange={(e) => updateBlock(index, { backgroundImage: e.target.value })} 
+                    <div className="space-y-2 col-span-2">
+                      <Label>Background Image</Label>
+                      <MediaPicker
+                        type="image"
+                        onSelect={(media) => updateBlock(index, { backgroundImage: media.url })}
                       />
+                      {block.backgroundImage && (
+                        <div className="mt-2 text-sm text-green-600 truncate">
+                          Selected: {block.backgroundImage}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -390,6 +396,157 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
                         <SelectItem value="career">Career Application</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                )}
+
+                {block.type === 'sidebar_section' && (
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <Label className="text-base font-bold">Main Content (Left)</Label>
+                      <Editor 
+                        value={block.content || ''} 
+                        onChange={(content) => updateBlock(index, { content })} 
+                      />
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-base font-bold">Sidebar Items (Right)</Label>
+                        <Button type="button" 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            const newSidebar = [...(block.sidebar || []), { title: 'New Item', type: 'text', content: '' }];
+                            updateBlock(index, { sidebar: newSidebar });
+                          }}
+                        >
+                          <Plus className="h-4 w-4 mr-2" /> Add Sidebar Item
+                        </Button>
+                      </div>
+                      
+                      {block.sidebar?.map((sidebarItem: any, sbIndex: number) => (
+                        <Card key={sbIndex} className="bg-slate-50 border-slate-200">
+                          <CardContent className="p-4 space-y-4">
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-xs font-bold text-slate-500 uppercase">Item {sbIndex + 1}</span>
+                              <Button type="button" 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-7 px-2 text-red-500 hover:text-red-700"
+                                onClick={() => {
+                                  const newSidebar = block.sidebar.filter((_: any, i: number) => i !== sbIndex);
+                                  updateBlock(index, { sidebar: newSidebar });
+                                }}
+                              >
+                                <Trash2 className="h-3.5 w-3.5 mr-1" /> Remove
+                              </Button>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label className="text-xs">Title</Label>
+                                <Input 
+                                  className="bg-white h-9"
+                                  value={sidebarItem.title} 
+                                  onChange={(e) => {
+                                    const newSidebar = [...block.sidebar];
+                                    newSidebar[sbIndex] = { ...newSidebar[sbIndex], title: e.target.value };
+                                    updateBlock(index, { sidebar: newSidebar });
+                                  }}
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-xs">Type</Label>
+                                <Select 
+                                  value={sidebarItem.type || 'text'} 
+                                  onValueChange={(val) => {
+                                    const newSidebar = [...block.sidebar];
+                                    newSidebar[sbIndex] = { ...newSidebar[sbIndex], type: val };
+                                    if (val === 'links' && !newSidebar[sbIndex].links) {
+                                      newSidebar[sbIndex].links = [{ label: 'Link 1', href: '#' }];
+                                    }
+                                    updateBlock(index, { sidebar: newSidebar });
+                                  }}
+                                >
+                                  <SelectTrigger className="bg-white h-9 text-sm">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="text">Text / Info</SelectItem>
+                                    <SelectItem value="links">Quick Links</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              
+                              <div className="space-y-2 col-span-2">
+                                {sidebarItem.type === 'links' ? (
+                                  <div className="space-y-3">
+                                    <Label className="text-xs">Links</Label>
+                                    {sidebarItem.links?.map((link: any, linkIndex: number) => (
+                                      <div key={linkIndex} className="flex gap-2 items-center">
+                                        <Input 
+                                          className="bg-white" 
+                                          placeholder="Label" 
+                                          value={link.label}
+                                          onChange={(e) => {
+                                            const newSidebar = [...block.sidebar];
+                                            newSidebar[sbIndex].links[linkIndex].label = e.target.value;
+                                            updateBlock(index, { sidebar: newSidebar });
+                                          }}
+                                        />
+                                        <Input 
+                                          className="bg-white" 
+                                          placeholder="URL" 
+                                          value={link.href}
+                                          onChange={(e) => {
+                                            const newSidebar = [...block.sidebar];
+                                            newSidebar[sbIndex].links[linkIndex].href = e.target.value;
+                                            updateBlock(index, { sidebar: newSidebar });
+                                          }}
+                                        />
+                                        <Button type="button" variant="ghost" size="icon" 
+                                          onClick={() => {
+                                            const newSidebar = [...block.sidebar];
+                                            newSidebar[sbIndex].links = newSidebar[sbIndex].links.filter((_: any, i: number) => i !== linkIndex);
+                                            updateBlock(index, { sidebar: newSidebar });
+                                          }}
+                                        >
+                                          <Trash2 className="h-4 w-4 text-red-500" />
+                                        </Button>
+                                      </div>
+                                    ))}
+                                    <Button type="button" variant="outline" size="sm" className="w-full text-xs"
+                                      onClick={() => {
+                                        const newSidebar = [...block.sidebar];
+                                        if (!newSidebar[sbIndex].links) newSidebar[sbIndex].links = [];
+                                        newSidebar[sbIndex].links.push({ label: 'New Link', href: '#' });
+                                        updateBlock(index, { sidebar: newSidebar });
+                                      }}
+                                    >
+                                      Add Link
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <>
+                                    <Label className="text-xs">Content</Label>
+                                    <Textarea 
+                                      className="bg-white"
+                                      rows={3}
+                                      value={sidebarItem.content} 
+                                      onChange={(e) => {
+                                        const newSidebar = [...block.sidebar];
+                                        newSidebar[sbIndex] = { ...newSidebar[sbIndex], content: e.target.value };
+                                        updateBlock(index, { sidebar: newSidebar });
+                                      }}
+                                    />
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
                   </div>
                 )}
               </CardContent>

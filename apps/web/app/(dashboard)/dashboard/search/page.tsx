@@ -19,44 +19,41 @@ function SearchPageContent() {
     setSearchQuery(query);
   };
 
-  // Mock search results
-  const results = searchQuery ? [
-    {
-      id: "1",
-      type: "product",
-      title: "Arduino Uno R3",
-      description: "Microcontroller board based on the ATmega328P",
-      category: "Products",
-      icon: Package,
-    },
-    {
-      id: "2",
-      type: "project",
-      title: "LED Blink Tutorial",
-      description: "Learn how to blink an LED with Arduino",
-      category: "Projects",
-      icon: FileText,
-    },
-    {
-      id: "3",
-      type: "user",
-      title: "John Doe",
-      description: "john@example.com",
-      category: "Users",
-      icon: User,
-    },
-    {
-      id: "4",
-      type: "order",
-      title: "Order #TRK-2024-001",
-      description: "Completed - $125.50",
-      category: "Orders",
-      icon: ShoppingCart,
-    },
-  ].filter(item => 
-    item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.description.toLowerCase().includes(searchQuery.toLowerCase())
-  ) : [];
+  const [results, setResults] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch results when searchQuery changes
+  import { useEffect } from "react";
+  
+  useEffect(() => {
+    if (!searchQuery || searchQuery.length < 2) {
+      setResults([]);
+      return;
+    }
+    
+    const fetchResults = async () => {
+      setIsLoading(true);
+      try {
+        const res = await fetch(`/api/admin/search?q=${encodeURIComponent(searchQuery)}`);
+        const data = await res.json();
+        if (data.success) {
+          // Map icons dynamically
+          const formatted = data.data.map((item: any) => ({
+            ...item,
+            icon: item.type === 'product' ? Package : item.type === 'project' ? FileText : item.type === 'user' ? User : ShoppingCart
+          }));
+          setResults(formatted);
+        }
+      } catch (error) {
+        console.error("Search failed:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    const debounceTimeout = setTimeout(fetchResults, 300);
+    return () => clearTimeout(debounceTimeout);
+  }, [searchQuery]);
 
   return (
     <div className="space-y-6">

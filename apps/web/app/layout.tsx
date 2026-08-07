@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { TopLoader } from "@/components/ui/top-loader";
+import { AnalyticsTracker } from "@/components/analytics-tracker";
 import { Providers } from "@/components/providers";
 
 // const inter = Inter({ subsets: ["latin"] });
@@ -73,6 +75,7 @@ export default async function RootLayout({
       </head>
       <body className="font-sans antialiased" suppressHydrationWarning>
         <Providers>
+          <AnalyticsTracker />
           <ThemeProvider
             attribute="class"
             defaultTheme="light"
