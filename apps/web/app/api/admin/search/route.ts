@@ -55,10 +55,7 @@ export async function GET(request: NextRequest) {
       // 4. Orders
       prisma.order.findMany({
         where: {
-          OR: [
-            { id: { contains: query, mode: 'insensitive' } },
-            { stripeSessionId: { contains: query, mode: 'insensitive' } },
-          ],
+          id: { contains: query, mode: 'insensitive' },
         },
         take: 5,
         select: { id: true, status: true, totalAmount: true },

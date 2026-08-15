@@ -7,12 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   DollarSign, TrendingUp, Users, ShoppingCart, 
-  BarChart3, Download, Loader2, Package 
+  BarChart3, Download, Loader2, Package, Globe
 } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { 
   useAnalyticsOverview, useProfitAnalytics, useActivityLogs,
-  useSalesAnalytics, useUserAnalytics 
+  useSalesAnalytics, useUserAnalytics, useTrafficAnalytics
 } from "@/lib/hooks/use-overview";
 import { LineChart } from "@/components/analytics/LineChart";
 import { AreaChart } from "@/components/analytics/AreaChart";
@@ -54,6 +54,7 @@ export default function AnalyticsPage() {
   const { data: profitData, isLoading: profitLoading } = useProfitAnalytics(start, end);
   const { data: salesData, isLoading: salesLoading } = useSalesAnalytics(start, end);
   const { data: userData, isLoading: userLoading } = useUserAnalytics(start, end);
+  const { data: trafficData, isLoading: trafficLoading } = useTrafficAnalytics(start, end);
   const { data: activityLogs } = useActivityLogs(1, 50);
 
   // Show error state
@@ -162,6 +163,7 @@ export default function AnalyticsPage() {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="sales">Sales & Revenue</TabsTrigger>
           <TabsTrigger value="profit">Profit Analysis</TabsTrigger>
+          <TabsTrigger value="traffic">Traffic</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="activity">Activity Log</TabsTrigger>
         </TabsList>
@@ -571,6 +573,90 @@ export default function AnalyticsPage() {
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground text-center py-8">No user data available</p>
+                  )}
+                </CardContent>
+              </Card>
+            </>
+          )}
+        </TabsContent>
+
+        {/* Traffic Tab */}
+        <TabsContent value="traffic" className="space-y-6">
+          {trafficLoading ? (
+            <ChartSkeleton />
+          ) : (
+            <>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <StatCard
+                  title="Total Page Views"
+                  value={trafficData?.summary?.totalPageViews || 0}
+                  icon={<Globe className="h-4 w-4 text-muted-foreground" />}
+                />
+                <StatCard
+                  title="Unique Visitors"
+                  value={trafficData?.summary?.uniqueVisitors || 0}
+                  icon={<Users className="h-4 w-4 text-muted-foreground" />}
+                />
+                <StatCard
+                  title="Bounce Rate"
+                  value={`${trafficData?.summary?.bounceRate || 0}%`}
+                  icon={<BarChart3 className="h-4 w-4 text-muted-foreground" />}
+                />
+                <StatCard
+                  title="Avg Session"
+                  value={`${trafficData?.summary?.avgSessionDuration || 0}s`}
+                  icon={<TrendingUp className="h-4 w-4 text-muted-foreground" />}
+                />
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Page Views over Time</CardTitle>
+                  </CardHeader>
+                  <CardContent className="h-[300px]">
+                    <LineChart 
+                      data={trafficData?.charts?.traffic || []} 
+                      index="date" 
+                      categories={["views", "visitors"]} 
+                      colors={["#2563eb", "#10b981"]}
+                    />
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Devices</CardTitle>
+                  </CardHeader>
+                  <CardContent className="h-[300px]">
+                    <PieChart 
+                      data={trafficData?.charts?.devices || []} 
+                      index="device"
+                      category="count" 
+                    />
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Top Pages</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {trafficData?.topPages?.length > 0 ? (
+                    <div className="space-y-4">
+                      {trafficData.topPages.map((page: any, i: number) => (
+                        <div key={i} className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0">
+                          <span className="font-medium truncate max-w-[200px] sm:max-w-[400px]">{page.path}</span>
+                          <div className="text-right">
+                            <p className="font-bold">{page.views} views</p>
+                            <p className="text-xs text-muted-foreground">{page.uniqueVisitors} visitors</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-8">No page view data available</p>
                   )}
                 </CardContent>
               </Card>

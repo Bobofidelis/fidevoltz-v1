@@ -177,3 +177,33 @@ export function useUserAnalytics(startDate?: Date, endDate?: Date) {
     retry: false,
   });
 }
+
+// Get traffic analytics
+export function useTrafficAnalytics(startDate?: Date, endDate?: Date) {
+  const params = new URLSearchParams();
+  if (startDate) params.append('startDate', startDate.toISOString());
+  if (endDate) params.append('endDate', endDate.toISOString());
+  
+  // Calculate days if possible, since the endpoint expects 'days'
+  if (startDate && endDate) {
+    const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    params.append('days', diffDays.toString());
+  }
+
+  return useQuery({
+    queryKey: ['traffic-analytics', startDate?.toISOString(), endDate?.toISOString()],
+    queryFn: async () => {
+      const response = await fetch(`/api/admin/analytics/traffic?${params.toString()}`);
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Unauthorized');
+        }
+        throw new Error('Failed to fetch traffic analytics');
+      }
+      const result = await response.json();
+      return result.data;
+    },
+    retry: false,
+  });
+}
