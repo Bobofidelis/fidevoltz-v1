@@ -590,52 +590,42 @@ export default function AnalyticsPage() {
                 <StatCard
                   title="Total Page Views"
                   value={trafficData?.summary?.totalPageViews || 0}
-                  icon={<Globe className="h-4 w-4 text-muted-foreground" />}
+                  icon={Globe}
                 />
                 <StatCard
                   title="Unique Visitors"
                   value={trafficData?.summary?.uniqueVisitors || 0}
-                  icon={<Users className="h-4 w-4 text-muted-foreground" />}
+                  icon={Users}
                 />
                 <StatCard
                   title="Bounce Rate"
                   value={`${trafficData?.summary?.bounceRate || 0}%`}
-                  icon={<BarChart3 className="h-4 w-4 text-muted-foreground" />}
+                  icon={BarChart3}
                 />
                 <StatCard
                   title="Avg Session"
                   value={`${trafficData?.summary?.avgSessionDuration || 0}s`}
-                  icon={<TrendingUp className="h-4 w-4 text-muted-foreground" />}
+                  icon={TrendingUp}
                 />
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Page Views over Time</CardTitle>
-                  </CardHeader>
-                  <CardContent className="h-[300px]">
-                    <LineChart 
-                      data={trafficData?.charts?.traffic || []} 
-                      index="date" 
-                      categories={["views", "visitors"]} 
-                      colors={["#2563eb", "#10b981"]}
-                    />
-                  </CardContent>
-                </Card>
+                <LineChart 
+                  title="Page Views over Time"
+                  data={trafficData?.charts?.traffic || []} 
+                  xAxisKey="date" 
+                  dataKeys={[
+                    { key: "views", name: "Page Views", color: "#2563eb" },
+                    { key: "visitors", name: "Unique Visitors", color: "#10b981" }
+                  ]}
+                />
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Devices</CardTitle>
-                  </CardHeader>
-                  <CardContent className="h-[300px]">
-                    <PieChart 
-                      data={trafficData?.charts?.devices || []} 
-                      index="device"
-                      category="count" 
-                    />
-                  </CardContent>
-                </Card>
+                <PieChart 
+                  title="Devices"
+                  data={trafficData?.charts?.devices || []} 
+                  dataKey="count"
+                  nameKey="device" 
+                />
               </div>
 
               <Card>
