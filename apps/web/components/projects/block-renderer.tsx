@@ -8,18 +8,10 @@ import Link from "next/link";
 import { AdSlot } from "@/components/ads/AdSlot";
 import { AddToCartBOMButton } from "./AddToCartBOMButton";
 
-function parseBasicMarkdown(text: string) {
-  if (!text) return "";
-  return text
-    .replace(/^### (.*$)/gim, '<h3 class="text-xl font-bold mt-6 mb-2">$1</h3>')
-    .replace(/^## (.*$)/gim, '<h2 class="text-2xl font-bold mt-8 mb-4 text-slate-900">$1</h2>')
-    .replace(/^# (.*$)/gim, '<h1 class="text-3xl font-extrabold mt-10 mb-6 text-slate-900">$1</h1>')
-    .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
-    .replace(/\*(.*?)\*/gim, '<em>$1</em>')
-    .replace(/^\d+\.\s+(.*$)/gim, '<li class="ml-6 list-decimal">$1</li>')
-    .replace(/^- (.*$)/gim, '<li class="ml-6 list-disc">$1</li>')
-    .replace(/\n/g, '<br/>');
-}
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 
 interface Block {
   id: string;
@@ -60,10 +52,33 @@ function renderBlock(block: Block, slug?: string) {
 
     case "markdown":
       return (
-        <div 
-          className="prose prose-slate max-w-none space-y-2 text-slate-700 leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: parseBasicMarkdown(block.content) }} 
-        />
+        <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed my-4">
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              code({ node, inline, className, children, ...props }: any) {
+                const match = /language-(\w+)/.exec(className || '');
+                return !inline && match ? (
+                  <SyntaxHighlighter
+                    style={vscDarkPlus as any}
+                    language={match[1]}
+                    PreTag="div"
+                    className="rounded-md my-4 shadow-sm"
+                    {...props}
+                  >
+                    {String(children).replace(/\n$/, '')}
+                  </SyntaxHighlighter>
+                ) : (
+                  <code className="bg-slate-100 text-pink-600 px-1 py-0.5 rounded text-sm font-mono" {...props}>
+                    {children}
+                  </code>
+                );
+              }
+            }}
+          >
+            {block.content}
+          </ReactMarkdown>
+        </div>
       );
 
     case "alert":
@@ -342,9 +357,15 @@ function CodeBlock({ language, code }: { language: string, code: string }) {
           {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
         </Button>
       </div>
-      <pre className="p-4 overflow-x-auto text-sm font-mono text-slate-300">
-        <code>{code}</code>
-      </pre>
+      <div className="overflow-x-auto text-sm">
+        <SyntaxHighlighter
+          style={vscDarkPlus as any}
+          language={language || 'text'}
+          customStyle={{ margin: 0, borderRadius: 0, background: '#1e1e1e' }}
+        >
+          {code}
+        </SyntaxHighlighter>
+      </div>
     </div>
   );
 }

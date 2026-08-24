@@ -380,9 +380,16 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="javascript">JavaScript</SelectItem>
+                            <SelectItem value="typescript">TypeScript</SelectItem>
                             <SelectItem value="cpp">C++ (Arduino)</SelectItem>
                             <SelectItem value="python">Python</SelectItem>
                             <SelectItem value="html">HTML</SelectItem>
+                            <SelectItem value="css">CSS</SelectItem>
+                            <SelectItem value="yaml">YAML</SelectItem>
+                            <SelectItem value="bash">Bash / Shell</SelectItem>
+                            <SelectItem value="json">JSON</SelectItem>
+                            <SelectItem value="sql">SQL</SelectItem>
+                            <SelectItem value="markdown">Markdown</SelectItem>
                           </SelectContent>
                         </Select>
                         <Textarea 
