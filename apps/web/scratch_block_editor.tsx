@@ -8,42 +8,6 @@ import { Editor } from "@/components/editor";
 import { Plus, Trash2, GripVertical, ChevronUp, ChevronDown, Layout, Type, Grid, HelpCircle, FormInput, AlignLeft } from "lucide-react";
 import { useState } from "react";
 
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { createContext, useContext } from 'react';
-
-const DragContext = createContext<any>(null);
-
-function SortableCardWrapper({ id, children }: { id: string, children: React.ReactNode }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
-  
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    zIndex: isDragging ? 50 : 1,
-    opacity: isDragging ? 0.8 : 1,
-  };
-  
-  return (
-    <DragContext.Provider value={{attributes, listeners}}>
-      <div ref={setNodeRef} style={style} className={isDragging ? 'shadow-2xl border-primary' : ''}>
-         {children}
-      </div>
-    </DragContext.Provider>
-  );
-}
-
-function DragHandle() {
-  const { attributes, listeners } = useContext(DragContext);
-  return (
-    <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing p-1 -ml-1 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors">
-      <GripVertical className="h-4 w-4" />
-    </div>
-  );
-}
-
-
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { MediaPicker } from "@/components/media/MediaPicker";
@@ -72,28 +36,8 @@ const ALLOWED_ICONS = ['Lightbulb', 'Cpu', 'Globe', 'Briefcase', 'FileQuestion',
 export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
 
-  // Ensure blocks have ids
-  const blocksWithIds = blocks.map((b, i) => b.id ? b : { ...b, id: `legacy-${i}-${b.type}` });
-
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (over && active.id !== over.id) {
-      const oldIndex = blocksWithIds.findIndex((b) => b.id === active.id);
-      const newIndex = blocksWithIds.findIndex((b) => b.id === over.id);
-      onChange(arrayMove(blocksWithIds, oldIndex, newIndex));
-    }
-  };
-
-
   const addBlock = (type: string) => {
-    let newBlock: Block = { id: crypto.randomUUID(), type };
+    let newBlock: Block = { type };
     
     if (type === 'hero') {
       newBlock = { ...newBlock, title: '', subtitle: '', badge: '', backgroundImage: '' };
@@ -136,16 +80,11 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
   return (
     <div className="space-y-6">
       <div className="space-y-4">
-
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={blocksWithIds.map(b => b.id!)} strategy={verticalListSortingStrategy}>
-            {blocksWithIds.map((block, index) => (
-              <SortableCardWrapper key={block.id} id={block.id!}>
-
+        {blocks.map((block, index) => (
           <Card key={index} className="border-slate-200">
             <CardHeader className="py-3 px-4 bg-slate-50 flex flex-row items-center justify-between space-y-0">
               <div className="flex items-center gap-3">
-                <DragHandle />
+                <GripVertical className="h-4 w-4 text-slate-400 cursor-move" />
                 <span className="font-medium text-sm text-slate-700 uppercase tracking-wider">
                   Block {index + 1}: {block.type}
                 </span>

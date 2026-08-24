@@ -276,10 +276,10 @@ function renderBlock(block: Block, slug?: string) {
                       <td className="px-6 py-4 text-slate-600">
                         {item.quantity ? (
                           <span className="bg-slate-100 text-slate-800 px-2 py-1 rounded-md text-xs font-bold">
-                            {item.quantity}{/^\d+$/.test(String(item.quantity).trim()) ? 'x' : ''}
+                            {item.quantity}
                           </span>
                         ) : (
-                          <span className="text-slate-400 text-xs italic">Optional</span>
+                          <span className="text-slate-400 text-xs italic">-</span>
                         )}
                       </td>
                       <td className="px-6 py-4 text-slate-600">{item.specs}</td>
