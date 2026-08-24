@@ -690,7 +690,7 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                                     newItems[i].name = e.target.value;
                                     updateBlock(block.id, { ...block.content, items: newItems });
                                   }} />
-                                  <Input placeholder="Quantity" value={item.quantity || ""} onChange={(e) => {
+                                  <Input placeholder="Qty (e.g. 1, 2, 1 dozen, Full Sheet)" value={item.quantity || ""} onChange={(e) => {
                                     const newItems = [...(block.content.items || [])];
                                     newItems[i].quantity = e.target.value;
                                     updateBlock(block.id, { ...block.content, items: newItems });
@@ -732,7 +732,7 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                               </div>
                             ))}
                             <Button type="button" variant="outline" size="sm" onClick={() => {
-                              const newItems = [...(block.content.items || []), { name: "", quantity: "1", specs: "", linkText: "Buy", productLink: "" }];
+                              const newItems = [...(block.content.items || []), { name: "", quantity: "", specs: "", linkText: "Buy", productLink: "" }];
                               updateBlock(block.id, { ...block.content, items: newItems });
                             }}>
                               <Plus className="h-4 w-4 mr-2" /> Add Item
