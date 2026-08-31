@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   DollarSign, TrendingUp, Users, ShoppingCart, 
-  BarChart3, Download, Loader2, Package, Globe
+  BarChart3, Download, Loader2, Package, Globe, LayoutDashboard, FileText
 } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { 
@@ -131,16 +131,21 @@ export default function AnalyticsPage() {
   return (
     <div className="space-y-6 p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Analytics</h2>
-          <p className="text-muted-foreground">
-            Detailed insights into your platform's performance
+          <div className="flex items-center gap-2 mb-1">
+            <div className="h-8 w-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+              <BarChart3 className="h-4 w-4 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold text-slate-900">Analytics</h1>
+          </div>
+          <p className="text-slate-500 text-sm">
+            Detailed insights into your platform&apos;s performance
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Select value={dateRange} onValueChange={setDateRange}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Select period" />
             </SelectTrigger>
             <SelectContent>
@@ -151,7 +156,7 @@ export default function AnalyticsPage() {
               <SelectItem value="all">All Time</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline">
+          <Button variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
@@ -159,13 +164,13 @@ export default function AnalyticsPage() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="sales">Sales & Revenue</TabsTrigger>
-          <TabsTrigger value="profit">Profit Analysis</TabsTrigger>
-          <TabsTrigger value="traffic">Traffic</TabsTrigger>
-          <TabsTrigger value="users">Users</TabsTrigger>
-          <TabsTrigger value="activity">Activity Log</TabsTrigger>
+        <TabsList className="bg-slate-100 p-1">
+          <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:shadow-sm"><LayoutDashboard className="h-4 w-4 mr-2" />Overview</TabsTrigger>
+          <TabsTrigger value="sales" className="data-[state=active]:bg-white data-[state=active]:shadow-sm"><ShoppingCart className="h-4 w-4 mr-2" />Sales &amp; Revenue</TabsTrigger>
+          <TabsTrigger value="profit" className="data-[state=active]:bg-white data-[state=active]:shadow-sm"><DollarSign className="h-4 w-4 mr-2" />Profit</TabsTrigger>
+          <TabsTrigger value="traffic" className="data-[state=active]:bg-white data-[state=active]:shadow-sm"><Globe className="h-4 w-4 mr-2" />Traffic</TabsTrigger>
+          <TabsTrigger value="users" className="data-[state=active]:bg-white data-[state=active]:shadow-sm"><Users className="h-4 w-4 mr-2" />Users</TabsTrigger>
+          <TabsTrigger value="activity" className="data-[state=active]:bg-white data-[state=active]:shadow-sm"><FileText className="h-4 w-4 mr-2" />Activity Log</TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
