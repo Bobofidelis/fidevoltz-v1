@@ -7,6 +7,7 @@ import { Search, Loader2, Package, FileText, ArrowRight, BookOpen } from "lucide
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 export function GlobalSearch({ triggerClassName = "", variant = "outline" }: { triggerClassName?: string, variant?: any }) {
   const [open, setOpen] = useState(false);
@@ -70,12 +71,15 @@ export function GlobalSearch({ triggerClassName = "", variant = "outline" }: { t
     <>
       <Button
         variant={variant}
-        className={`relative h-9 w-9 p-0 xl:h-10 xl:w-60 xl:justify-start xl:px-3 xl:py-2 text-slate-500 hover:text-slate-900 border-slate-200 ${triggerClassName}`}
+        className={cn(
+          "relative h-9 w-9 p-0 xl:h-11 xl:w-72 xl:justify-start xl:px-4 xl:py-2 text-slate-600 font-medium hover:text-slate-900 border-slate-300 bg-slate-50 hover:bg-slate-100 shadow-sm transition-all",
+          triggerClassName
+        )}
         onClick={() => setOpen(true)}
       >
         <Search className="h-4 w-4 xl:mr-2" />
         <span className="hidden xl:inline-flex">Search website...</span>
-        <kbd className="pointer-events-none absolute right-1.5 top-2 hidden h-6 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 xl:flex">
+        <kbd className="pointer-events-none absolute right-2 top-2.5 hidden h-6 select-none items-center gap-1 rounded border bg-white px-1.5 font-mono text-[10px] font-medium opacity-100 xl:flex text-slate-500 shadow-sm">
           <span className="text-xs">⌘</span>K
         </kbd>
       </Button>
@@ -86,17 +90,17 @@ export function GlobalSearch({ triggerClassName = "", variant = "outline" }: { t
             <DialogTitle>Search website</DialogTitle>
             <DialogDescription>Search for products, tutorials, and more.</DialogDescription>
           </div>
-          <div className="flex items-center border-b px-4 h-14">
-            <Search className="h-5 w-5 text-slate-500 mr-3 flex-shrink-0" />
+          <div className="flex items-center border-b px-4 h-20">
+            <Search className="h-8 w-8 text-slate-900 mr-4 flex-shrink-0" />
             <input
               type="text"
               placeholder="What are you looking for?"
-              className="flex-1 bg-transparent border-none outline-none focus:ring-0 text-base py-3 placeholder:text-slate-400"
+              className="flex-1 bg-transparent border-none outline-none focus:ring-0 text-2xl font-bold text-black py-6 placeholder:text-slate-400 placeholder:font-medium"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               autoFocus
             />
-            {loading && <Loader2 className="h-5 w-5 animate-spin text-slate-400 flex-shrink-0" />}
+            {loading && <Loader2 className="h-6 w-6 animate-spin text-slate-400 flex-shrink-0" />}
           </div>
 
           <div className="max-h-[60vh] overflow-y-auto">
@@ -136,7 +140,7 @@ export function GlobalSearch({ triggerClassName = "", variant = "outline" }: { t
                             )}
                           </div>
                           <div className="text-sm font-semibold text-slate-900">
-                            ${product.price.toFixed(2)}
+                            ${product.price ? Number(product.price).toFixed(2) : "0.00"}
                           </div>
                         </button>
                       ))}
