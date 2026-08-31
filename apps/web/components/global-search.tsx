@@ -7,7 +7,7 @@ import { Search, Loader2, Package, FileText, ArrowRight, BookOpen } from "lucide
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 
 export function GlobalSearch({ triggerClassName = "", variant = "outline" }: { triggerClassName?: string, variant?: any }) {
   const [open, setOpen] = useState(false);
@@ -140,7 +140,7 @@ export function GlobalSearch({ triggerClassName = "", variant = "outline" }: { t
                             )}
                           </div>
                           <div className="text-sm font-semibold text-slate-900">
-                            ${product.price ? Number(product.price).toFixed(2) : "0.00"}
+                            {formatCurrency(product.price ? Number(product.price) : 0)}
                           </div>
                         </button>
                       ))}
