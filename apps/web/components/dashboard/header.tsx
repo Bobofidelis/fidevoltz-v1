@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { useSession } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+import { GlobalSearch } from "@/components/global-search";
+
 export function DashboardHeader({ onMenuClick }: { onMenuClick: () => void }) {
   const { data: session } = useSession();
   const user = session?.user;
@@ -22,29 +24,20 @@ export function DashboardHeader({ onMenuClick }: { onMenuClick: () => void }) {
         >
           <Menu className="h-5 w-5" />
         </Button>
-        <div className="relative hidden md:block w-96">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
-          <Input
-            type="search"
-            placeholder="Search..."
-            className="w-full bg-slate-800 border-slate-700 text-white placeholder:text-slate-400 pl-9 md:w-[300px] lg:w-[400px] focus-visible:ring-slate-600"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                const query = (e.currentTarget as HTMLInputElement).value;
-                if (query.trim()) {
-                   window.location.href = `/dashboard/search?q=${encodeURIComponent(query)}`;
-                }
-              }
-            }}
+        <div className="hidden md:block">
+          <GlobalSearch 
+            variant="outline"
+            triggerClassName="bg-slate-800 border-slate-700 text-slate-400 hover:text-white hover:bg-slate-700 xl:w-[300px]" 
           />
         </div>
         
         {/* Mobile Search Button */}
-        <Link href="/dashboard/search" className="md:hidden">
-          <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white hover:bg-slate-800">
-            <Search className="h-5 w-5" />
-          </Button>
-        </Link>
+        <div className="md:hidden">
+          <GlobalSearch 
+            variant="ghost"
+            triggerClassName="text-slate-400 hover:text-white hover:bg-slate-800 border-none" 
+          />
+        </div>
       </div>
 
       <div className="flex items-center gap-4">

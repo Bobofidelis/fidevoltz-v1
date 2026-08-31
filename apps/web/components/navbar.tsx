@@ -24,6 +24,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { GlobalSearch } from "@/components/global-search";
 
 export function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -72,7 +73,8 @@ export function Navbar() {
           </Link>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
+          <GlobalSearch />
           <Link href="/cart">
             <Button variant="ghost" size="icon" className="relative hover:bg-slate-100">
               <ShoppingCart className="h-5 w-5 text-slate-700" />
