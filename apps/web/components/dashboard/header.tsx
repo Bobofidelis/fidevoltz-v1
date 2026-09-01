@@ -27,6 +27,7 @@ export function DashboardHeader({ onMenuClick }: { onMenuClick: () => void }) {
         <div className="hidden md:block">
           <GlobalSearch 
             variant="outline"
+            context="dashboard"
             triggerClassName="bg-slate-800 border-slate-700 text-slate-400 hover:text-white hover:bg-slate-700 xl:w-[300px]" 
           />
         </div>
@@ -35,6 +36,7 @@ export function DashboardHeader({ onMenuClick }: { onMenuClick: () => void }) {
         <div className="md:hidden">
           <GlobalSearch 
             variant="ghost"
+            context="dashboard"
             triggerClassName="text-slate-400 hover:text-white hover:bg-slate-800 border-none" 
           />
         </div>

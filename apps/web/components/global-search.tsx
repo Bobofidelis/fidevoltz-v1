@@ -3,17 +3,23 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Search, Loader2, Package, FileText, ArrowRight, BookOpen } from "lucide-react";
+import { Search, Loader2, Package, FileText, ArrowRight, BookOpen, Folder, User, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency, formatDate } from "@/lib/utils";
 
-export function GlobalSearch({ triggerClassName = "", variant = "outline" }: { triggerClassName?: string, variant?: any }) {
+export function GlobalSearch({ triggerClassName = "", variant = "outline", context = "frontend" }: { triggerClassName?: string, variant?: any, context?: "frontend" | "dashboard" }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<{ products: any[]; projects: any[] }>({ products: [], projects: [] });
+  const [results, setResults] = useState<{ 
+    products: any[]; 
+    projects: any[];
+    categories: any[];
+    users: any[];
+    orders: any[];
+  }>({ products: [], projects: [], categories: [], users: [], orders: [] });
   const router = useRouter();
 
   useEffect(() => {
@@ -30,14 +36,14 @@ export function GlobalSearch({ triggerClassName = "", variant = "outline" }: { t
   useEffect(() => {
     if (!open) {
       setQuery("");
-      setResults({ products: [], projects: [] });
+      setResults({ products: [], projects: [], categories: [], users: [], orders: [] });
       return;
     }
   }, [open]);
 
   useEffect(() => {
     if (query.length < 2) {
-      setResults({ products: [], projects: [] });
+      setResults({ products: [], projects: [], categories: [], users: [], orders: [] });
       setLoading(false);
       return;
     }
@@ -45,10 +51,16 @@ export function GlobalSearch({ triggerClassName = "", variant = "outline" }: { t
     const timer = setTimeout(async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}&context=${context}`);
         const data = await res.json();
         if (data.success) {
-          setResults(data.data);
+          setResults({
+            products: data.data.products || [],
+            projects: data.data.projects || [],
+            categories: data.data.categories || [],
+            users: data.data.users || [],
+            orders: data.data.orders || [],
+          });
         }
       } catch (error) {
         console.error("Search failed:", error);
@@ -58,14 +70,14 @@ export function GlobalSearch({ triggerClassName = "", variant = "outline" }: { t
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [query, context]);
 
   const handleSelect = (url: string) => {
     setOpen(false);
     router.push(url);
   };
 
-  const hasResults = results.products.length > 0 || results.projects.length > 0;
+  const hasResults = results.products.length > 0 || results.projects.length > 0 || results.categories.length > 0 || results.users.length > 0 || results.orders.length > 0;
 
   return (
     <>
@@ -78,23 +90,23 @@ export function GlobalSearch({ triggerClassName = "", variant = "outline" }: { t
         onClick={() => setOpen(true)}
       >
         <Search className="h-4 w-4 xl:mr-2" />
-        <span className="hidden xl:inline-flex">Search website...</span>
+        <span className="hidden xl:inline-flex">{context === "dashboard" ? "Search dashboard..." : "Search website..."}</span>
         <kbd className="pointer-events-none absolute right-2 top-2.5 hidden h-6 select-none items-center gap-1 rounded border bg-white px-1.5 font-mono text-[10px] font-medium opacity-100 xl:flex text-slate-500 shadow-sm">
           <span className="text-xs">⌘</span>K
         </kbd>
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-[650px] p-0 overflow-hidden gap-0 rounded-xl shadow-2xl">
+        <DialogContent className="sm:max-w-[700px] p-0 overflow-hidden gap-0 rounded-xl shadow-2xl">
           <div className="sr-only">
-            <DialogTitle>Search website</DialogTitle>
-            <DialogDescription>Search for products, tutorials, and more.</DialogDescription>
+            <DialogTitle>Search</DialogTitle>
+            <DialogDescription>Search across the platform.</DialogDescription>
           </div>
           <div className="flex items-center border-b px-4 h-20">
             <Search className="h-8 w-8 text-slate-900 mr-4 flex-shrink-0" />
             <input
               type="text"
-              placeholder="What are you looking for?"
+              placeholder={context === "dashboard" ? "Search users, orders, products..." : "Search products, tutorials, categories..."}
               className="flex-1 bg-transparent border-none outline-none focus:ring-0 text-2xl font-bold text-black py-6 placeholder:text-slate-400 placeholder:font-medium"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -103,21 +115,125 @@ export function GlobalSearch({ triggerClassName = "", variant = "outline" }: { t
             {loading && <Loader2 className="h-6 w-6 animate-spin text-slate-400 flex-shrink-0" />}
           </div>
 
-          <div className="max-h-[60vh] overflow-y-auto">
+          <div className="max-h-[60vh] overflow-y-auto bg-white">
             {!query ? (
-              <div className="p-8 text-center text-sm text-slate-500">
-                Type at least 2 characters to search across products and tutorials...
+              <div className="p-12 text-center text-sm text-slate-500">
+                Type at least 2 characters to search across the platform...
               </div>
             ) : !loading && !hasResults ? (
-              <div className="p-12 text-center">
+              <div className="p-16 text-center">
                 <Search className="h-10 w-10 mx-auto text-slate-300 mb-3" />
                 <p className="text-slate-600 font-medium text-lg">No results found.</p>
                 <p className="text-slate-400 text-sm mt-1">Try adjusting your search terms.</p>
               </div>
             ) : (
-              <div className="p-3">
+              <div className="p-3 space-y-4">
+                
+                {/* CATEGORIES */}
+                {results.categories.length > 0 && (
+                  <div>
+                    <div className="px-2 py-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                      Categories
+                    </div>
+                    <div className="space-y-1">
+                      {results.categories.map((cat) => (
+                        <button
+                          key={cat.id}
+                          onClick={() => handleSelect(context === 'dashboard' ? `/dashboard/categories` : `/store?category=${cat.id}`)}
+                          className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 text-left transition-colors group"
+                        >
+                          <div className="h-8 w-8 rounded bg-orange-100 flex items-center justify-center flex-shrink-0">
+                            <Folder className="h-4 w-4 text-orange-600" />
+                          </div>
+                          <div className="flex-1 truncate">
+                            <div className="text-sm font-medium text-slate-900 truncate group-hover:text-orange-600 transition-colors">
+                              {cat.name}
+                            </div>
+                            {cat.description && (
+                              <div className="text-xs text-slate-500 truncate line-clamp-1">{cat.description}</div>
+                            )}
+                          </div>
+                          <ArrowRight className="h-4 w-4 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* USERS (Dashboard only) */}
+                {results.users.length > 0 && (
+                  <div>
+                    <div className="px-2 py-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                      Users
+                    </div>
+                    <div className="space-y-1">
+                      {results.users.map((user) => (
+                        <button
+                          key={user.id}
+                          onClick={() => handleSelect(`/dashboard/users/${user.id}`)}
+                          className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 text-left transition-colors group"
+                        >
+                          <div className="h-8 w-8 rounded bg-teal-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                            {user.avatar ? (
+                              <img src={user.avatar} className="h-full w-full object-cover" alt="" />
+                            ) : (
+                              <User className="h-4 w-4 text-teal-600" />
+                            )}
+                          </div>
+                          <div className="flex-1 truncate">
+                            <div className="text-sm font-medium text-slate-900 truncate group-hover:text-teal-600 transition-colors">
+                              {user.name} <span className="text-xs font-normal text-slate-400 ml-2">({user.role})</span>
+                            </div>
+                            <div className="text-xs text-slate-500 truncate">{user.email}</div>
+                          </div>
+                          <ArrowRight className="h-4 w-4 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ORDERS (Dashboard only) */}
+                {results.orders.length > 0 && (
+                  <div>
+                    <div className="px-2 py-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                      Orders
+                    </div>
+                    <div className="space-y-1">
+                      {results.orders.map((order) => (
+                        <button
+                          key={order.id}
+                          onClick={() => handleSelect(`/dashboard/orders/${order.id}`)}
+                          className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 text-left transition-colors group"
+                        >
+                          <div className="h-8 w-8 rounded bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                            <CreditCard className="h-4 w-4 text-emerald-600" />
+                          </div>
+                          <div className="flex-1 truncate">
+                            <div className="text-sm font-medium text-slate-900 truncate group-hover:text-emerald-600 transition-colors">
+                              Order #{order.id.slice(-6).toUpperCase()}
+                            </div>
+                            <div className="text-xs text-slate-500 truncate">
+                              {order.user?.name ? `Placed by ${order.user.name}` : formatDate(order.createdAt)}
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end">
+                            <div className="text-sm font-semibold text-slate-900">
+                              {formatCurrency(Number(order.total) || 0)}
+                            </div>
+                            <div className="text-[10px] uppercase font-bold text-slate-500">
+                              {order.status}
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* PRODUCTS */}
                 {results.products.length > 0 && (
-                  <div className="mb-4">
+                  <div>
                     <div className="px-2 py-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
                       Store Products
                     </div>
@@ -125,7 +241,7 @@ export function GlobalSearch({ triggerClassName = "", variant = "outline" }: { t
                       {results.products.map((product) => (
                         <button
                           key={product.id}
-                          onClick={() => handleSelect(`/store/product/${product.id}`)}
+                          onClick={() => handleSelect(context === 'dashboard' ? `/dashboard/products/${product.id}/edit` : `/store/product/${product.id}`)}
                           className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 text-left transition-colors group"
                         >
                           <div className="h-8 w-8 rounded bg-blue-100 flex items-center justify-center flex-shrink-0">
@@ -148,6 +264,7 @@ export function GlobalSearch({ triggerClassName = "", variant = "outline" }: { t
                   </div>
                 )}
 
+                {/* PROJECTS */}
                 {results.projects.length > 0 && (
                   <div>
                     <div className="px-2 py-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
@@ -157,7 +274,7 @@ export function GlobalSearch({ triggerClassName = "", variant = "outline" }: { t
                       {results.projects.map((project) => (
                         <button
                           key={project.id}
-                          onClick={() => handleSelect(`/projects/${project.slug}`)}
+                          onClick={() => handleSelect(context === 'dashboard' ? `/dashboard/projects/${project.id}/edit` : `/projects/${project.slug}`)}
                           className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-100 text-left transition-colors group"
                         >
                           <div className="h-8 w-8 rounded bg-purple-100 flex items-center justify-center flex-shrink-0">
