@@ -219,7 +219,7 @@ export function GlobalSearch({ triggerClassName = "", variant = "outline", conte
                           </div>
                           <div className="flex flex-col items-end">
                             <div className="text-sm font-semibold text-slate-900">
-                              {formatCurrency(Number(order.total) || 0)}
+                              {formatCurrency(Number(order.totalAmount) || 0)}
                             </div>
                             <div className="text-[10px] uppercase font-bold text-slate-500">
                               {order.status}

@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
             ],
           },
           take: 5,
-          select: { id: true, status: true, total: true, createdAt: true, user: { select: { name: true } } }
+          select: { id: true, status: true, totalAmount: true, createdAt: true, user: { select: { name: true } } }
         });
       } else if (session?.user?.id) {
         // Normal users can search their own orders
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
             id: { contains: query, mode: 'insensitive' }
           },
           take: 5,
-          select: { id: true, status: true, total: true, createdAt: true }
+          select: { id: true, status: true, totalAmount: true, createdAt: true }
         });
       }
 
@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
       // FRONTEND SEARCH
       results.products = await prisma.product.findMany({
         where: {
-          status: 'PUBLISHED',
+          status: 'ACTIVE',
           OR: [
             { name: { contains: query, mode: 'insensitive' } },
             { description: { contains: query, mode: 'insensitive' } },
@@ -117,10 +117,7 @@ export async function GET(request: NextRequest) {
 
       results.categories = await prisma.category.findMany({
         where: {
-          OR: [
-            { name: { contains: query, mode: 'insensitive' } },
-            { description: { contains: query, mode: 'insensitive' } },
-          ],
+          name: { contains: query, mode: 'insensitive' },
         },
         take: 5,
       });
