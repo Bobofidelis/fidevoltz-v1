@@ -3,7 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ShoppingCart, Menu, Zap, User, LogOut, LayoutDashboard, Settings, Package, ShoppingBag, Bell } from "lucide-react";
+import {
+  ShoppingCart, Menu, Zap, User, LogOut,
+  LayoutDashboard, Settings, Package, ShoppingBag, Bell
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cart-store";
 import { useSession, signOut } from "next-auth/react";
@@ -25,102 +28,142 @@ import {
 } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { GlobalSearch } from "@/components/global-search";
+import { cn } from "@/lib/utils";
+
+const NAV_LINKS = [
+  { href: "/projects", label: "Tutorials" },
+  { href: "/store", label: "Store" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
+];
 
 export function Navbar() {
   const [mounted, setMounted] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
     setMounted(true);
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
   const items = useCartStore((state) => state.items);
   const { data: session } = useSession();
   const user = session?.user;
   const cartCount = items.reduce((acc, item) => acc + item.quantity, 0);
 
-  // Dynamic branding
   const { data: settingsData } = usePublicSettings("branding");
   const branding = settingsData?.grouped?.branding || {};
   const siteName = branding["branding.siteName"] || "FideVoltz";
   const logo = branding["branding.logo"];
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
-      <div className="container flex h-16 items-center justify-between px-4 md:px-6">
-        <Link href="/" className="flex items-center gap-2">
+    <nav
+      className={cn(
+        "sticky top-0 z-50 w-full transition-all duration-200",
+        scrolled
+          ? "bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm"
+          : "bg-white/80 backdrop-blur-md border-b border-slate-100"
+      )}
+    >
+      {/* Gradient accent line */}
+      <div className="h-[2px] w-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
+
+      <div className="container flex h-15 items-center justify-between px-4 md:px-6 py-2.5">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2.5 group">
           {logo ? (
             <img src={logo} alt={siteName} className="h-8 w-auto" />
           ) : (
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-              <Zap className="h-5 w-5 text-white" />
+            <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
+              <Zap className="h-4 w-4 text-white" />
             </div>
           )}
-          <span className="text-xl font-bold text-slate-900">{siteName}</span>
+          <span className="text-xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+            {siteName}
+          </span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-8">
-          <Link href="/projects" className="text-base font-medium text-slate-700 hover:text-slate-900 transition-colors">
-            Tutorials
-          </Link>
-          <Link href="/store" className="text-base font-medium text-slate-700 hover:text-slate-900 transition-colors">
-            Store
-          </Link>
-          <Link href="/about" className="text-base font-medium text-slate-700 hover:text-slate-900 transition-colors">
-            About
-          </Link>
-          <Link href="/contact" className="text-base font-medium text-slate-700 hover:text-slate-900 transition-colors">
-            Contact
-          </Link>
+        {/* Desktop nav links */}
+        <div className="hidden md:flex items-center gap-1">
+          {NAV_LINKS.map(({ href, label }) => {
+            const isActive = pathname === href || pathname.startsWith(href + "/");
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={cn(
+                  "relative px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                  isActive
+                    ? "text-blue-600 bg-blue-50"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                )}
+              >
+                {label}
+                {isActive && (
+                  <span className="absolute bottom-0 left-3 right-3 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" />
+                )}
+              </Link>
+            );
+          })}
         </div>
 
-        <div className="flex items-center gap-2 md:gap-4">
+        {/* Right side icons */}
+        <div className="flex items-center gap-1.5">
+          {/* Search */}
           <GlobalSearch />
+
+          {/* Cart */}
           <Link href="/cart">
-            <Button variant="ghost" size="icon" className="relative hover:bg-slate-100">
-              <ShoppingCart className="h-5 w-5 text-slate-700" />
+            <Button variant="ghost" size="icon" className="relative h-9 w-9 hover:bg-slate-100 rounded-lg">
+              <ShoppingCart className="h-4.5 w-4.5 text-slate-600" />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-slate-900 text-white text-xs flex items-center justify-center">
-                  {cartCount}
+                <span className="absolute -top-0.5 -right-0.5 h-4.5 w-4.5 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white text-[10px] font-bold flex items-center justify-center">
+                  {cartCount > 9 ? "9+" : cartCount}
                 </span>
               )}
             </Button>
           </Link>
+
+          {/* Notifications */}
           <Link href="/dashboard/notifications">
-            <Button variant="ghost" size="icon" className="relative hover:bg-slate-100">
-              <Bell className="h-5 w-5 text-slate-700" />
+            <Button variant="ghost" size="icon" className="relative h-9 w-9 hover:bg-slate-100 rounded-lg">
+              <Bell className="h-4.5 w-4.5 text-slate-600" />
             </Button>
           </Link>
+
+          {/* User menu */}
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage 
+                <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0 ml-1">
+                  <Avatar className="h-8 w-8 ring-2 ring-slate-200 hover:ring-blue-400 transition-all">
+                    <AvatarImage
                       src={
-                        user?.avatar 
-                          ? user.avatar.startsWith('http') 
-                            ? user.avatar 
-                            : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '')}${user.avatar}`
+                        user?.avatar
+                          ? user.avatar.startsWith("http")
+                            ? user.avatar
+                            : `${process.env.NEXT_PUBLIC_API_URL?.replace("/api", "")}${user.avatar}`
                           : `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.email}`
-                      } 
-                      alt={user?.name || "User"} 
+                      }
+                      alt={user?.name || "User"}
                     />
-                    <AvatarFallback>{user?.name?.[0]?.toUpperCase() || "U"}</AvatarFallback>
+                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold text-sm">
+                      {user?.name?.[0]?.toUpperCase() || "U"}
+                    </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{user?.name}</p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {user?.email}
-                    </p>
+                    <p className="text-sm font-semibold leading-none">{user?.name}</p>
+                    <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                
-                {/* Common links for all roles */}
                 <Link href="/dashboard/overview">
                   <DropdownMenuItem>
                     <LayoutDashboard className="mr-2 h-4 w-4" />
@@ -133,18 +176,14 @@ export function Navbar() {
                     <span>Profile</span>
                   </DropdownMenuItem>
                 </Link>
-                
-                {/* Orders link for ADMIN, EDITOR, and USER */}
-                {(user.role === 'ADMIN' || user.role === 'EDITOR' || user.role === 'USER') && (
+                {(user.role === "ADMIN" || user.role === "EDITOR" || user.role === "USER") && (
                   <Link href="/dashboard/orders">
                     <DropdownMenuItem>
                       <ShoppingBag className="mr-2 h-4 w-4" />
-                      <span>{user.role === 'USER' ? 'My Orders' : 'Orders'}</span>
+                      <span>{user.role === "USER" ? "My Orders" : "Orders"}</span>
                     </DropdownMenuItem>
                   </Link>
                 )}
-                
-                {/* Settings and Notifications for all users */}
                 <Link href="/dashboard/settings">
                   <DropdownMenuItem>
                     <Settings className="mr-2 h-4 w-4" />
@@ -157,9 +196,7 @@ export function Navbar() {
                     <span>Notifications</span>
                   </DropdownMenuItem>
                 </Link>
-                
-                {/* Admin-only links */}
-                {user.role === 'ADMIN' && (
+                {user.role === "ADMIN" && (
                   <>
                     <DropdownMenuSeparator />
                     <Link href="/dashboard/products">
@@ -176,68 +213,72 @@ export function Navbar() {
                     </Link>
                   </>
                 )}
-                
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => {
-                  signOut({ callbackUrl: '/' });
-                }}>
+                <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Link href={`/auth/login?returnUrl=${encodeURIComponent(pathname)}`} className="hidden md:block">
-              <Button variant="outline" className="border-slate-300 hover:bg-slate-50">
+            <Link href={`/auth/login?returnUrl=${encodeURIComponent(pathname)}`} className="hidden md:block ml-1">
+              <Button size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-sm">
                 Sign In
               </Button>
             </Link>
           )}
+
+          {/* Mobile menu */}
           {mounted ? (
             <Sheet>
               <SheetTrigger asChild>
-                <Button size="icon" variant="ghost" className="md:hidden hover:bg-slate-100">
-                  <Menu className="h-5 w-5 text-slate-700" />
+                <Button size="icon" variant="ghost" className="md:hidden h-9 w-9 hover:bg-slate-100 rounded-lg">
+                  <Menu className="h-5 w-5 text-slate-600" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left">
+              <SheetContent side="left" className="w-72">
                 <SheetHeader>
-                  <SheetTitle className="text-left flex items-center gap-2">
+                  <SheetTitle className="text-left flex items-center gap-2.5">
                     {logo ? (
                       <img src={logo} alt={siteName} className="h-8 w-auto" />
                     ) : (
-                      <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                        <Zap className="h-5 w-5 text-white" />
+                      <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
+                        <Zap className="h-4 w-4 text-white" />
                       </div>
                     )}
-                    {siteName}
+                    <span className="font-bold text-slate-900">{siteName}</span>
                   </SheetTitle>
                 </SheetHeader>
-                <div className="flex flex-col gap-6 mt-8">
-                  <Link href="/projects" className="text-lg font-medium text-slate-700 hover:text-slate-900 transition-colors">
-                    Tutorials
-                  </Link>
-                  <Link href="/store" className="text-lg font-medium text-slate-700 hover:text-slate-900 transition-colors">
-                    Store
-                  </Link>
-                  <Link href="/about" className="text-lg font-medium text-slate-700 hover:text-slate-900 transition-colors">
-                    About
-                  </Link>
-                  <Link href="/contact" className="text-lg font-medium text-slate-700 hover:text-slate-900 transition-colors">
-                    Contact
-                  </Link>
-                  <hr className="border-slate-200" />
+                <div className="flex flex-col gap-1 mt-8">
+                  {NAV_LINKS.map(({ href, label }) => {
+                    const isActive = pathname === href || pathname.startsWith(href + "/");
+                    return (
+                      <Link
+                        key={href}
+                        href={href}
+                        className={cn(
+                          "flex items-center px-3 py-2.5 rounded-lg text-base font-medium transition-colors",
+                          isActive
+                            ? "text-blue-600 bg-blue-50"
+                            : "text-slate-700 hover:text-slate-900 hover:bg-slate-50"
+                        )}
+                      >
+                        {label}
+                      </Link>
+                    );
+                  })}
+                  <hr className="border-slate-200 my-3" />
                   {!user && (
-                     <Link href={`/auth/login?returnUrl=${encodeURIComponent(pathname)}`}>
-                      <Button className="w-full">Sign In</Button>
+                    <Link href={`/auth/login?returnUrl=${encodeURIComponent(pathname)}`}>
+                      <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600">Sign In</Button>
                     </Link>
                   )}
                 </div>
               </SheetContent>
             </Sheet>
           ) : (
-            <Button size="icon" variant="ghost" className="md:hidden hover:bg-slate-100">
-              <Menu className="h-5 w-5 text-slate-700" />
+            <Button size="icon" variant="ghost" className="md:hidden h-9 w-9">
+              <Menu className="h-5 w-5 text-slate-600" />
             </Button>
           )}
         </div>
