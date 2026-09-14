@@ -336,24 +336,77 @@ export default function AnalyticsPage() {
         <TabsContent value="activity" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Activity Log</CardTitle>
-              <CardDescription>Complete audit trail of platform actions</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Activity Log</CardTitle>
+                  <CardDescription>Complete audit trail of platform actions</CardDescription>
+                </div>
+                {activityLogs?.pagination && (
+                  <span className="text-xs text-muted-foreground">
+                    {activityLogs.pagination.total} total events
+                  </span>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                {activityLogs?.logs?.map((log: any) => (
-                  <div key={log.id} className="flex items-center justify-between p-3 bg-muted rounded-lg text-sm">
-                    <div className="flex items-center gap-3">
-                      <span className="font-medium">{log.user?.name || "System"}</span>
-                      <span className="text-muted-foreground">{log.action}</span>
-                      <span className="font-medium">{log.resource}</span>
-                    </div>
-                    <span className="text-xs text-muted-foreground">
-                      {format(new Date(log.createdAt), "MMM dd, HH:mm")}
-                    </span>
-                  </div>
-                ))}
-              </div>
+              {!activityLogs ? (
+                <div className="space-y-2">
+                  {[1,2,3,4,5].map(i => (
+                    <div key={i} className="h-14 bg-slate-100 animate-pulse rounded-lg" />
+                  ))}
+                </div>
+              ) : activityLogs?.logs?.length > 0 ? (
+                <div className="space-y-1.5">
+                  {activityLogs.logs.map((log: any) => {
+                    const actionColor =
+                      log.action === 'CREATE' ? 'bg-emerald-100 text-emerald-700' :
+                      log.action === 'DELETE' ? 'bg-rose-100 text-rose-700' :
+                      log.action === 'UPDATE' ? 'bg-blue-100 text-blue-700' :
+                      log.action === 'LOGIN'  ? 'bg-purple-100 text-purple-700' :
+                      'bg-slate-100 text-slate-600';
+                    return (
+                      <div key={log.id} className="flex items-center justify-between p-3 border border-slate-100 rounded-xl hover:bg-slate-50 transition-colors text-sm">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center shrink-0 text-xs font-bold text-slate-600">
+                            {(log.user?.name || "S")[0].toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-semibold text-slate-800">{log.user?.name || "System"}</span>
+                              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide ${actionColor}`}>
+                                {log.action}
+                              </span>
+                              <span className="text-slate-500 truncate">{log.resource}</span>
+                              {log.resourceId && (
+                                <span className="text-[11px] text-slate-400 truncate hidden sm:inline">
+                                  #{log.resourceId.slice(-6)}
+                                </span>
+                              )}
+                            </div>
+                            {log.details && typeof log.details === 'object' && (
+                              <p className="text-xs text-slate-400 mt-0.5 truncate max-w-xs">
+                                {JSON.stringify(log.details).slice(0, 80)}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0 ml-3">
+                          <p className="text-xs text-slate-500">{format(new Date(log.createdAt), "MMM dd")}</p>
+                          <p className="text-xs text-slate-400">{format(new Date(log.createdAt), "HH:mm")}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-16">
+                  <FileText className="h-10 w-10 mx-auto text-slate-200 mb-4" />
+                  <p className="font-medium text-slate-600">No activity recorded yet</p>
+                  <p className="text-sm text-slate-400 mt-1">
+                    User actions like logins, product updates, and order changes will appear here
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
