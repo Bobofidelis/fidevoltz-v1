@@ -44,10 +44,34 @@ function renderBlock(block: Block, slug?: string) {
   switch (block.type) {
     case "text":
       return (
-        <div 
-          className="prose prose-slate max-w-none"
-          dangerouslySetInnerHTML={{ __html: block.content.toString().replace(/\n/g, "<br/>") }} 
-        />
+        <>
+          <style>{`
+            .prose-rte h2 { font-size: 1.5rem; font-weight: 700; margin: 1.25rem 0 0.75rem; color: #1e293b; }
+            .prose-rte h3 { font-size: 1.25rem; font-weight: 700; margin: 1rem 0 0.5rem; color: #1e293b; }
+            .prose-rte h4 { font-size: 1.1rem; font-weight: 700; margin: 0.75rem 0 0.5rem; color: #1e293b; }
+            .prose-rte p { margin: 0.5rem 0; line-height: 1.75; }
+            .prose-rte p:first-child { margin-top: 0; }
+            .prose-rte strong { font-weight: 700; }
+            .prose-rte em { font-style: italic; }
+            .prose-rte u { text-decoration: underline; }
+            .prose-rte s { text-decoration: line-through; }
+            .prose-rte ul { list-style-type: disc !important; padding-left: 1.75rem !important; margin: 0.75rem 0; }
+            .prose-rte ol { list-style-type: decimal !important; padding-left: 1.75rem !important; margin: 0.75rem 0; }
+            .prose-rte li { margin: 0.3rem 0; line-height: 1.6; display: list-item !important; }
+            .prose-rte li p { margin: 0; }
+            .prose-rte blockquote { border-left: 4px solid #6366f1; padding: 0.75rem 1rem; margin: 1rem 0; background: #f8f8ff; color: #4b5563; font-style: italic; border-radius: 0 0.5rem 0.5rem 0; }
+            .prose-rte a { color: #2563eb; text-decoration: underline; }
+            .prose-rte a:hover { color: #1d4ed8; }
+            .prose-rte hr { border: none; border-top: 2px solid #e2e8f0; margin: 1.5rem 0; }
+            .prose-rte code { background: #f1f5f9; color: #e11d48; border-radius: 0.25rem; padding: 0.1rem 0.35rem; font-size: 0.875em; font-family: monospace; font-weight: 500; }
+            .prose-rte pre { background: #1e293b; color: #f8fafc; border-radius: 0.5rem; padding: 1rem; margin: 1rem 0; overflow-x: auto; }
+            .prose-rte pre code { background: transparent; color: inherit; padding: 0; font-size: 0.875em; }
+          `}</style>
+          <div
+            className="prose-rte max-w-none text-slate-700 leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: block.content.toString() }}
+          />
+        </>
       );
 
     case "markdown":

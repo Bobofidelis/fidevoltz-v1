@@ -111,16 +111,19 @@ export function Navbar() {
         </div>
 
         {/* Right side icons */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2 md:gap-3">
           {/* Search */}
           <GlobalSearch />
 
+          {/* Divider */}
+          <div className="hidden md:block h-6 w-px bg-slate-200" />
+
           {/* Cart */}
           <Link href="/cart">
-            <Button variant="ghost" size="icon" className="relative h-9 w-9 hover:bg-slate-100 rounded-lg">
-              <ShoppingCart className="h-4.5 w-4.5 text-slate-600" />
+            <Button variant="ghost" size="icon" className="relative h-10 w-10 hover:bg-slate-100 rounded-xl">
+              <ShoppingCart className="h-5 w-5 text-slate-600" />
               {cartCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 h-4.5 w-4.5 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white text-[10px] font-bold flex items-center justify-center">
+                <span className="absolute -top-0.5 -right-0.5 h-5 w-5 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white text-[10px] font-bold flex items-center justify-center shadow-sm">
                   {cartCount > 9 ? "9+" : cartCount}
                 </span>
               )}
@@ -129,10 +132,13 @@ export function Navbar() {
 
           {/* Notifications */}
           <Link href="/dashboard/notifications">
-            <Button variant="ghost" size="icon" className="relative h-9 w-9 hover:bg-slate-100 rounded-lg">
-              <Bell className="h-4.5 w-4.5 text-slate-600" />
+            <Button variant="ghost" size="icon" className="relative h-10 w-10 hover:bg-slate-100 rounded-xl">
+              <Bell className="h-5 w-5 text-slate-600" />
             </Button>
           </Link>
+
+          {/* Divider */}
+          <div className="hidden md:block h-6 w-px bg-slate-200" />
 
           {/* User menu */}
           {user ? (
