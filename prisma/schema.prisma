@@ -66,6 +66,7 @@ model ProjectPost {
   slug          String              @unique
   excerpt       String?
   content       Json?
+  sidebar       Json?
   featuredImage String?
   category      String
   difficulty    String?             @default("Intermediate")
@@ -689,6 +690,7 @@ model Page {
   title       String
   slug        String   @unique
   content     Json
+  sidebar     Json?
   isPublished Boolean  @default(true)
   seoTitle    String?
   seoDesc     String?

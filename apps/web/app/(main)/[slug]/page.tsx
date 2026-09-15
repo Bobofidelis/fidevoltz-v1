@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { Metadata } from 'next';
 import { PageRenderer } from '@/components/page-renderer';
+import { BlockRenderer } from "@/components/projects/block-renderer";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -61,7 +62,25 @@ export default async function DynamicPage({ params }: PageProps) {
 
   // Cast Json content to Block array and ensure it's an array
   const blocks = Array.isArray(page.content) ? (page.content as any[]) : [];
+  const sidebarBlocks = Array.isArray(page.sidebar) ? (page.sidebar as any[]) : [];
   console.log(`[DynamicPage] Found ${blocks.length} blocks for slug: ${slug}`);
+
+  if (sidebarBlocks.length > 0) {
+    return (
+      <main className="min-h-screen bg-slate-50 py-12">
+        <div className="container px-4 md:px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+            <div className="lg:col-span-2 space-y-8 bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+              <PageRenderer content={blocks} />
+            </div>
+            <div className="lg:col-span-1 space-y-6">
+              <BlockRenderer blocks={sidebarBlocks} slug={page.slug} />
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen">

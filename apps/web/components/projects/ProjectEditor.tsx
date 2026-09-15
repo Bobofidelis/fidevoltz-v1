@@ -73,6 +73,10 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
   const [blocks, setBlocks] = useState<Block[]>(
     Array.isArray(initialData?.content) ? initialData.content : []
   );
+  
+  const [sidebarBlocks, setSidebarBlocks] = useState<Block[]>(
+    Array.isArray(initialData?.sidebar) ? initialData.sidebar : []
+  );
 
   // Components State
   const [components, setComponents] = useState<any[]>(initialData?.components || []);
@@ -220,6 +224,7 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
       allowComments,
       status,
       content: blocks,
+      sidebar: sidebarBlocks,
       components,
       attachments
     };
@@ -256,6 +261,13 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
         <Button type="button" variant="ghost" size="sm" className="rounded-full hover:bg-slate-100 shrink-0" onClick={() => router.back()}>Cancel</Button>
         
         <div className="w-px h-6 bg-slate-200 shrink-0 mx-1" />
+
+        <SidebarEditor 
+          blocks={sidebarBlocks as any} 
+          onSave={(newBlocks) => setSidebarBlocks(newBlocks as any)}
+          triggerLabel="Edit Public Sidebar"
+          triggerClassName="rounded-full shrink-0 hidden md:flex"
+        />
 
         <SidebarEditor 
           blocks={blocks as any} 

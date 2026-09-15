@@ -35,6 +35,7 @@ interface PageFormProps {
     title: string;
     slug: string;
     content: any[];
+    sidebar?: any[];
     isPublished: boolean;
     seoTitle?: string;
     seoDesc?: string;
@@ -53,6 +54,7 @@ export function PageForm({ initialData, mode }: PageFormProps) {
       : (initialData?.content && typeof initialData.content === 'object' && (initialData.content as any).type === 'doc')
         ? [{ type: 'text', content: initialData.content }]
         : [] as any[],
+    sidebar: Array.isArray(initialData?.sidebar) ? initialData.sidebar : [],
     isPublished: initialData?.isPublished ?? true,
     seoTitle: initialData?.seoTitle || '',
     seoDesc: initialData?.seoDesc || '',
@@ -223,6 +225,13 @@ export function PageForm({ initialData, mode }: PageFormProps) {
         </Link>
         
         <div className="w-px h-6 bg-slate-200 shrink-0 mx-1" />
+
+        <SidebarEditor 
+          blocks={formData.sidebar as any} 
+          onSave={(blocks) => setFormData(prev => ({ ...prev, sidebar: blocks as any }))}
+          triggerLabel="Edit Public Sidebar"
+          triggerClassName="rounded-full shrink-0"
+        />
 
         <SidebarEditor 
           blocks={formData.content as any} 

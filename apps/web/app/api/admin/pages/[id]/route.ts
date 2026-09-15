@@ -60,7 +60,7 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { title, slug, content, isPublished, seoTitle, seoDesc } = body;
+    const { title, slug, content, sidebar, isPublished, seoTitle, seoDesc } = body;
 
     // Check if slug is taken by another page (if slug is being updated)
     if (slug) {
@@ -85,6 +85,7 @@ export async function PATCH(
         title,
         slug,
         content,
+        sidebar: sidebar !== undefined ? sidebar : undefined,
         isPublished,
         seoTitle,
         seoDesc,

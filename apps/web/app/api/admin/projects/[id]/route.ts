@@ -57,7 +57,8 @@ export async function PUT(
       status, 
       allowComments,
       components,
-      attachments
+      attachments,
+      sidebar
     } = body;
 
     // Check if slug is taken by another project
@@ -80,6 +81,7 @@ export async function PUT(
           slug,
           excerpt,
           content: content || [],
+          sidebar: sidebar !== undefined ? sidebar : undefined,
           featuredImage,
           category,
           difficulty,
