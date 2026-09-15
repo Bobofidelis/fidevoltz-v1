@@ -17,9 +17,10 @@ import {
 import { cn } from "@/lib/utils";
 import { nanoid } from "nanoid";
 
-type BlockType = "text" | "markdown" | "code" | "heading" | "image" | "alert";
+type KnownBlockType = "text" | "markdown" | "code" | "heading" | "image" | "alert";
+type BlockType = KnownBlockType | (string & {});
 
-interface Block {
+export interface Block {
   id: string;
   type: BlockType;
   content: any;

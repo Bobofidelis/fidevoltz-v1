@@ -37,6 +37,8 @@ import { ProductLinkPicker } from "@/components/projects/product-link-picker";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { SidebarSettings } from "@/components/dashboard/SidebarSettings";
+import { SidebarEditor } from "@/components/dashboard/SidebarEditor";
 import { toast } from "sonner";
 
 interface ProjectEditorProps {
@@ -250,25 +252,36 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      <div className="fixed bottom-6 right-6 md:right-8 z-50 flex flex-col md:flex-row items-end md:items-center gap-4 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-2xl border border-slate-200">
-        <div className="flex items-center gap-2">
-          <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className="w-[140px] bg-white">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="DRAFT">Draft</SelectItem>
-              <SelectItem value="PUBLISHED">Published</SelectItem>
-              <SelectItem value="ARCHIVED">Archived</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
-          <Button type="submit" disabled={loading} className="shadow-lg hover:shadow-xl transition-shadow">
-            {loading ? "Saving..." : initialData ? "Update Project" : "Create Project"}
-          </Button>
-        </div>
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 md:left-auto md:transform-none md:right-8 z-50 flex items-center gap-2 sm:gap-3 bg-white/95 backdrop-blur-md px-4 sm:px-5 py-3 sm:py-3.5 rounded-full shadow-2xl border border-slate-200 w-[95%] md:w-auto overflow-x-auto">
+        <Button type="button" variant="ghost" size="sm" className="rounded-full hover:bg-slate-100 shrink-0" onClick={() => router.back()}>Cancel</Button>
+        
+        <div className="w-px h-6 bg-slate-200 shrink-0 mx-1" />
+
+        <SidebarEditor 
+          blocks={blocks as any} 
+          onSave={(newBlocks) => setBlocks(newBlocks as any)}
+          triggerLabel="Block Editor"
+          triggerClassName="rounded-full shrink-0 hidden md:flex"
+        />
+
+        <SidebarSettings 
+          triggerLabel="Quick Settings"
+          triggerClassName="rounded-full shrink-0"
+          data={{
+            status: status,
+            slug: slug,
+            category: category,
+          }}
+          onSave={(data) => {
+            if (data.status) setStatus(data.status);
+            if (data.slug) setSlug(data.slug);
+            if (data.category !== undefined) setCategory(data.category);
+          }}
+        />
+
+        <Button type="submit" disabled={loading} className="gap-2 shadow-md px-6 rounded-full shrink-0 bg-blue-600 hover:bg-blue-700 text-white ml-auto">
+          {loading ? "Saving..." : initialData ? "Update Project" : "Create Project"}
+        </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">

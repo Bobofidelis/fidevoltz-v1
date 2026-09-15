@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { BlockEditor } from './block-editor';
+import { SidebarSettings } from '@/components/dashboard/SidebarSettings';
+import { SidebarEditor } from '@/components/dashboard/SidebarEditor';
 import {
   Card,
   CardContent,
@@ -141,186 +143,119 @@ export function PageForm({ initialData, mode }: PageFormProps) {
       </div>
 
       {/* Main content grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         
-        {/* Left — Page Content (2/3 width) */}
-        <div className="lg:col-span-2 space-y-6">
+        {/* Left — Page Content (Full width now that sidebar is in a sheet) */}
+        <div className="lg:col-span-3 space-y-6">
           
           {/* Title card */}
-          <Card className="shadow-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2 text-base">
+          <Card className="shadow-sm border-slate-200">
+            <CardHeader className="pb-4 bg-slate-50/50 border-b">
+              <CardTitle className="flex items-center gap-2 text-base text-slate-800">
                 <FileText className="h-4 w-4 text-blue-600" />
                 Page Content
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6 pt-6">
               <div className="space-y-2">
-                <Label htmlFor="title">Page Title <span className="text-red-500">*</span></Label>
+                <Label htmlFor="title" className="text-slate-700">Page Title <span className="text-red-500">*</span></Label>
                 <Input
                   id="title"
                   placeholder="e.g. Shipping Information"
                   value={formData.title}
                   onChange={handleTitleChange}
-                  className="text-lg font-medium"
+                  className="text-lg font-medium border-slate-300 focus-visible:ring-blue-500"
                 />
               </div>
               
-              <div className="space-y-3">
+              <div className="space-y-3 pt-2">
                 <div className="flex items-center justify-between">
-                  <Label>Blocks Content <span className="text-red-500">*</span></Label>
-                  <span className="text-xs text-slate-400">
+                  <Label className="text-slate-700">Blocks Content <span className="text-red-500">*</span></Label>
+                  <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
                     {formData.content.length} block{formData.content.length !== 1 ? 's' : ''}
                   </span>
                 </div>
-                <BlockEditor
-                  blocks={formData.content}
-                  onChange={(blocks) => setFormData(prev => ({ ...prev, content: blocks }))}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* SEO card */}
-          <Card className="shadow-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Search className="h-4 w-4 text-green-600" />
-                Search Engine Optimization
-              </CardTitle>
-              <CardDescription>Optimize how this page appears in search results</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="seoTitle">SEO Title</Label>
-                <Input
-                  id="seoTitle"
-                  placeholder={formData.title || "Leave blank to use page title"}
-                  value={formData.seoTitle}
-                  onChange={(e) => setFormData(prev => ({ ...prev, seoTitle: e.target.value }))}
-                />
-                <p className="text-xs text-slate-400">
-                  {(formData.seoTitle || formData.title).length}/60 characters
-                </p>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="seoDesc">Meta Description</Label>
-                <Textarea
-                  id="seoDesc"
-                  placeholder="Brief summary for search results (150-160 characters ideal)"
-                  value={formData.seoDesc}
-                  onChange={(e) => setFormData(prev => ({ ...prev, seoDesc: e.target.value }))}
-                  rows={3}
-                />
-                <p className="text-xs text-slate-400">{formData.seoDesc.length}/160 characters</p>
-              </div>
-
-              {/* Google Preview */}
-              {(formData.title || formData.seoTitle) && (
-                <div className="mt-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
-                  <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Google Preview</p>
-                  <p className="text-blue-700 font-medium text-sm leading-snug hover:underline cursor-pointer">
-                    {formData.seoTitle || formData.title}
-                  </p>
-                  <p className="text-green-700 text-xs mt-0.5">
-                    yourdomain.com/{formData.slug || '...'}
-                  </p>
-                  <p className="text-slate-600 text-xs mt-1 leading-relaxed line-clamp-2">
-                    {formData.seoDesc || 'No description provided. Add a meta description to improve search visibility.'}
-                  </p>
+                <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-1">
+                  <BlockEditor
+                    blocks={formData.content}
+                    onChange={(blocks) => setFormData(prev => ({ ...prev, content: blocks }))}
+                  />
                 </div>
-              )}
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Right — Settings sidebar (1/3 width) */}
-        <div className="space-y-6">
-          <Card className="shadow-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-base">Page Settings</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="slug">URL Slug <span className="text-red-500">*</span></Label>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-slate-400 text-sm flex-shrink-0">/</span>
-                  <Input
-                    id="slug"
-                    placeholder="e.g. shipping-info"
-                    value={formData.slug}
-                    onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-') }))}
-                    className="font-mono text-sm"
-                  />
-                </div>
-                <p className="text-xs text-slate-400">
-                  yourdomain.com/<strong className="text-slate-600">{formData.slug || '...'}</strong>
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Status</Label>
-                <Select
-                  value={formData.isPublished ? "published" : "draft"}
-                  onValueChange={(val) => setFormData(prev => ({ ...prev, isPublished: val === "published" }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="published">
-                      <div className="flex items-center gap-2">
-                        <Globe className="h-4 w-4 text-green-600" />
-                        Published
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="draft">
-                      <div className="flex items-center gap-2">
-                        <Lock className="h-4 w-4 text-slate-500" />
-                        Draft
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {mode === 'edit' && formData.slug && (
-                <Link href={`/${formData.slug}`} target="_blank">
-                  <Button type="button" variant="outline" className="w-full gap-2 mt-2">
-                    <Eye className="h-4 w-4" />
-                    View Live Page
-                  </Button>
-                </Link>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Quick tips */}
-          <Card className="bg-blue-50 border-blue-100 shadow-sm">
-            <CardContent className="p-4 space-y-2">
-              <p className="text-xs font-semibold text-blue-800">📌 Tips</p>
-              <ul className="text-xs text-blue-700 space-y-1.5">
-                <li>• Add a <strong>Hero</strong> block at the top for visual impact</li>
-                <li>• Use <strong>FAQ</strong> blocks for support pages</li>
-                <li>• Use <strong>Grid</strong> blocks to highlight features</li>
-                <li>• Keep meta descriptions under 160 characters</li>
+        {/* Right — Quick tips */}
+        <div className="space-y-6 lg:col-span-1">
+          <Card className="bg-blue-50/80 border-blue-100 shadow-sm sticky top-24">
+            <CardContent className="p-5 space-y-3">
+              <p className="text-sm font-semibold text-blue-900 flex items-center gap-2">
+                <span className="text-lg">💡</span> Pro Tips
+              </p>
+              <ul className="text-sm text-blue-800/90 space-y-2.5">
+                <li className="flex gap-2 leading-tight">
+                  <span className="text-blue-400">•</span>
+                  <span>Add a <strong>Hero</strong> block at the top for visual impact.</span>
+                </li>
+                <li className="flex gap-2 leading-tight">
+                  <span className="text-blue-400">•</span>
+                  <span>Use <strong>FAQ</strong> blocks for support pages.</span>
+                </li>
+                <li className="flex gap-2 leading-tight">
+                  <span className="text-blue-400">•</span>
+                  <span>Keep meta descriptions under 160 characters in settings.</span>
+                </li>
+                <li className="flex gap-2 leading-tight">
+                  <span className="text-blue-400">•</span>
+                  <span>Click <strong>Page Settings</strong> below to configure SEO and URL.</span>
+                </li>
               </ul>
             </CardContent>
           </Card>
         </div>
       </div>
 
-      {/* Floating Save Bar — always visible, no form submit needed */}
-      <div className="fixed bottom-6 right-6 md:right-8 z-50 flex items-center gap-3 bg-white/95 backdrop-blur-md px-5 py-3.5 rounded-2xl shadow-2xl border border-slate-200">
-        <Link href="/dashboard/pages">
-          <Button type="button" variant="outline" size="sm">Cancel</Button>
+      {/* Floating Save Bar — always visible */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 md:left-auto md:transform-none md:right-8 z-50 flex items-center gap-2 sm:gap-3 bg-white/95 backdrop-blur-md px-4 sm:px-5 py-3 sm:py-3.5 rounded-full shadow-2xl border border-slate-200 w-[95%] md:w-auto overflow-x-auto">
+        <Link href="/dashboard/pages" className="shrink-0">
+          <Button type="button" variant="ghost" size="sm" className="rounded-full hover:bg-slate-100">Cancel</Button>
         </Link>
+        
+        <div className="w-px h-6 bg-slate-200 shrink-0 mx-1" />
+
+        <SidebarEditor 
+          blocks={formData.content as any} 
+          onSave={(blocks) => setFormData(prev => ({ ...prev, content: blocks as any }))}
+          triggerLabel="Block Editor"
+          triggerClassName="rounded-full shrink-0"
+        />
+
+        <SidebarSettings 
+          triggerLabel="Page Settings"
+          triggerClassName="rounded-full shrink-0"
+          data={{
+            status: formData.isPublished ? "PUBLISHED" : "DRAFT",
+            slug: formData.slug,
+            seoTitle: formData.seoTitle,
+            seoDescription: formData.seoDesc,
+          }}
+          onSave={(data) => {
+            setFormData(prev => ({
+              ...prev,
+              isPublished: data.status === "PUBLISHED",
+              slug: data.slug || prev.slug,
+              seoTitle: data.seoTitle || prev.seoTitle,
+              seoDesc: data.seoDescription || prev.seoDesc,
+            }));
+          }}
+        />
+
         <Button
           type="button"
           onClick={handleSave}
           disabled={mutation.isPending}
-          className="gap-2 shadow-md px-5"
+          className="gap-2 shadow-md px-6 rounded-full shrink-0 bg-blue-600 hover:bg-blue-700 text-white ml-auto"
         >
           {mutation.isPending ? (
             <>
