@@ -271,6 +271,7 @@ export function SidebarEditor({
     <>
       {showTrigger && (
         <Button
+          type="button"
           variant="outline"
           size="sm"
           onClick={() => setIsOpen(true)}
@@ -344,6 +345,7 @@ export function SidebarEditor({
               </div>
               <div className="p-2 border-t">
                 <Button
+                  type="button"
                   size="sm"
                   variant="outline"
                   className="w-full gap-2 h-8 text-xs"
@@ -385,9 +387,9 @@ export function SidebarEditor({
                       </p>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => moveBlock(selectedBlock.id, -1)} title="Move up">↑</Button>
-                      <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => moveBlock(selectedBlock.id, 1)} title="Move down">↓</Button>
-                      <Button size="icon" variant="ghost" className="h-7 w-7 text-red-500 hover:text-red-600" onClick={() => removeBlock(selectedBlock.id)} title="Remove">
+                      <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={() => moveBlock(selectedBlock.id, -1)} title="Move up">↑</Button>
+                      <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={() => moveBlock(selectedBlock.id, 1)} title="Move down">↓</Button>
+                      <Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-red-500 hover:text-red-600" onClick={() => removeBlock(selectedBlock.id)} title="Remove">
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
@@ -407,8 +409,8 @@ export function SidebarEditor({
           {/* Footer */}
           <SheetFooter className="border-t bg-white px-5 py-4 sticky bottom-0">
             <div className="flex gap-2 w-full">
-              <Button variant="outline" onClick={() => setIsOpen(false)} className="flex-1">Cancel</Button>
-              <Button onClick={handleSave} disabled={saving || !onSave} className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-0">
+              <Button type="button" variant="outline" onClick={() => setIsOpen(false)} className="flex-1">Cancel</Button>
+              <Button type="button" onClick={handleSave} disabled={saving || !onSave} className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-0">
                 {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                 {saving ? "Saving..." : `Save ${blocks.length} Block${blocks.length !== 1 ? "s" : ""}`}
               </Button>

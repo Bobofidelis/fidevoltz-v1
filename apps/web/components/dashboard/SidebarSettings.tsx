@@ -120,6 +120,7 @@ export function SidebarSettings({
     <>
       {showTrigger && (
         <Button
+          type="button"
           variant="outline"
           size="sm"
           onClick={() => setIsOpen(true)}
@@ -312,8 +313,8 @@ export function SidebarSettings({
 
           <SheetFooter className="sticky bottom-0 bg-white border-t px-6 py-4">
             <div className="flex gap-2 w-full">
-              <Button variant="outline" onClick={() => setIsOpen(false)} className="flex-1">Cancel</Button>
-              <Button onClick={handleSave} disabled={saving || !onSave} className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0">
+              <Button type="button" variant="outline" onClick={() => setIsOpen(false)} className="flex-1">Cancel</Button>
+              <Button type="button" onClick={handleSave} disabled={saving || !onSave} className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0">
                 {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                 {saving ? "Saving..." : "Save Settings"}
               </Button>
