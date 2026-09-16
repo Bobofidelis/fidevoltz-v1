@@ -141,7 +141,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-slate-900/40" />
         
-        <div className="relative container px-4 md:px-6 h-full flex flex-col justify-end pb-12">
+        <div className="relative max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 h-full flex flex-col justify-end pb-12">
           <nav className="flex items-center gap-2 text-sm text-white/70 mb-6 font-medium flex-wrap">
             <Link href="/" className="hover:text-white transition-colors">Home</Link>
             <span>&gt;</span>
@@ -200,12 +200,12 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
       {/* Content */}
       <section className="py-12">
-        <div className="container px-4 md:px-6">
+        <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12">
           <AdSlot page={`projects/${project.slug}`} zone="HEADER" className="mb-8" />
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
             {/* Main Content */}
-            <div className="lg:col-span-2 space-y-8">
+            <div className="lg:col-span-8 xl:col-span-9 space-y-8">
                
                {/* Excerpt/Intro */}
                {project.excerpt && (
@@ -302,7 +302,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             </div>
 
             {/* Sidebar */}
-            <div className="space-y-6">
+            <div className="lg:col-span-4 xl:col-span-3 space-y-6">
                <ProjectSidebar project={project} />
             </div>
           </div>

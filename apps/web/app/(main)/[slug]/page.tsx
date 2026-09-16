@@ -68,12 +68,12 @@ export default async function DynamicPage({ params }: PageProps) {
   if (sidebarBlocks.length > 0) {
     return (
       <main className="min-h-screen bg-slate-50 py-12">
-        <div className="container px-4 md:px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-            <div className="lg:col-span-2 space-y-8 bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+            <div className="lg:col-span-8 xl:col-span-9 space-y-8 bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
               <PageRenderer content={blocks} />
             </div>
-            <div className="lg:col-span-1 space-y-6">
+            <div className="lg:col-span-4 xl:col-span-3 space-y-6">
               <BlockRenderer blocks={sidebarBlocks} slug={page.slug} />
             </div>
           </div>
