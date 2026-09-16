@@ -66,6 +66,9 @@ export default async function DynamicPage({ params }: PageProps) {
   console.log(`[DynamicPage] Found ${blocks.length} blocks for slug: ${slug}`);
 
   if (sidebarBlocks.length > 0) {
+    const settingsBlock = sidebarBlocks.find(b => b.type === 'sidebar_settings');
+    const isSticky = settingsBlock ? settingsBlock.content.sticky : true;
+
     return (
       <main className="min-h-screen bg-slate-50 py-12">
         <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12">
@@ -73,7 +76,7 @@ export default async function DynamicPage({ params }: PageProps) {
             <div className="lg:col-span-8 xl:col-span-9 space-y-8 bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
               <PageRenderer content={blocks} />
             </div>
-            <div className="lg:col-span-4 xl:col-span-3 space-y-6">
+            <div className={isSticky ? "lg:col-span-4 xl:col-span-3 space-y-6 sticky top-24 self-start" : "lg:col-span-4 xl:col-span-3 space-y-6"}>
               <BlockRenderer blocks={sidebarBlocks} slug={page.slug} />
             </div>
           </div>

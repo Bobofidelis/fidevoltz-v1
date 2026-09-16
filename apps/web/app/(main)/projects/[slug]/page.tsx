@@ -131,6 +131,11 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
   const projectUrl = `https://fidevoltz.com/projects/${project.slug}`;
 
+  // Check if sidebar should be sticky based on the settings block
+  const sidebarBlocks = Array.isArray(project.sidebar) ? project.sidebar : [];
+  const settingsBlock = sidebarBlocks.find((b: any) => b.type === 'sidebar_settings');
+  const isSticky = settingsBlock ? settingsBlock.content.sticky : true; // default to true if no settings block yet
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Hero Section */}
@@ -302,7 +307,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             </div>
 
             {/* Sidebar */}
-            <div className="lg:col-span-4 xl:col-span-3 space-y-6">
+            <div className={isSticky ? "lg:col-span-4 xl:col-span-3 space-y-6 sticky top-24 self-start" : "lg:col-span-4 xl:col-span-3 space-y-6"}>
                <ProjectSidebar project={project} />
             </div>
           </div>

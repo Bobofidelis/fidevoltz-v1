@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { AdSlot } from "@/components/ads/AdSlot";
 import { AddToCartBOMButton } from "./AddToCartBOMButton";
+import { TableOfContents, LatestPostsWidget, FeaturedPostsWidget, CategoriesWidget } from "./sidebar-widgets";
 
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -351,8 +352,21 @@ function renderBlock(block: Block, slug?: string) {
       );
 
     case "campaign_data":
-      // Completely hide this block on the public frontend. It's only for the dashboard.
+    case "sidebar_settings":
+      // Completely hide these blocks on the public frontend. They are handled by the parent layout or dashboard.
       return null;
+
+    case "toc":
+      return <TableOfContents title={block.content.title} />;
+      
+    case "latest_posts":
+      return <LatestPostsWidget title={block.content.title} count={block.content.count} />;
+
+    case "featured_posts":
+      return <FeaturedPostsWidget title={block.content.title} slugs={block.content.slugs} />;
+
+    case "categories":
+      return <CategoriesWidget title={block.content.title} />;
 
     default:
       return null;

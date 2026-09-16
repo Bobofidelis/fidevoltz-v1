@@ -17,7 +17,7 @@ import {
 import { cn } from "@/lib/utils";
 import { nanoid } from "nanoid";
 
-type KnownBlockType = "text" | "markdown" | "code" | "heading" | "image" | "alert";
+type KnownBlockType = "text" | "markdown" | "code" | "heading" | "image" | "alert" | "sidebar_settings" | "toc" | "latest_posts" | "featured_posts" | "categories" | "ad";
 type BlockType = KnownBlockType | (string & {});
 
 export interface Block {
@@ -49,6 +49,12 @@ const BLOCK_TYPES: { type: BlockType; label: string; icon: any; desc: string; co
   { type: "alert", label: "Alert Box", icon: AlertCircle, desc: "Info, warning, tip or danger callout", color: "text-amber-600 bg-amber-50" },
   { type: "code", label: "Code Block", icon: Code2, desc: "Syntax-highlighted code snippet", color: "text-emerald-600 bg-emerald-50" },
   { type: "image", label: "Image", icon: ImageIcon, desc: "Single image or gallery", color: "text-pink-600 bg-pink-50" },
+  { type: "sidebar_settings", label: "Sidebar Settings", icon: GripVertical, desc: "Configure if sidebar floats", color: "text-slate-600 bg-slate-100" },
+  { type: "toc", label: "Table of Contents", icon: List, desc: "Auto-generated clickable TOC", color: "text-indigo-600 bg-indigo-50" },
+  { type: "latest_posts", label: "Latest Posts", icon: FileText, desc: "Recent articles list", color: "text-blue-600 bg-blue-50" },
+  { type: "featured_posts", label: "Featured Posts", icon: FileText, desc: "Hand-picked articles", color: "text-orange-600 bg-orange-50" },
+  { type: "categories", label: "Categories", icon: FileText, desc: "List of categories", color: "text-teal-600 bg-teal-50" },
+  { type: "ad", label: "Ad Slot", icon: Plus, desc: "Monetization ad placement", color: "text-red-600 bg-red-50" },
 ];
 
 function defaultContent(type: BlockType): any {
@@ -59,6 +65,12 @@ function defaultContent(type: BlockType): any {
     case "heading": return { level: "h2", text: "New Heading" };
     case "image": return { urls: [], alt: "", size: "default", layout: "single" };
     case "alert": return { type: "info", title: "Note", text: "Add your callout text here." };
+    case "sidebar_settings": return { sticky: true };
+    case "toc": return { title: "Table of Contents" };
+    case "latest_posts": return { title: "Latest Posts", count: 3 };
+    case "featured_posts": return { title: "Featured Posts", slugs: "" };
+    case "categories": return { title: "Categories" };
+    case "ad": return { zone: "SIDEBAR_RIGHT" };
     default: return "";
   }
 }
@@ -200,6 +212,90 @@ function BlockEditor({ block, onChange }: { block: Block; onChange: (b: Block) =
                 </SelectContent>
               </Select>
             </div>
+          </div>
+        </div>
+      );
+
+    case "sidebar_settings":
+      return (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between p-3 border rounded-lg bg-slate-50">
+            <div className="space-y-0.5">
+              <Label className="text-sm font-semibold">Floating Sidebar</Label>
+              <p className="text-xs text-slate-500">Make the sidebar sticky while scrolling</p>
+            </div>
+            <input 
+              type="checkbox" 
+              className="h-4 w-4"
+              checked={block.content.sticky} 
+              onChange={e => set({ ...block.content, sticky: e.target.checked })} 
+            />
+          </div>
+        </div>
+      );
+
+    case "toc":
+      return (
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <Label className="text-xs">Title</Label>
+            <Input value={block.content.title || ""} onChange={e => set({ ...block.content, title: e.target.value })} className="h-9" placeholder="Table of Contents" />
+          </div>
+        </div>
+      );
+
+    case "latest_posts":
+      return (
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <Label className="text-xs">Title</Label>
+            <Input value={block.content.title || ""} onChange={e => set({ ...block.content, title: e.target.value })} className="h-9" placeholder="Latest Posts" />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Number of Posts</Label>
+            <Input type="number" min="1" max="10" value={block.content.count || 3} onChange={e => set({ ...block.content, count: parseInt(e.target.value) || 3 })} className="h-9" />
+          </div>
+        </div>
+      );
+
+    case "featured_posts":
+      return (
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <Label className="text-xs">Title</Label>
+            <Input value={block.content.title || ""} onChange={e => set({ ...block.content, title: e.target.value })} className="h-9" placeholder="Featured Posts" />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Project Slugs (comma separated)</Label>
+            <Textarea value={block.content.slugs || ""} onChange={e => set({ ...block.content, slugs: e.target.value })} className="text-xs min-h-[60px]" placeholder="project-1, project-2" />
+          </div>
+        </div>
+      );
+
+    case "categories":
+      return (
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <Label className="text-xs">Title</Label>
+            <Input value={block.content.title || ""} onChange={e => set({ ...block.content, title: e.target.value })} className="h-9" placeholder="Categories" />
+          </div>
+        </div>
+      );
+
+    case "ad":
+      return (
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <Label className="text-xs">Ad Zone</Label>
+            <Select value={block.content.zone || "SIDEBAR_RIGHT"} onValueChange={v => set({ ...block.content, zone: v })}>
+              <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="SIDEBAR_RIGHT">Sidebar Right</SelectItem>
+                <SelectItem value="CONTENT_TOP">Content Top</SelectItem>
+                <SelectItem value="CONTENT_BOTTOM">Content Bottom</SelectItem>
+                <SelectItem value="CONTENT_MIDDLE">Content Middle</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       );
