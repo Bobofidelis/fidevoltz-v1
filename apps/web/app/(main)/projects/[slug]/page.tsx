@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Clock, User, Calendar, Signal, ArrowRight } from "lucide-react";
 import { BlockRenderer } from "@/components/projects/block-renderer";
 import { ProjectSidebar } from "@/components/projects/project-sidebar";
+import { PublicSidebarRenderer } from "@/components/projects/PublicSidebarRenderer";
 import { CommentSection } from "@/components/comments/CommentSection";
 import { ShareBlock } from "@/components/projects/ShareBlock";
 import { prisma } from "@/lib/prisma";
@@ -132,9 +133,12 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   const projectUrl = `https://fidevoltz.com/projects/${project.slug}`;
 
   // Check if sidebar should be sticky based on the settings block
-  const sidebarBlocks = Array.isArray(project.sidebar) ? project.sidebar : [];
+  const sidebarBlocks = Array.isArray(project.sidebar) ? (project.sidebar as any[]) : [];
   const settingsBlock = sidebarBlocks.find((b: any) => b.type === 'sidebar_settings');
-  const isSticky = settingsBlock ? settingsBlock.content.sticky : true; // default to true if no settings block yet
+  const isSticky: boolean = settingsBlock ? Boolean((settingsBlock as any).content?.sticky) : true;
+
+  // Whether there are any custom sidebar blocks to show above the defaults
+  const hasCustomSidebar = sidebarBlocks.filter((b: any) => b.type !== 'sidebar_settings').length > 0;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -306,10 +310,17 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
               )}
             </div>
 
-            {/* Sidebar */}
-            <div className={isSticky ? "lg:col-span-4 xl:col-span-3 space-y-6 sticky top-24 self-start" : "lg:col-span-4 xl:col-span-3 space-y-6"}>
-               <ProjectSidebar project={project} />
-            </div>
+            {/* Sidebar — sticky and independently scrollable */}
+            <aside className={`lg:col-span-4 xl:col-span-3 min-w-0 ${isSticky ? 'lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto' : ''}`}>
+              <div className="space-y-4">
+                {/* Custom sidebar blocks from the editor come first */}
+                {hasCustomSidebar && (
+                  <PublicSidebarRenderer blocks={sidebarBlocks} slug={project.slug} />
+                )}
+                {/* Default project sidebar (components, downloads, CTA, share) always renders */}
+                <ProjectSidebar project={project} />
+              </div>
+            </aside>
           </div>
         </div>
       </section>

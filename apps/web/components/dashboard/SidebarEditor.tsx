@@ -1,18 +1,16 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import {
   PencilLine, Plus, Trash2, GripVertical, FileText, Code2,
   Image as ImageIcon, AlertCircle, ChevronRight, Loader2,
-  Bold, Italic, Underline, List, Heading2, Quote, Minus
+  List, Heading2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { nanoid } from "nanoid";
@@ -323,6 +321,16 @@ export function SidebarEditor({
   const [saving, setSaving] = useState(false);
   const [tab, setTab] = useState<"blocks" | "add">("blocks");
 
+  // Re-sync blocks from parent whenever the sheet opens
+  useEffect(() => {
+    if (isOpen) {
+      setBlocks(initialBlocks.map(b => ({ ...b })));
+      setSelected(null);
+      setTab("blocks");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
   const selectedBlock = blocks.find(b => b.id === selected);
 
   const addBlock = (type: BlockType) => {
@@ -455,23 +463,50 @@ export function SidebarEditor({
             {/* Right: editor pane */}
             <div className="flex-1 overflow-y-auto">
               {tab === "add" ? (
-                <div className="p-4 space-y-2">
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Choose Block Type</p>
-                  {BLOCK_TYPES.map(({ type, label, icon: Icon, desc, color }) => (
-                    <button
-                      key={type}
-                      onClick={() => addBlock(type)}
-                      className="w-full flex items-center gap-3 p-3 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50 text-left transition-all group"
-                    >
-                      <div className={`h-9 w-9 rounded-lg flex items-center justify-center ${color}`}>
-                        <Icon className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-slate-800">{label}</p>
-                        <p className="text-xs text-slate-400">{desc}</p>
-                      </div>
-                    </button>
-                  ))}
+                <div className="p-4 space-y-4">
+                  {/* Sidebar-specific widgets */}
+                  <div>
+                    <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                      <GripVertical className="h-3.5 w-3.5" /> Sidebar Widgets
+                    </p>
+                    <div className="space-y-1.5">
+                      {BLOCK_TYPES.filter(b => ["sidebar_settings", "toc", "latest_posts", "featured_posts", "categories", "ad"].includes(b.type as string)).map(({ type, label, icon: Icon, desc, color }) => (
+                        <button
+                          key={type}
+                          onClick={() => addBlock(type)}
+                          className="w-full flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 text-left transition-all group"
+                        >
+                          <div className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${color}`}>
+                            <Icon className="h-4 w-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-slate-800 leading-tight">{label}</p>
+                            <p className="text-[11px] text-slate-400 leading-tight mt-0.5 truncate">{desc}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="border-t border-slate-100 pt-3">
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">General Content</p>
+                    <div className="space-y-1.5">
+                      {BLOCK_TYPES.filter(b => ["text", "markdown", "heading", "alert", "code", "image"].includes(b.type as string)).map(({ type, label, icon: Icon, desc, color }) => (
+                        <button
+                          key={type}
+                          onClick={() => addBlock(type)}
+                          className="w-full flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50 text-left transition-all group"
+                        >
+                          <div className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${color}`}>
+                            <Icon className="h-4 w-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-slate-800 leading-tight">{label}</p>
+                            <p className="text-[11px] text-slate-400 leading-tight mt-0.5 truncate">{desc}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               ) : selectedBlock ? (
                 <div className="p-4 space-y-4">

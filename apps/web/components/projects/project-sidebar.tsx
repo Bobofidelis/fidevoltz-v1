@@ -8,8 +8,6 @@ import { ShareBlock } from "@/components/projects/ShareBlock";
 import { AdSlot } from "@/components/ads/AdSlot";
 import { useEffect, useState } from "react";
 
-import { BlockRenderer } from "@/components/projects/block-renderer";
-
 interface ProjectSidebarProps {
   project: any;
 }
@@ -17,7 +15,6 @@ interface ProjectSidebarProps {
 export function ProjectSidebar({ project }: ProjectSidebarProps) {
   const components = project.components || [];
   const attachments = project.attachments || [];
-  const sidebarBlocks = Array.isArray(project.sidebar) ? project.sidebar : [];
   const [pageUrl, setPageUrl] = useState("");
 
   useEffect(() => {
@@ -25,11 +22,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
   }, []);
 
   return (
-    <div className="space-y-6">
-      {/* Custom Sidebar Blocks from Editor */}
-      {sidebarBlocks.length > 0 && (
-        <BlockRenderer blocks={sidebarBlocks} slug={project.slug} />
-      )}
+    <div className="space-y-4">
 
       {/* Components Needed */}
       {components.length > 0 && (
