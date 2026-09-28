@@ -15,6 +15,7 @@ interface ProjectsPageProps {
   searchParams: Promise<{
     q?: string;
     category?: string;
+    difficulty?: string;
     page?: string;
     tag?: string;
   }>;
@@ -23,10 +24,11 @@ interface ProjectsPageProps {
 export const revalidate = 60; // Revalidate every minute
 
 export default async function ProjectsPage({ searchParams }: ProjectsPageProps) {
-  const { q, category: cat, page: p } = await searchParams;
+  const { q, category: cat, difficulty: diff, page: p } = await searchParams;
   
   const query = q || "";
   const category = cat || "All";
+  const difficulty = diff || "";
   const page = parseInt(p || "1");
   const limit = 8;
   const skip = (page - 1) * limit;
@@ -43,14 +45,17 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
     ];
   }
 
+  // Category filter only applies to real categories (not difficulty levels)
   if (category && category !== "All") {
     where.category = category;
   }
 
-  // Handle tag filtering by fetching matching IDs first if tag is present
-  // Since content is a JSON array, Prisma filtering is complex. 
-  // We'll fetch all PUBLISHED projects and filter their content array in memory for the tag, 
-  // then restrict the main query to those IDs.
+  // Difficulty filter — Beginner/Intermediate/Advanced filter by the difficulty column
+  if (difficulty) {
+    where.difficulty = { equals: difficulty, mode: "insensitive" };
+  }
+
+  // Handle tag filtering
   const { tag } = await searchParams;
   if (tag) {
     const allPublished = await prisma.projectPost.findMany({
@@ -89,20 +94,21 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
 
   const totalPages = Math.ceil(totalProjects / limit);
 
-  // Get unique categories for filter dynamically from database
+  // Get unique real categories from DB (excludes difficulty values)
+  const difficultyLevels = ["Beginner", "Intermediate", "Advanced"];
   const distinctCats = await prisma.projectPost.findMany({
     select: { category: true },
     where: { status: "PUBLISHED" },
     distinct: ["category"]
   });
 
-  const baseCategories = ["All", "Beginner", "Intermediate", "Advanced", "IoT", "Robotics", "Automation", "Sensors", "Programming"];
-  
   const dbCategories = distinctCats
     .map(c => c.category)
-    .filter(c => c && !baseCategories.includes(c)); // Avoid duplicates
+    .filter(c => c && !difficultyLevels.includes(c))
+    .sort();
 
-  const categories = [...baseCategories, ...dbCategories];
+  // Active filter state to pass to client component
+  const activeFilter = difficulty || category;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -178,13 +184,22 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
               {/* All Projects Section */}
               <section id="all-projects" className={`space-y-6 transition-all duration-500 ${query ? 'pt-4 min-h-screen' : ''}`}>
                 
-                {/* Search Component (Client Side) */}
-                <ProjectSearch initialQuery={query} initialCategory={category} categories={categories} />
+                {/* Search & Filter Component (Client Side) */}
+                <ProjectSearch 
+                  initialQuery={query} 
+                  initialCategory={category} 
+                  initialDifficulty={difficulty}
+                  categories={dbCategories} 
+                />
                 
                 {/* Results Count Helper */}
                 <div className="mt-3 flex items-center justify-between text-xs text-slate-500 px-1">
-                    <span>Found {totalProjects} results</span>
-                    {query && <span className="text-blue-600 font-medium">Searching for "{query}"</span>}
+                    <span>Found <strong>{totalProjects}</strong> {totalProjects === 1 ? "result" : "results"}</span>
+                    <div className="flex items-center gap-2">
+                      {query && <span className="text-blue-600 font-medium">Search: "{query}"</span>}
+                      {difficulty && <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">{difficulty}</span>}
+                      {category !== "All" && !difficulty && <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full font-medium">{category}</span>}
+                    </div>
                 </div>
 
                 {/* Projects Grid */}
