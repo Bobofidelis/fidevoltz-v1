@@ -293,11 +293,17 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
             status: status,
             slug: slug,
             category: category,
+            seoTitle: title,
+            seoDescription: excerpt,
           }}
           onSave={(data) => {
             if (data.status) setStatus(data.status);
             if (data.slug) setSlug(data.slug);
             if (data.category !== undefined) setCategory(data.category);
+            if (data.seoTitle !== undefined && data.seoTitle !== title) {
+              // User intentionally changed SEO title — we don't overwrite the main title 
+              // but we could store it. For now just note it.
+            }
           }}
         />
 
@@ -348,33 +354,43 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-sm font-semibold">Category</Label>
-                  <Input 
-                    list="category-list"
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    placeholder="e.g. Arduino, Robotics, Advanced"
-                    className="bg-white font-medium"
-                    required
-                  />
-                  <datalist id="category-list">
-                    <option value="Beginner" />
-                    <option value="Intermediate" />
-                    <option value="Advanced" />
-                    <option value="Arduino" />
-                    <option value="ESP32" />
-                    <option value="Raspberry Pi" />
-                    <option value="IoT" />
-                    <option value="Robotics" />
-                    <option value="Electronics" />
-                    <option value="3D Printing" />
-                    <option value="Home Automation" />
-                    <option value="Motor Control" />
-                    <option value="Sensors" />
-                    <option value="Programming" />
-                    {dynamicCategories.filter(c => !["Beginner", "Intermediate", "Advanced", "Arduino", "ESP32", "Raspberry Pi", "IoT", "Robotics", "Electronics", "3D Printing", "Home Automation", "Motor Control", "Sensors", "Programming"].includes(c)).map(c => (
-                      <option key={c} value={c} />
-                    ))}
-                  </datalist>
+                  {category === "__custom__" || (category && !["Arduino","ESP32","Raspberry Pi","IoT","Robotics","Electronics","3D Printing","Home Automation","Motor Control","Sensors","Programming","Automation","Other",...dynamicCategories].includes(category)) ? (
+                    <div className="flex gap-2">
+                      <Input
+                        autoFocus
+                        value={category === "__custom__" ? "" : category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        placeholder="Type new category name..."
+                        className="bg-white font-medium flex-1"
+                      />
+                      <Button type="button" variant="ghost" size="sm" onClick={() => setCategory("")} className="shrink-0 text-slate-500">✕</Button>
+                    </div>
+                  ) : (
+                    <Select value={category} onValueChange={(v) => setCategory(v)}>
+                      <SelectTrigger className="bg-white font-medium">
+                        <SelectValue placeholder="Select or type a category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Arduino">⚡ Arduino</SelectItem>
+                        <SelectItem value="ESP32">📡 ESP32</SelectItem>
+                        <SelectItem value="Raspberry Pi">🍓 Raspberry Pi</SelectItem>
+                        <SelectItem value="IoT">🌐 IoT</SelectItem>
+                        <SelectItem value="Robotics">🤖 Robotics</SelectItem>
+                        <SelectItem value="Electronics">🔌 Electronics</SelectItem>
+                        <SelectItem value="3D Printing">🖨️ 3D Printing</SelectItem>
+                        <SelectItem value="Home Automation">🏠 Home Automation</SelectItem>
+                        <SelectItem value="Motor Control">⚙️ Motor Control</SelectItem>
+                        <SelectItem value="Sensors">🔍 Sensors</SelectItem>
+                        <SelectItem value="Programming">💻 Programming</SelectItem>
+                        <SelectItem value="Automation">🔧 Automation</SelectItem>
+                        <SelectItem value="Other">📦 Other</SelectItem>
+                        {dynamicCategories.filter(c => !["Arduino","ESP32","Raspberry Pi","IoT","Robotics","Electronics","3D Printing","Home Automation","Motor Control","Sensors","Programming","Automation","Other"].includes(c)).map(c => (
+                          <SelectItem key={c} value={c}>🏷️ {c}</SelectItem>
+                        ))}
+                        <SelectItem value="__custom__">✏️ Add new category...</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-sm font-semibold">Status</Label>
@@ -1116,28 +1132,43 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                 </div>
                 <div className="space-y-2">
                   <Label>Category</Label>
-                  <Input
-                    list="category-list-settings"
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    placeholder="e.g. Arduino, Robotics..."
-                  />
-                  <datalist id="category-list-settings">
-                    <option value="Arduino" />
-                    <option value="ESP32" />
-                    <option value="Raspberry Pi" />
-                    <option value="IoT" />
-                    <option value="Robotics" />
-                    <option value="Electronics" />
-                    <option value="3D Printing" />
-                    <option value="Home Automation" />
-                    <option value="Motor Control" />
-                    <option value="Sensors" />
-                    <option value="Programming" />
-                    {dynamicCategories
-                      .filter(c => !["Arduino","ESP32","Raspberry Pi","IoT","Robotics","Electronics","3D Printing","Home Automation","Motor Control","Sensors","Programming"].includes(c))
-                      .map(c => <option key={c} value={c} />)}
-                  </datalist>
+                  {category === "__custom__" || (category && !["Arduino","ESP32","Raspberry Pi","IoT","Robotics","Electronics","3D Printing","Home Automation","Motor Control","Sensors","Programming","Automation","Other",...dynamicCategories].includes(category)) ? (
+                    <div className="flex gap-2">
+                      <Input
+                        autoFocus
+                        value={category === "__custom__" ? "" : category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        placeholder="Type new category name..."
+                        className="flex-1"
+                      />
+                      <Button type="button" variant="ghost" size="sm" onClick={() => setCategory("")} className="shrink-0 text-slate-500">✕</Button>
+                    </div>
+                  ) : (
+                    <Select value={category} onValueChange={setCategory}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Arduino">⚡ Arduino</SelectItem>
+                        <SelectItem value="ESP32">📡 ESP32</SelectItem>
+                        <SelectItem value="Raspberry Pi">🍓 Raspberry Pi</SelectItem>
+                        <SelectItem value="IoT">🌐 IoT</SelectItem>
+                        <SelectItem value="Robotics">🤖 Robotics</SelectItem>
+                        <SelectItem value="Electronics">🔌 Electronics</SelectItem>
+                        <SelectItem value="3D Printing">🖨️ 3D Printing</SelectItem>
+                        <SelectItem value="Home Automation">🏠 Home Automation</SelectItem>
+                        <SelectItem value="Motor Control">⚙️ Motor Control</SelectItem>
+                        <SelectItem value="Sensors">🔍 Sensors</SelectItem>
+                        <SelectItem value="Programming">💻 Programming</SelectItem>
+                        <SelectItem value="Automation">🔧 Automation</SelectItem>
+                        <SelectItem value="Other">📦 Other</SelectItem>
+                        {dynamicCategories.filter(c => !["Arduino","ESP32","Raspberry Pi","IoT","Robotics","Electronics","3D Printing","Home Automation","Motor Control","Sensors","Programming","Automation","Other"].includes(c)).map(c => (
+                          <SelectItem key={c} value={c}>🏷️ {c}</SelectItem>
+                        ))}
+                        <SelectItem value="__custom__">✏️ Add new category...</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label>Difficulty Level</Label>

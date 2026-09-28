@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -82,6 +82,20 @@ export function SidebarSettings({
     visibility: "public",
     ...data,
   });
+
+  // Re-sync form when the sheet opens with fresh data (e.g. current title/excerpt)
+  useEffect(() => {
+    if (isOpen) {
+      setForm(prev => ({
+        ...prev,
+        ...data,
+        // Only pre-fill SEO if they are currently empty
+        seoTitle: prev.seoTitle || data.seoTitle || "",
+        seoDescription: prev.seoDescription || data.seoDescription || "",
+      }));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   const set = (key: keyof SidebarSettingsData, value: any) =>
     setForm(prev => ({ ...prev, [key]: value }));

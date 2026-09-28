@@ -92,10 +92,12 @@ export function LatestPostsWidget({ title = "Latest Posts", count = 4 }: { title
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/projects?limit=${count}`)
+    fetch(`/api/projects?limit=${count}&published=true`)
       .then((r) => r.json())
       .then((data) => {
-        setPosts(data?.projects || data?.data || []);
+        // API returns { success: true, data: { data: [...], pagination: {} } }
+        const posts = data?.data?.data || data?.data || data?.projects || [];
+        setPosts(Array.isArray(posts) ? posts : []);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -169,10 +171,11 @@ export function FeaturedPostsWidget({ title = "Featured", slugs = "" }: { title?
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/projects?limit=10`)
+    fetch(`/api/projects?limit=50&published=true`)
       .then((r) => r.json())
       .then((data) => {
-        const all: any[] = data?.projects || data?.data || [];
+        const all: any[] = data?.data?.data || data?.data || data?.projects || [];
+        if (!Array.isArray(all)) { setLoading(false); return; }
         if (slugs.trim()) {
           const slugList = slugs.split(",").map((s) => s.trim().toLowerCase());
           const filtered = all.filter((p) => slugList.includes(p.slug?.toLowerCase()));
@@ -222,10 +225,11 @@ export function CategoriesWidget({ title = "Categories" }: { title?: string }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/projects?limit=100`)
+    fetch(`/api/projects?limit=200&published=true`)
       .then((r) => r.json())
       .then((data) => {
-        const all: any[] = data?.projects || data?.data || [];
+        const all: any[] = data?.data?.data || data?.data || data?.projects || [];
+        if (!Array.isArray(all)) { setLoading(false); return; }
         const counts: Record<string, number> = {};
         all.forEach((p) => {
           if (p.category) counts[p.category] = (counts[p.category] || 0) + 1;

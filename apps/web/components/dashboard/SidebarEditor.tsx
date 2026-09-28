@@ -63,7 +63,7 @@ function defaultContent(type: BlockType): any {
     case "heading": return { level: "h2", text: "New Heading" };
     case "image": return { urls: [], alt: "", size: "default", layout: "single" };
     case "alert": return { type: "info", title: "Note", text: "Add your callout text here." };
-    case "sidebar_settings": return { sticky: true };
+    case "sidebar_settings": return { sticky: true, side: "right", scrollMode: "sticky", width: "normal" };
     case "toc": return { title: "Table of Contents" };
     case "latest_posts": return { title: "Latest Posts", count: 3 };
     case "featured_posts": return { title: "Featured Posts", slugs: "" };
@@ -216,18 +216,43 @@ function BlockEditor({ block, onChange }: { block: Block; onChange: (b: Block) =
 
     case "sidebar_settings":
       return (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between p-3 border rounded-lg bg-slate-50">
-            <div className="space-y-0.5">
-              <Label className="text-sm font-semibold">Floating Sidebar</Label>
-              <p className="text-xs text-slate-500">Make the sidebar sticky while scrolling</p>
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold">Sidebar Side</Label>
+              <Select value={block.content.side || "right"} onValueChange={v => set({ ...block.content, side: v })}>
+                <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="right">👉 Right side</SelectItem>
+                  <SelectItem value="left">👈 Left side</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <input 
-              type="checkbox" 
-              className="h-4 w-4"
-              checked={block.content.sticky} 
-              onChange={e => set({ ...block.content, sticky: e.target.checked })} 
-            />
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold">Scroll Behaviour</Label>
+              <Select value={block.content.scrollMode || "sticky"} onValueChange={v => set({ ...block.content, scrollMode: v })}>
+                <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="sticky">📌 Sticky (follows scroll)</SelectItem>
+                  <SelectItem value="fixed">🔒 Fixed (always visible)</SelectItem>
+                  <SelectItem value="scroll">📜 Scrolls with page</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold">Sidebar Width</Label>
+            <Select value={block.content.width || "normal"} onValueChange={v => set({ ...block.content, width: v })}>
+              <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="narrow">Narrow (col-span-3)</SelectItem>
+                <SelectItem value="normal">Normal (col-span-4)</SelectItem>
+                <SelectItem value="wide">Wide (col-span-5)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="p-3 bg-blue-50 rounded-lg border border-blue-100 text-xs text-blue-700">
+            💡 The sidebar will appear on the <strong>{block.content.side || "right"}</strong> side of the page content and will <strong>{block.content.scrollMode === "sticky" ? "follow you as you scroll" : block.content.scrollMode === "fixed" ? "stay fixed in place" : "scroll with the page"}</strong>.
           </div>
         </div>
       );

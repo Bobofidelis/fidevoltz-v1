@@ -132,13 +132,41 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
   const projectUrl = `https://fidevoltz.com/projects/${project.slug}`;
 
-  // Check if sidebar should be sticky based on the settings block
+  // Parse sidebar settings
   const sidebarBlocks = Array.isArray(project.sidebar) ? (project.sidebar as any[]) : [];
   const settingsBlock = sidebarBlocks.find((b: any) => b.type === 'sidebar_settings');
-  const isSticky: boolean = settingsBlock ? Boolean((settingsBlock as any).content?.sticky) : true;
+  const sidebarSide: "left" | "right" = settingsBlock?.content?.side || "right";
+  const scrollMode: "sticky" | "fixed" | "scroll" = settingsBlock?.content?.scrollMode || "sticky";
+  const sidebarWidth: "narrow" | "normal" | "wide" = settingsBlock?.content?.width || "normal";
+  
+  // Column span mapping
+  const widthMap = { narrow: 3, normal: 4, wide: 5 };
+  const sidebarColSpan = widthMap[sidebarWidth];
+  const contentColSpan = 12 - sidebarColSpan;
+
+  // Scroll mode classes
+  const stickyClass = scrollMode === "sticky"
+    ? "lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto"
+    : scrollMode === "fixed"
+    ? "lg:fixed lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto lg:w-[inherit]"
+    : "";
 
   // Whether there are any custom sidebar blocks to show above the defaults
   const hasCustomSidebar = sidebarBlocks.filter((b: any) => b.type !== 'sidebar_settings').length > 0;
+
+  // Sidebar JSX element
+  const sidebarAside = (
+    <aside className={`lg:col-span-${sidebarColSpan} min-w-0 ${stickyClass}`}>
+      <div className="space-y-4 lg:overflow-y-auto lg:max-h-[calc(100vh-3rem)] scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent pr-1">
+        {/* Custom sidebar blocks from the editor come first */}
+        {hasCustomSidebar && (
+          <PublicSidebarRenderer blocks={sidebarBlocks} slug={project.slug} />
+        )}
+        {/* Default project sidebar (components, downloads, CTA, share) always renders */}
+        <ProjectSidebar project={project} />
+      </div>
+    </aside>
+  );
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -212,9 +240,13 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12">
           <AdSlot page={`projects/${project.slug}`} zone="HEADER" className="mb-8" />
           
+          {/* Grid: sidebar order depends on side setting */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+            {/* Left sidebar */}
+            {sidebarSide === "left" && sidebarAside}
+
             {/* Main Content */}
-            <div className="lg:col-span-8 xl:col-span-9 space-y-8">
+            <div className={`lg:col-span-${contentColSpan} xl:col-span-${contentColSpan} space-y-8`}>
                
                {/* Excerpt/Intro */}
                {project.excerpt && (
@@ -310,17 +342,8 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
               )}
             </div>
 
-            {/* Sidebar — sticky and independently scrollable */}
-            <aside className={`lg:col-span-4 xl:col-span-3 min-w-0 ${isSticky ? 'lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto' : ''}`}>
-              <div className="space-y-4">
-                {/* Custom sidebar blocks from the editor come first */}
-                {hasCustomSidebar && (
-                  <PublicSidebarRenderer blocks={sidebarBlocks} slug={project.slug} />
-                )}
-                {/* Default project sidebar (components, downloads, CTA, share) always renders */}
-                <ProjectSidebar project={project} />
-              </div>
-            </aside>
+            {/* Right sidebar */}
+            {sidebarSide === "right" && sidebarAside}
           </div>
         </div>
       </section>
