@@ -111,41 +111,43 @@ export function Navbar() {
         </div>
 
         {/* Right side icons */}
-        <div className="flex items-center gap-2 md:gap-3">
+        <div className="flex items-center gap-1 md:gap-2">
           {/* Search */}
-          <GlobalSearch />
+          <div className="hidden sm:block">
+            <GlobalSearch />
+          </div>
 
           {/* Divider */}
-          <div className="hidden md:block h-6 w-px bg-slate-200" />
+          <div className="hidden md:block h-6 w-px bg-slate-200 mx-1" />
 
           {/* Cart */}
-          <Link href="/cart">
-            <Button variant="ghost" size="icon" className="relative h-10 w-10 hover:bg-slate-100 rounded-xl">
+          <Button variant="ghost" size="icon" className="relative h-10 w-10 hover:bg-slate-100 rounded-xl" asChild>
+            <Link href="/cart">
               <ShoppingCart className="h-5 w-5 text-slate-600" />
               {cartCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 h-5 w-5 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white text-[10px] font-bold flex items-center justify-center shadow-sm">
+                <span className="absolute top-0 right-0 h-4 w-4 transform translate-x-1/4 -translate-y-1/4 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white text-[10px] font-bold flex items-center justify-center shadow-md">
                   {cartCount > 9 ? "9+" : cartCount}
                 </span>
               )}
-            </Button>
-          </Link>
+            </Link>
+          </Button>
 
           {/* Notifications */}
-          <Link href="/dashboard/notifications">
-            <Button variant="ghost" size="icon" className="relative h-10 w-10 hover:bg-slate-100 rounded-xl">
+          <Button variant="ghost" size="icon" className="relative h-10 w-10 hover:bg-slate-100 rounded-xl" asChild>
+            <Link href="/dashboard/notifications">
               <Bell className="h-5 w-5 text-slate-600" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
 
           {/* Divider */}
-          <div className="hidden md:block h-6 w-px bg-slate-200" />
+          <div className="hidden md:block h-6 w-px bg-slate-200 mx-1" />
 
           {/* User menu */}
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0 ml-1">
-                  <Avatar className="h-8 w-8 ring-2 ring-slate-200 hover:ring-blue-400 transition-all">
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 ml-1">
+                  <Avatar className="h-9 w-9 ring-2 ring-slate-100 hover:ring-blue-400 transition-all shadow-sm">
                     <AvatarImage
                       src={
                         user?.avatar

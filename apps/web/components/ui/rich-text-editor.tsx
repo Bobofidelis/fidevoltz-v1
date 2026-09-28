@@ -287,29 +287,7 @@ export function RichTextEditor({ content, onChange, placeholder, className }: Ri
 
   return (
     <div className={cn("border rounded-md bg-white overflow-hidden shadow-sm", className)}>
-      {/* Scoped styles for TipTap editor content */}
-      <style>{`
-        .rte-editor h2 { font-size: 1.5rem; font-weight: 700; margin: 1.25rem 0 0.75rem; color: #1e293b; }
-        .rte-editor h3 { font-size: 1.25rem; font-weight: 700; margin: 1rem 0 0.5rem; color: #1e293b; }
-        .rte-editor h4 { font-size: 1.1rem; font-weight: 700; margin: 0.75rem 0 0.5rem; color: #1e293b; }
-        .rte-editor p { margin: 0.5rem 0; line-height: 1.75; }
-        .rte-editor p:first-child { margin-top: 0; }
-        .rte-editor strong { font-weight: 700; }
-        .rte-editor em { font-style: italic; }
-        .rte-editor u { text-decoration: underline; }
-        .rte-editor s { text-decoration: line-through; }
-        .rte-editor ul.rte-ul, .rte-editor ul { list-style-type: disc !important; padding-left: 1.75rem !important; margin: 0.75rem 0; }
-        .rte-editor ol.rte-ol, .rte-editor ol { list-style-type: decimal !important; padding-left: 1.75rem !important; margin: 0.75rem 0; }
-        .rte-editor li { margin: 0.3rem 0; line-height: 1.6; display: list-item !important; }
-        .rte-editor li p { margin: 0; }
-        .rte-editor blockquote { border-left: 4px solid #6366f1; padding: 0.75rem 1rem; margin: 1rem 0; background: #f8f8ff; color: #4b5563; font-style: italic; border-radius: 0 0.5rem 0.5rem 0; }
-        .rte-editor a.rte-link { color: #2563eb; text-decoration: underline; }
-        .rte-editor a.rte-link:hover { color: #1d4ed8; }
-        .rte-editor hr { border: none; border-top: 2px solid #e2e8f0; margin: 1.5rem 0; }
-        .rte-editor code { background: #f1f5f9; color: #e11d48; border-radius: 0.25rem; padding: 0.1rem 0.3rem; font-size: 0.875em; font-family: monospace; }
-        .rte-editor pre { background: #1e293b; color: #f8fafc; border-radius: 0.5rem; padding: 1rem; margin: 1rem 0; overflow-x: auto; }
-        .rte-editor .ProseMirror-focused { outline: none; }
-      `}</style>
+
       <MenuBar editor={editor} />
       <EditorContent editor={editor} />
       {!editor?.getText() && placeholder && (

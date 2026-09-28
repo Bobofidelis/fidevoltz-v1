@@ -1,7 +1,7 @@
 "use client";
 
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { 
   Plus, 
@@ -210,8 +210,7 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
   };
 
   // Submit
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     setLoading(true);
 
     const payload = {
@@ -256,7 +255,8 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <div className="relative">
+      {/* ── Floating Action Pill ── outside the form so it NEVER accidentally submits ── */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 md:left-auto md:transform-none md:right-8 z-50 flex items-center gap-2 sm:gap-3 bg-white/95 backdrop-blur-md px-4 sm:px-5 py-3 sm:py-3.5 rounded-full shadow-2xl border border-slate-200 w-[95%] md:w-auto overflow-x-auto">
         <Button type="button" variant="ghost" size="sm" className="rounded-full hover:bg-slate-100 shrink-0" onClick={() => router.back()}>Cancel</Button>
         
@@ -265,7 +265,7 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
         <SidebarEditor 
           blocks={sidebarBlocks as any} 
           onSave={(newBlocks) => setSidebarBlocks(newBlocks as any)}
-          triggerLabel="Edit Public Sidebar"
+          triggerLabel="Edit Sidebar"
           triggerClassName="rounded-full shrink-0 hidden md:flex"
         />
 
@@ -291,10 +291,27 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
           }}
         />
 
-        <Button type="submit" disabled={loading} className="gap-2 shadow-md px-6 rounded-full shrink-0 bg-blue-600 hover:bg-blue-700 text-white ml-auto">
+        {/* Status badge */}
+        <span className={`hidden md:inline-flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full border ${
+          status === "PUBLISHED" ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
+          status === "ARCHIVED"  ? "bg-slate-100 text-slate-600 border-slate-200" :
+          "bg-amber-50 text-amber-700 border-amber-200"
+        }`}>
+          {status === "PUBLISHED" ? "🟢" : status === "ARCHIVED" ? "📦" : "📝"} {status}
+        </span>
+
+        <Button 
+          type="button" 
+          disabled={loading} 
+          className="gap-2 shadow-md px-6 rounded-full shrink-0 bg-blue-600 hover:bg-blue-700 text-white ml-auto"
+          onClick={handleSubmit}
+        >
           {loading ? "Saving..." : initialData ? "Update Project" : "Create Project"}
         </Button>
       </div>
+
+    <form className="space-y-8 pb-24">
+
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
@@ -305,6 +322,65 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
         </TabsList>
 
         <TabsContent value="content" className="space-y-6">
+          {/* Quick entry fields — title and excerpt, right here at top */}
+          <Card className="border-blue-100 bg-blue-50/30">
+            <CardContent className="pt-4 pb-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-1.5 md:col-span-2">
+                  <Label className="text-sm font-semibold">Project Title <span className="text-red-500">*</span></Label>
+                  <Input 
+                    value={title} 
+                    onChange={handleTitleChange} 
+                    placeholder="e.g. Build an Arduino VVVF Elevator Controller" 
+                    className="text-base font-medium h-11 bg-white"
+                    required 
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-sm font-semibold">Category</Label>
+                  <Select value={category} onValueChange={setCategory}>
+                    <SelectTrigger className="bg-white"><SelectValue placeholder="Select category" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Arduino">Arduino</SelectItem>
+                      <SelectItem value="ESP32">ESP32</SelectItem>
+                      <SelectItem value="Raspberry Pi">Raspberry Pi</SelectItem>
+                      <SelectItem value="IoT">IoT</SelectItem>
+                      <SelectItem value="Robotics">Robotics</SelectItem>
+                      <SelectItem value="Electronics">Electronics</SelectItem>
+                      <SelectItem value="3D Printing">3D Printing</SelectItem>
+                      <SelectItem value="Home Automation">Home Automation</SelectItem>
+                      <SelectItem value="Motor Control">Motor Control</SelectItem>
+                      <SelectItem value="Sensors">Sensors</SelectItem>
+                      <SelectItem value="Programming">Programming</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-sm font-semibold">Status</Label>
+                  <Select value={status} onValueChange={setStatus}>
+                    <SelectTrigger className="bg-white"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="DRAFT">📝 Draft</SelectItem>
+                      <SelectItem value="PUBLISHED">🟢 Published</SelectItem>
+                      <SelectItem value="ARCHIVED">📦 Archived</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5 md:col-span-2">
+                  <Label className="text-sm font-semibold">Excerpt</Label>
+                  <Textarea 
+                    value={excerpt} 
+                    onChange={(e) => setExcerpt(e.target.value)} 
+                    rows={2} 
+                    placeholder="Short summary shown in listings and search results..."
+                    className="bg-white resize-none"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Project Content</CardTitle>
@@ -1239,5 +1315,6 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
         </TabsContent>
       </Tabs>
     </form>
+    </div>
   );
 }
