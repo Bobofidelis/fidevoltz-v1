@@ -277,7 +277,9 @@ export function CategoriesWidget({ title = "Categories" }: { title?: string }) {
 // ─────────────────────────────────────────────
 // Ad Widget (sidebar)
 // ─────────────────────────────────────────────
-export function AdWidget({ zone = "SIDEBAR_RIGHT", slug }: { zone?: string; slug?: string }) {
+type AdZone = "POPUP" | "HEADER" | "SIDEBAR_LEFT" | "SIDEBAR_RIGHT" | "CONTENT_TOP" | "CONTENT_MIDDLE" | "CONTENT_BOTTOM" | "FOOTER";
+
+export function AdWidget({ zone = "SIDEBAR_RIGHT", slug }: { zone?: AdZone; slug?: string }) {
   if (!slug) return null;
   return (
     <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm">

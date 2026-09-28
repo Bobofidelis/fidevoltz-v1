@@ -975,44 +975,70 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
         <TabsContent value="settings" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Metadata</CardTitle>
-              <CardDescription>SEO and display settings</CardDescription>
+              <CardTitle>Project Settings</CardTitle>
+              <CardDescription>Status, visibility, SEO and metadata</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+
+              {/* Status — most important, at the top */}
+              <div className="flex items-center justify-between p-4 rounded-xl border-2 border-dashed border-blue-200 bg-blue-50/40">
+                <div>
+                  <p className="font-semibold text-slate-800">Publish Status</p>
+                  <p className="text-xs text-slate-500 mt-0.5">Controls whether this project is visible to the public</p>
+                </div>
+                <Select value={status} onValueChange={setStatus}>
+                  <SelectTrigger className="w-[140px] bg-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="DRAFT">📝 Draft</SelectItem>
+                    <SelectItem value="PUBLISHED">🟢 Published</SelectItem>
+                    <SelectItem value="ARCHIVED">📦 Archived</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label>Title</Label>
-                  <Input value={title} onChange={handleTitleChange} required />
+                  <Input value={title} onChange={handleTitleChange} placeholder="Project title" required />
                 </div>
                 <div className="space-y-2">
-                  <Label>Slug</Label>
-                  <Input value={slug} onChange={(e) => setSlug(e.target.value)} required />
+                  <Label>Slug (URL)</Label>
+                  <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="my-project-slug" required />
                 </div>
                 <div className="space-y-2">
                   <Label>Category</Label>
-                   <Select value={category} onValueChange={setCategory}>
+                  <Select value={category} onValueChange={setCategory}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Beginner">Beginner</SelectItem>
-                      <SelectItem value="Intermediate">Intermediate</SelectItem>
-                      <SelectItem value="Advanced">Advanced</SelectItem>
+                      <SelectItem value="Arduino">Arduino</SelectItem>
+                      <SelectItem value="ESP32">ESP32</SelectItem>
+                      <SelectItem value="Raspberry Pi">Raspberry Pi</SelectItem>
                       <SelectItem value="IoT">IoT</SelectItem>
                       <SelectItem value="Robotics">Robotics</SelectItem>
+                      <SelectItem value="Electronics">Electronics</SelectItem>
+                      <SelectItem value="3D Printing">3D Printing</SelectItem>
+                      <SelectItem value="Home Automation">Home Automation</SelectItem>
+                      <SelectItem value="Motor Control">Motor Control</SelectItem>
+                      <SelectItem value="Sensors">Sensors</SelectItem>
+                      <SelectItem value="Programming">Programming</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Difficulty</Label>
+                  <Label>Difficulty Level</Label>
                   <Select value={difficulty} onValueChange={setDifficulty}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select difficulty" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Easy">Easy</SelectItem>
-                      <SelectItem value="Medium">Medium</SelectItem>
-                      <SelectItem value="Hard">Hard</SelectItem>
+                      <SelectItem value="Beginner">🟢 Beginner</SelectItem>
+                      <SelectItem value="Intermediate">🟡 Intermediate</SelectItem>
+                      <SelectItem value="Advanced">🔴 Advanced</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -1020,7 +1046,7 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
 
               <div className="space-y-2">
                 <Label>Excerpt (Short Description)</Label>
-                <Textarea value={excerpt} onChange={(e) => setExcerpt(e.target.value)} rows={3} />
+                <Textarea value={excerpt} onChange={(e) => setExcerpt(e.target.value)} rows={3} placeholder="Brief project description shown in listings and search results..." />
               </div>
 
               <div className="space-y-2">
@@ -1031,32 +1057,40 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                     if (media) setFeaturedImage(media.secureUrl || media.url);
                   }}
                 >
-                  <div className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:bg-accent/50 w-full md:w-1/2">
+                  <div className="border-2 border-dashed rounded-xl p-4 text-center cursor-pointer hover:bg-blue-50/30 hover:border-blue-300 transition-all w-full md:w-1/2">
                     {featuredImage ? (
-                      <img src={featuredImage} alt="Featured" className="w-full h-auto rounded-md" />
+                      <div className="space-y-2">
+                        <img src={featuredImage} alt="Featured" className="w-full h-auto rounded-lg max-h-48 object-cover" />
+                        <p className="text-xs text-blue-600 font-medium">Click to replace</p>
+                      </div>
                     ) : (
                       <div className="py-8">
-                        <ImageIcon className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">Set Featured Image</span>
+                        <ImageIcon className="h-10 w-10 mx-auto mb-2 text-slate-300" />
+                        <p className="text-sm font-medium text-slate-600">Set Featured Image</p>
+                        <p className="text-xs text-slate-400 mt-1">Click to pick from media library</p>
                       </div>
                     )}
                   </div>
                 </MediaPicker>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 border border-slate-200">
                 <input 
                   type="checkbox" 
                   id="comments" 
                   checked={allowComments} 
                   onChange={(e) => setAllowComments(e.target.checked)} 
-                  className="rounded border-gray-300"
+                  className="rounded border-gray-300 h-4 w-4 accent-blue-600"
                 />
-                <Label htmlFor="comments">Allow Comments</Label>
+                <div>
+                  <Label htmlFor="comments" className="font-medium cursor-pointer">Allow Comments</Label>
+                  <p className="text-xs text-slate-400">Let readers leave comments on this project</p>
+                </div>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
+
 
         <TabsContent value="components" className="space-y-6">
           <Card>
