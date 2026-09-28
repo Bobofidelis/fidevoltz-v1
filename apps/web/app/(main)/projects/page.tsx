@@ -89,10 +89,20 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
 
   const totalPages = Math.ceil(totalProjects / limit);
 
-  // Get unique categories for filter
-  // Ideally this should be a separate query or aggregated, but simplified for now
-  // We can hardcode common categories or fetch distinct
-  const categories = ["All", "Beginner", "Intermediate", "Advanced", "IoT", "Robotics", "Automation", "Sensors", "Programming"];
+  // Get unique categories for filter dynamically from database
+  const distinctCats = await prisma.projectPost.findMany({
+    select: { category: true },
+    where: { status: "PUBLISHED" },
+    distinct: ["category"]
+  });
+
+  const baseCategories = ["All", "Beginner", "Intermediate", "Advanced", "IoT", "Robotics", "Automation", "Sensors", "Programming"];
+  
+  const dbCategories = distinctCats
+    .map(c => c.category)
+    .filter(c => c && !baseCategories.includes(c)); // Avoid duplicates
+
+  const categories = [...baseCategories, ...dbCategories];
 
   return (
     <div className="min-h-screen bg-slate-50">

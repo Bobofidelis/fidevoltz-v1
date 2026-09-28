@@ -1,7 +1,7 @@
 "use client";
 
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { 
   Plus, 
@@ -83,6 +83,16 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
   const [isComponentDialogOpen, setIsComponentDialogOpen] = useState(false);
   const [productSearch, setProductSearch] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
+
+  // Dynamic Categories State
+  const [dynamicCategories, setDynamicCategories] = useState<string[]>([]);
+  
+  useEffect(() => {
+    fetch('/api/projects/categories')
+      .then(r => r.json())
+      .then(d => { if(d.success) setDynamicCategories(d.data) })
+      .catch(e => console.error(e));
+  }, []);
 
   // Attachments State
   const [attachments, setAttachments] = useState<any[]>(initialData?.attachments || []);
@@ -338,23 +348,33 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-sm font-semibold">Category</Label>
-                  <Select value={category} onValueChange={setCategory}>
-                    <SelectTrigger className="bg-white"><SelectValue placeholder="Select category" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Arduino">Arduino</SelectItem>
-                      <SelectItem value="ESP32">ESP32</SelectItem>
-                      <SelectItem value="Raspberry Pi">Raspberry Pi</SelectItem>
-                      <SelectItem value="IoT">IoT</SelectItem>
-                      <SelectItem value="Robotics">Robotics</SelectItem>
-                      <SelectItem value="Electronics">Electronics</SelectItem>
-                      <SelectItem value="3D Printing">3D Printing</SelectItem>
-                      <SelectItem value="Home Automation">Home Automation</SelectItem>
-                      <SelectItem value="Motor Control">Motor Control</SelectItem>
-                      <SelectItem value="Sensors">Sensors</SelectItem>
-                      <SelectItem value="Programming">Programming</SelectItem>
-                      <SelectItem value="Other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Input 
+                    list="category-list"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    placeholder="e.g. Arduino, Robotics, Advanced"
+                    className="bg-white font-medium"
+                    required
+                  />
+                  <datalist id="category-list">
+                    <option value="Beginner" />
+                    <option value="Intermediate" />
+                    <option value="Advanced" />
+                    <option value="Arduino" />
+                    <option value="ESP32" />
+                    <option value="Raspberry Pi" />
+                    <option value="IoT" />
+                    <option value="Robotics" />
+                    <option value="Electronics" />
+                    <option value="3D Printing" />
+                    <option value="Home Automation" />
+                    <option value="Motor Control" />
+                    <option value="Sensors" />
+                    <option value="Programming" />
+                    {dynamicCategories.filter(c => !["Beginner", "Intermediate", "Advanced", "Arduino", "ESP32", "Raspberry Pi", "IoT", "Robotics", "Electronics", "3D Printing", "Home Automation", "Motor Control", "Sensors", "Programming"].includes(c)).map(c => (
+                      <option key={c} value={c} />
+                    ))}
+                  </datalist>
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-sm font-semibold">Status</Label>

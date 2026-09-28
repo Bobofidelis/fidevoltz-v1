@@ -122,6 +122,7 @@ export default function ProjectsPage() {
             <TableRow>
               <TableHead className="whitespace-nowrap">Title</TableHead>
               <TableHead className="whitespace-nowrap">Category</TableHead>
+              <TableHead className="whitespace-nowrap">Difficulty</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Author</TableHead>
               <TableHead>Date</TableHead>
@@ -131,13 +132,13 @@ export default function ProjectsPage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8">
+                <TableCell colSpan={7} className="text-center py-8">
                   Loading projects...
                 </TableCell>
               </TableRow>
             ) : filteredProjects.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                   No projects found. Create your first project!
                 </TableCell>
               </TableRow>
@@ -146,9 +147,12 @@ export default function ProjectsPage() {
                 <TableRow key={project.id}>
                   <TableCell className="font-medium whitespace-nowrap flex items-center gap-2">
                     <FileText className="h-4 w-4 text-muted-foreground" />
-                    {project.title}
+                    <span className="truncate max-w-[300px]">{project.title}</span>
                   </TableCell>
                   <TableCell className="whitespace-nowrap">{project.category}</TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    <Badge variant="outline" className="text-xs">{project.difficulty || "Intermediate"}</Badge>
+                  </TableCell>
                   <TableCell>
                     <Badge 
                       variant={project.status === "PUBLISHED" ? "default" : "secondary"}
