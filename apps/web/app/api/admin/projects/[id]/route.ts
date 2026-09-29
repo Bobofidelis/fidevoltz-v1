@@ -55,6 +55,7 @@ export async function PUT(
       category, 
       difficulty, 
       status, 
+      featured,
       allowComments,
       components,
       attachments,
@@ -86,6 +87,7 @@ export async function PUT(
           category,
           difficulty,
           status,
+          featured: featured ?? false,
           allowComments,
           publishedAt: status === "PUBLISHED" ? new Date() : null,
         }

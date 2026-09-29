@@ -10,12 +10,14 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10');
     const category = searchParams.get('category') || '';
     const published = searchParams.get('published');
+    const featuredParam = searchParams.get('featured');
 
     const skip = (page - 1) * limit;
 
-    const where = {
+    const where: any = {
       ...(category && { category }),
       ...(published !== null && { status: published === 'true' ? 'PUBLISHED' : 'DRAFT' }),
+      ...(featuredParam === 'true' && { featured: true, status: 'PUBLISHED' }),
     };
 
     const [projects, total] = await Promise.all([
@@ -23,7 +25,12 @@ export async function GET(request: NextRequest) {
         where,
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { publishedAt: 'desc' },
+        select: {
+          id: true, title: true, slug: true, excerpt: true,
+          featuredImage: true, category: true, difficulty: true,
+          status: true, featured: true, publishedAt: true, createdAt: true,
+        },
       }),
       prisma.projectPost.count({ where }),
     ]);

@@ -136,7 +136,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   const sidebarBlocks = Array.isArray(project.sidebar) ? (project.sidebar as any[]) : [];
   const settingsBlock = sidebarBlocks.find((b: any) => b.type === 'sidebar_settings');
   const sidebarSide: "left" | "right" = settingsBlock?.content?.side || "right";
-  const scrollMode: "sticky" | "fixed" | "scroll" = settingsBlock?.content?.scrollMode || "sticky";
+  const scrollMode: "sticky" | "scroll" = settingsBlock?.content?.scrollMode === "scroll" ? "scroll" : "sticky";
   const sidebarWidth: "narrow" | "normal" | "wide" = settingsBlock?.content?.width || "normal";
   
   // Column span mapping
@@ -144,20 +144,19 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   const sidebarColSpan = widthMap[sidebarWidth];
   const contentColSpan = 12 - sidebarColSpan;
 
-  // Scroll mode classes
-  const stickyClass = scrollMode === "sticky"
-    ? "lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto"
-    : scrollMode === "fixed"
-    ? "lg:fixed lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto lg:w-[inherit]"
-    : "";
+  // Sticky: sidebar sticks at the top as user scrolls (natural, no own scrollbar)
+  // Scroll: sidebar just flows normally with the page
+  const asideClass = scrollMode === "sticky"
+    ? `lg:col-span-${sidebarColSpan} min-w-0 lg:sticky lg:top-24 lg:self-start`
+    : `lg:col-span-${sidebarColSpan} min-w-0`;
 
   // Whether there are any custom sidebar blocks to show above the defaults
   const hasCustomSidebar = sidebarBlocks.filter((b: any) => b.type !== 'sidebar_settings').length > 0;
 
   // Sidebar JSX element
   const sidebarAside = (
-    <aside className={`lg:col-span-${sidebarColSpan} min-w-0 ${stickyClass}`}>
-      <div className="space-y-4 lg:overflow-y-auto lg:max-h-[calc(100vh-3rem)] scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent pr-1">
+    <aside className={asideClass}>
+      <div className="space-y-4">
         {/* Custom sidebar blocks from the editor come first */}
         {hasCustomSidebar && (
           <PublicSidebarRenderer blocks={sidebarBlocks} slug={project.slug} />
@@ -258,7 +257,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                {/* Content Top Ad */}
                <AdSlot page={`projects/${project.slug}`} zone="CONTENT_TOP" className="w-full" />
 
-              <div className="bg-white rounded-xl p-8 shadow-sm border border-slate-100">
+              <div id="article-content" className="bg-white rounded-xl p-8 shadow-sm border border-slate-100">
                  <BlockRenderer blocks={blocks} slug={project.slug} />
               </div>
 

@@ -16,18 +16,20 @@ export function TableOfContents({ title = "Table of Contents" }: { title?: strin
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      const elements = Array.from(document.querySelectorAll("h2, h3, h4"));
+      // Only scan headings inside the main article content, not sidebar/footer headings
+      const container = document.getElementById("article-content") || document;
+      const elements = Array.from(container.querySelectorAll("h2, h3, h4"));
       const parsed = elements
         .filter(el => el.textContent && el.textContent.trim().length > 0)
         .map((el, index) => {
           if (!el.id) {
             const text = el.textContent || "";
-            el.id = text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "") || `heading-${index}`;
+            el.id = "toc-" + (text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "") || `heading-${index}`);
           }
           return { id: el.id, text: (el.textContent || "").trim(), level: parseInt(el.tagName.replace("H", "")) };
         });
       setHeadings(parsed);
-    }, 600);
+    }, 800); // slight delay to let content render
 
     return () => clearTimeout(timer);
   }, []);
@@ -166,52 +168,116 @@ export function LatestPostsWidget({ title = "Latest Posts", count = 4 }: { title
 // ─────────────────────────────────────────────
 // Featured Posts
 // ─────────────────────────────────────────────
-export function FeaturedPostsWidget({ title = "Featured", slugs = "" }: { title?: string; slugs?: string }) {
+export function FeaturedPostsWidget({ title = "Featured Projects", slugs = "" }: { title?: string; slugs?: string }) {
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/projects?limit=50&published=true`)
+    // Fetch featured projects — uses ?featured=true to get DB featured flag
+    fetch(`/api/projects?featured=true&published=true&limit=5`)
       .then((r) => r.json())
       .then((data) => {
-        const all: any[] = data?.data?.data || data?.data || data?.projects || [];
+        let all: any[] = data?.data?.data || data?.data || data?.projects || [];
         if (!Array.isArray(all)) { setLoading(false); return; }
+        
+        // If specific slugs are provided, filter to those
         if (slugs.trim()) {
           const slugList = slugs.split(",").map((s) => s.trim().toLowerCase());
           const filtered = all.filter((p) => slugList.includes(p.slug?.toLowerCase()));
-          setPosts(filtered.length > 0 ? filtered : all.slice(0, 3));
+          // Fall back to just latest featured if no slug matches
+          setPosts(filtered.length > 0 ? filtered : all.slice(0, 4));
         } else {
-          setPosts(all.slice(0, 3));
+          setPosts(all.slice(0, 4));
         }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => {
+        // Fallback: fetch latest published if featured query fails
+        fetch(`/api/projects?published=true&limit=4`)
+          .then(r => r.json())
+          .then(data => {
+            const all: any[] = data?.data?.data || data?.data || data?.projects || [];
+            setPosts(Array.isArray(all) ? all.slice(0, 4) : []);
+          })
+          .catch(() => {})
+          .finally(() => setLoading(false));
+      });
   }, [slugs]);
 
-  if (loading) return <Card className="border-slate-200 shadow-sm h-32 animate-pulse bg-slate-100" />;
+  if (loading) {
+    return (
+      <Card className="border-slate-200 shadow-sm overflow-hidden">
+        <CardContent className="p-4 space-y-3">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="flex gap-3 animate-pulse">
+              <div className="w-16 h-14 bg-slate-200 rounded-lg shrink-0" />
+              <div className="flex-1 space-y-2 py-1">
+                <div className="h-3 bg-slate-200 rounded w-full" />
+                <div className="h-3 bg-slate-200 rounded w-3/4" />
+                <div className="h-4 bg-slate-100 rounded w-1/3" />
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+    );
+  }
   if (!posts.length) return null;
 
+  const difficultyColors: Record<string, string> = {
+    Beginner: "bg-emerald-100 text-emerald-700",
+    Intermediate: "bg-amber-100 text-amber-700",
+    Advanced: "bg-red-100 text-red-700",
+  };
+
   return (
-    <Card className="border-slate-200 shadow-sm overflow-hidden bg-gradient-to-br from-blue-600 to-indigo-700 text-white">
-      <CardHeader className="py-3 px-4 border-b border-white/20">
+    <Card className="border-slate-200 shadow-sm overflow-hidden">
+      <CardHeader className="py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 border-b-0">
         <CardTitle className="text-sm font-semibold flex items-center gap-2 text-white">
-          <Star className="h-4 w-4 text-yellow-300" />
+          <Star className="h-4 w-4 text-yellow-300 fill-yellow-300" />
           {title}
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-0 divide-y divide-white/10">
+      <CardContent className="p-0 divide-y divide-slate-100">
         {posts.map((post: any) => (
-          <Link key={post.id} href={`/projects/${post.slug}`} className="group block p-4 hover:bg-white/10 transition-colors">
-            <h4 className="text-sm font-medium text-white group-hover:text-yellow-300 line-clamp-2 leading-snug transition-colors">
-              {post.title}
-            </h4>
-            {post.category && (
-              <Badge className="mt-2 text-[10px] bg-white/20 text-white border-none hover:bg-white/30">
-                {post.category}
-              </Badge>
-            )}
+          <Link key={post.id} href={`/projects/${post.slug}`} className="group flex gap-3 p-3 hover:bg-slate-50 transition-colors">
+            {/* Thumbnail */}
+            <div
+              className="w-16 h-14 rounded-lg bg-cover bg-center shrink-0 border border-slate-200 group-hover:border-blue-300 transition-colors overflow-hidden relative"
+              style={{ backgroundImage: post.featuredImage ? `url(${post.featuredImage})` : undefined }}
+            >
+              {!post.featuredImage && (
+                <div className="w-full h-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                  <TrendingUp className="h-5 w-5 text-white/70" />
+                </div>
+              )}
+            </div>
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+              <h4 className="text-xs font-semibold text-slate-800 group-hover:text-blue-600 line-clamp-2 leading-snug transition-colors mb-1">
+                {post.title}
+              </h4>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {post.category && (
+                  <span className="text-[10px] font-medium bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full leading-none">
+                    {post.category}
+                  </span>
+                )}
+                {post.difficulty && (
+                  <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full leading-none ${difficultyColors[post.difficulty] || "bg-slate-100 text-slate-600"}`}>
+                    {post.difficulty}
+                  </span>
+                )}
+              </div>
+            </div>
+            <ChevronRight className="h-3.5 w-3.5 text-slate-300 group-hover:text-blue-400 transition-colors shrink-0 self-center" />
           </Link>
         ))}
+        <div className="p-3 bg-slate-50 text-center">
+          <Link href="/projects?featured=true" className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center justify-center gap-1 transition-colors">
+            View all featured <ChevronRight className="h-3 w-3" />
+          </Link>
+        </div>
       </CardContent>
     </Card>
   );

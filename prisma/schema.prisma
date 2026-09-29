@@ -71,6 +71,7 @@ model ProjectPost {
   category      String
   difficulty    String?             @default("Intermediate")
   status        String              @default("DRAFT")
+  featured      Boolean             @default(false)
   publishedAt   DateTime?
   allowComments Boolean             @default(true)
   authorId      String

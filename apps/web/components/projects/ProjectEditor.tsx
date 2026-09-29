@@ -68,6 +68,7 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
   const [featuredImage, setFeaturedImage] = useState(initialData?.featuredImage || "");
   const [allowComments, setAllowComments] = useState(initialData?.allowComments ?? true);
   const [status, setStatus] = useState(initialData?.status || "DRAFT");
+  const [featured, setFeatured] = useState(initialData?.featured ?? false);
 
   // Blocks State
   const [blocks, setBlocks] = useState<Block[]>(
@@ -231,6 +232,7 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
       difficulty,
       featuredImage,
       allowComments,
+      featured,
       status,
       content: blocks,
       sidebar: sidebarBlocks,
@@ -1213,6 +1215,20 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                     )}
                   </div>
                 </MediaPicker>
+              </div>
+
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-50 border border-amber-200">
+                <input 
+                  type="checkbox" 
+                  id="featured" 
+                  checked={featured} 
+                  onChange={(e) => setFeatured(e.target.checked)} 
+                  className="rounded border-gray-300 h-4 w-4 accent-amber-500"
+                />
+                <div>
+                  <Label htmlFor="featured" className="font-medium cursor-pointer flex items-center gap-1.5">⭐ Mark as Featured</Label>
+                  <p className="text-xs text-slate-500">Featured projects appear in the sidebar "Featured Posts" widget and on the featured filter page</p>
+                </div>
               </div>
 
               <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 border border-slate-200">

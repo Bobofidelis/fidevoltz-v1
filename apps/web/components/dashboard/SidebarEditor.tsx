@@ -47,7 +47,7 @@ const BLOCK_TYPES: { type: BlockType; label: string; icon: any; desc: string; co
   { type: "alert", label: "Alert Box", icon: AlertCircle, desc: "Info, warning, tip or danger callout", color: "text-amber-600 bg-amber-50" },
   { type: "code", label: "Code Block", icon: Code2, desc: "Syntax-highlighted code snippet", color: "text-emerald-600 bg-emerald-50" },
   { type: "image", label: "Image", icon: ImageIcon, desc: "Single image or gallery", color: "text-pink-600 bg-pink-50" },
-  { type: "sidebar_settings", label: "Sidebar Settings", icon: GripVertical, desc: "Configure if sidebar floats", color: "text-slate-600 bg-slate-100" },
+  { type: "sidebar_settings", label: "⚙️ Sidebar Settings", icon: GripVertical, desc: "Position, width and scroll behaviour", color: "text-slate-600 bg-slate-100" },
   { type: "toc", label: "Table of Contents", icon: List, desc: "Auto-generated clickable TOC", color: "text-indigo-600 bg-indigo-50" },
   { type: "latest_posts", label: "Latest Posts", icon: FileText, desc: "Recent articles list", color: "text-blue-600 bg-blue-50" },
   { type: "featured_posts", label: "Featured Posts", icon: FileText, desc: "Hand-picked articles", color: "text-orange-600 bg-orange-50" },
@@ -233,9 +233,8 @@ function BlockEditor({ block, onChange }: { block: Block; onChange: (b: Block) =
               <Select value={block.content.scrollMode || "sticky"} onValueChange={v => set({ ...block.content, scrollMode: v })}>
                 <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="sticky">📌 Sticky (follows scroll)</SelectItem>
-                  <SelectItem value="fixed">🔒 Fixed (always visible)</SelectItem>
-                  <SelectItem value="scroll">📜 Scrolls with page</SelectItem>
+                  <SelectItem value="sticky">📌 Sticky — follows as you scroll</SelectItem>
+                  <SelectItem value="scroll">📜 Scrolls with the page</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -252,7 +251,7 @@ function BlockEditor({ block, onChange }: { block: Block; onChange: (b: Block) =
             </Select>
           </div>
           <div className="p-3 bg-blue-50 rounded-lg border border-blue-100 text-xs text-blue-700">
-            💡 The sidebar will appear on the <strong>{block.content.side || "right"}</strong> side of the page content and will <strong>{block.content.scrollMode === "sticky" ? "follow you as you scroll" : block.content.scrollMode === "fixed" ? "stay fixed in place" : "scroll with the page"}</strong>.
+            💡 The sidebar will appear on the <strong>{block.content.side || "right"}</strong> side. In <strong>Sticky</strong> mode it pins at the top as you scroll. In <strong>Scrolls with page</strong> mode it moves naturally with the content.
           </div>
         </div>
       );
