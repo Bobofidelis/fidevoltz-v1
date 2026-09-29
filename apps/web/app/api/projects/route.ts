@@ -26,11 +26,6 @@ export async function GET(request: NextRequest) {
         skip,
         take: limit,
         orderBy: { publishedAt: 'desc' },
-        select: {
-          id: true, title: true, slug: true, excerpt: true,
-          featuredImage: true, category: true, difficulty: true,
-          status: true, featured: true, publishedAt: true, createdAt: true,
-        },
       }),
       prisma.projectPost.count({ where }),
     ]);
