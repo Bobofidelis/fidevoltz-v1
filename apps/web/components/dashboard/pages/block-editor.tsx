@@ -125,7 +125,7 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
     } else if (type === 'form') {
       newBlock = { ...newBlock, formType: 'support' };
     } else if (type === 'sidebar_section') {
-      newBlock = { ...newBlock, content: '', sidebar: [] };
+      newBlock = { ...newBlock, content: '', sidebar: [], layout: { side: 'right', sticky: true, width: 'normal' } };
     }
 
     onChange([...normalizedBlocks, newBlock]);
@@ -391,9 +391,59 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
 
                       {/* ── SIDEBAR SECTION ── */}
                       {block.type === 'sidebar_section' && (
-                        <div className="space-y-6">
+                        <div className="space-y-8">
+                          {/* Layout Settings Panel */}
+                          <div className="p-5 bg-blue-50/50 border border-blue-100 rounded-xl space-y-4">
+                            <h4 className="text-sm font-bold text-slate-800 flex items-center gap-2 mb-2">
+                              <Layout className="h-4 w-4 text-blue-600" />
+                              Sidebar Settings
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                              <div className="space-y-2">
+                                <Label className="text-xs font-semibold text-slate-600">Sidebar Position</Label>
+                                <Select 
+                                  value={block.layout?.side || 'right'} 
+                                  onValueChange={val => updateBlock(block.id, { layout: { ...block.layout, side: val } })}
+                                >
+                                  <SelectTrigger className="bg-white border-slate-200"><SelectValue /></SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="right">Right Side</SelectItem>
+                                    <SelectItem value="left">Left Side</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-xs font-semibold text-slate-600">Scroll Behaviour</Label>
+                                <Select 
+                                  value={block.layout?.sticky === false ? 'scroll' : 'sticky'} 
+                                  onValueChange={val => updateBlock(block.id, { layout: { ...block.layout, sticky: val === 'sticky' } })}
+                                >
+                                  <SelectTrigger className="bg-white border-slate-200"><SelectValue /></SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="sticky">Sticky (Floats alongside content)</SelectItem>
+                                    <SelectItem value="scroll">Normal (Scrolls with page)</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-xs font-semibold text-slate-600">Sidebar Width</Label>
+                                <Select 
+                                  value={block.layout?.width || 'normal'} 
+                                  onValueChange={val => updateBlock(block.id, { layout: { ...block.layout, width: val } })}
+                                >
+                                  <SelectTrigger className="bg-white border-slate-200"><SelectValue /></SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="narrow">Narrow (25%)</SelectItem>
+                                    <SelectItem value="normal">Normal (33%)</SelectItem>
+                                    <SelectItem value="wide">Wide (41%)</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                          </div>
+
                           <div className="space-y-2">
-                            <Label className="text-base font-bold">Main Content (Left)</Label>
+                            <Label className="text-base font-bold">Main Content</Label>
                             <Editor value={block.content || ''} onChange={content => updateBlock(block.id, { content })} />
                           </div>
                           <div className="space-y-4">

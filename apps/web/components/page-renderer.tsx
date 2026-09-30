@@ -456,40 +456,81 @@ export function PageRenderer({ content }: PageRendererProps) {
               </section>
             );
 
-          case 'sidebar_section':
+          case 'sidebar_section': {
+            const side = block.layout?.side || 'right';
+            const sticky = block.layout?.sticky !== false;
+            const width = block.layout?.width || 'normal';
+            
+            // Map widths explicitly for Tailwind compiler
+            let asideCols = "lg:col-span-4";
+            let mainCols = "lg:col-span-8";
+            if (width === 'narrow') {
+              asideCols = "lg:col-span-3";
+              mainCols = "lg:col-span-9";
+            } else if (width === 'wide') {
+              asideCols = "lg:col-span-5";
+              mainCols = "lg:col-span-7";
+            }
+            
+            const asideClass = sticky 
+              ? `${asideCols} min-w-0 lg:sticky lg:top-20 lg:self-start`
+              : `${asideCols} min-w-0`;
+              
+            const mainClass = `${mainCols} min-w-0`;
+
+            const SidebarElement = (
+              <aside className={`${asideClass} space-y-8`}>
+                {block.sidebar?.map((item: any, i: number) => (
+                  <div key={i} className="bg-slate-50 p-6 rounded-xl border border-slate-100 shadow-sm">
+                    {item.title && <h4 className="font-bold text-slate-900 mb-4">{item.title}</h4>}
+                    {item.type === 'links' ? (
+                      <ul className="space-y-3">
+                        {item.links?.map((link: any, li: number) => (
+                          <li key={li}>
+                            <Link href={link.href} className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-2">
+                              {link.label}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
+                        {item.content}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </aside>
+            );
+
+            const MainElement = (
+              <div className={mainClass}>
+                <div id="page-content" className="w-full prose max-w-none">
+                  <WysiwygRenderer content={block.content} />
+                </div>
+              </div>
+            );
+
             return (
               <section key={index} className="py-20 bg-white">
                 <div className="container px-4 md:px-6">
-                  <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
-                    <div className="lg:col-span-3">
-                      <WysiwygRenderer content={block.content} />
-                    </div>
-                    <aside className="lg:col-span-1 space-y-8">
-                      {block.sidebar?.map((item: any, i: number) => (
-                        <div key={i} className="bg-slate-50 p-6 rounded-xl border border-slate-100">
-                          <h4 className="font-bold text-slate-900 mb-4">{item.title}</h4>
-                          {item.type === 'links' ? (
-                            <ul className="space-y-2">
-                              {item.links.map((link: any, li: number) => (
-                                <li key={li}>
-                                  <Link href={link.href} className="text-blue-600 hover:text-blue-700 text-sm flex items-center gap-2">
-                                    {link.label}
-                                  </Link>
-                                </li>
-                              ))}
-                            </ul>
-                          ) : (
-                            <div className="text-sm text-slate-600 leading-relaxed">
-                              {item.content}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </aside>
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 relative items-start">
+                    {side === 'left' ? (
+                      <>
+                        {SidebarElement}
+                        {MainElement}
+                      </>
+                    ) : (
+                      <>
+                        {MainElement}
+                        {SidebarElement}
+                      </>
+                    )}
                   </div>
                 </div>
               </section>
             );
+          }
 
           default:
             return <div key={index}>Unknown block type: {block.type}</div>;
