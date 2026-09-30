@@ -10,7 +10,7 @@ import Link from "next/link";
 import { 
   ShoppingCart, Star, Heart, Share2, ArrowLeft, Check, Plus, Minus, 
   Truck, ShieldCheck, Box, RefreshCw, FileText, Download, Cpu, 
-  Zap, Settings, Layers, ExternalLink, Loader2, AlertCircle
+  Zap, Settings, Layers, ExternalLink, Loader2, AlertCircle, Package
 } from "lucide-react";
 import { useApiQuery } from "@/lib/hooks/use-api-query";
 import type { Product } from "@fidevoltz/types";
