@@ -4,31 +4,35 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Search, Package, Truck, CheckCircle, Clock } from "lucide-react";
+import { Search, Package, Truck, CheckCircle, Clock, AlertCircle, Loader2 } from "lucide-react";
 
 export default function TrackOrderPage() {
   const [orderId, setOrderId] = useState("");
   const [trackingResult, setTrackingResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleTrack = (e: React.FormEvent) => {
+  const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!orderId.trim()) return;
     setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setTrackingResult({
-        id: orderId,
-        status: "Shipped",
-        date: "2023-11-28",
-        steps: [
-          { status: "Order Placed", date: "Nov 28, 10:30 AM", completed: true },
-          { status: "Processing", date: "Nov 28, 2:00 PM", completed: true },
-          { status: "Shipped", date: "Nov 29, 9:00 AM", completed: true },
-          { status: "Delivered", date: "Estimated Nov 30", completed: false },
-        ]
-      });
+    setError("");
+    setTrackingResult(null);
+
+    try {
+      const res = await fetch(`/api/orders/${orderId.trim()}/tracking`);
+      if (res.status === 404) {
+        setError("Order not found. Please check your order ID and try again.");
+        return;
+      }
+      if (!res.ok) throw new Error("Failed to fetch tracking");
+      const data = await res.json();
+      setTrackingResult(data?.data || data);
+    } catch {
+      setError("Unable to fetch tracking information. Please try again.");
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -54,9 +58,15 @@ export default function TrackOrderPage() {
               />
             </div>
             <Button type="submit" size="lg" className="h-12 px-8" disabled={loading}>
-              {loading ? "Tracking..." : "Track"}
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Track"}
             </Button>
           </form>
+          {error && (
+            <div className="mt-4 flex items-center gap-2 text-red-600 text-sm bg-red-50 rounded-lg px-4 py-3">
+              <AlertCircle className="h-4 w-4 shrink-0" />
+              {error}
+            </div>
+          )}
         </CardContent>
       </Card>
 

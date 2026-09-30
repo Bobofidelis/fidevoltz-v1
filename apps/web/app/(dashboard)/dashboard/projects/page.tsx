@@ -145,9 +145,12 @@ export default function ProjectsPage() {
             ) : (
               filteredProjects.map((project) => (
                 <TableRow key={project.id}>
-                  <TableCell className="font-medium whitespace-nowrap flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                    <span className="truncate max-w-[300px]">{project.title}</span>
+                  <TableCell className="font-medium whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <span className="truncate max-w-[280px]">{project.title}</span>
+                      {project.featured && <span title="Featured" className="text-amber-500 text-xs">⭐</span>}
+                    </div>
                   </TableCell>
                   <TableCell className="whitespace-nowrap">{project.category}</TableCell>
                   <TableCell className="whitespace-nowrap">

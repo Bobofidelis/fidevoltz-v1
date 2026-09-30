@@ -1,6 +1,6 @@
 "use client";
 
-import { notFound, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -46,8 +46,16 @@ export default function ProductDetailPage() {
   }
 
   if (!product) {
-    notFound();
-    return null; // TS satisfaction
+    return (
+      <div className="min-h-screen flex items-center justify-center flex-col gap-4 text-center px-4">
+        <Package className="h-16 w-16 text-slate-300" />
+        <h1 className="text-2xl font-bold text-slate-800">Product Not Found</h1>
+        <p className="text-slate-500 max-w-md">This product doesn&apos;t exist or may have been removed.</p>
+        <Link href="/store">
+          <Button variant="outline">Back to Store</Button>
+        </Link>
+      </div>
+    );
   }
 
   // Flatten images logic: 'images' array has priority, fall back to 'image' string

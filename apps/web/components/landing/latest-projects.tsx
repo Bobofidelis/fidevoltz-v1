@@ -12,7 +12,7 @@ export async function LatestProjects() {
   const projectsData = await prisma.projectPost.findMany({
     where: { status: 'PUBLISHED' },
     take: 3,
-    orderBy: { createdAt: 'desc' },
+    orderBy: { publishedAt: 'desc' },
   });
 
   // Transform projects data
@@ -20,19 +20,17 @@ export async function LatestProjects() {
     id: p.id,
     title: p.title,
     slug: p.slug,
-    excerpt: (p.content as any)?.length > 100 
-      ? JSON.stringify(p.content).substring(0, 150) + '...' 
-      : 'Explore this project to learn more',
+    excerpt: p.excerpt || 'Explore this hands-on project to learn and build something great.',
     image: p.featuredImage || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800',
     category: p.category || 'Tutorial',
     difficulty: p.difficulty || 'Beginner',
     readTime: '5 min read',
-    date: new Date(p.createdAt).toLocaleDateString('en-US', { 
+    date: new Date(p.publishedAt || p.createdAt).toLocaleDateString('en-US', { 
       month: 'short', 
       day: 'numeric', 
       year: 'numeric' 
     }),
-    trending: true,
+    trending: p.featured ?? false,
   }));
 
   // Empty state

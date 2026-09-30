@@ -147,7 +147,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   // Sticky: sidebar sticks at the top as user scrolls (natural, no own scrollbar)
   // Scroll: sidebar just flows normally with the page
   const asideClass = scrollMode === "sticky"
-    ? `lg:col-span-${sidebarColSpan} min-w-0 lg:sticky lg:top-24 lg:self-start`
+    ? `lg:col-span-${sidebarColSpan} min-w-0 lg:sticky lg:top-20 lg:self-start`
     : `lg:col-span-${sidebarColSpan} min-w-0`;
 
   // Whether there are any custom sidebar blocks to show above the defaults
