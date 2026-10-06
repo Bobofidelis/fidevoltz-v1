@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { WysiwygRenderer } from "@/components/wysiwyg-renderer";
-import { ChevronDown, Lightbulb, Cpu, Globe, Briefcase, FileQuestion, MessageCircle, LifeBuoy, Send, Loader2, CheckCircle2 } from "lucide-react";
+import { ChevronDown, Lightbulb, Cpu, Globe, Briefcase, FileQuestion, MessageCircle, LifeBuoy, Send, Loader2, CheckCircle2, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
@@ -531,6 +531,71 @@ export function PageRenderer({ content }: PageRendererProps) {
               </section>
             );
           }
+
+          case 'image':
+            if (!block.url) return null;
+            return (
+              <section key={index} className="py-10 bg-white">
+                <div className="container px-4 md:px-6 max-w-4xl mx-auto">
+                  <figure className="space-y-3">
+                    <img src={block.url} alt={block.alt || ''} className="w-full rounded-xl shadow-md object-cover" loading="lazy" />
+                    {block.caption && <figcaption className="text-center text-sm text-slate-500 italic">{block.caption}</figcaption>}
+                  </figure>
+                </div>
+              </section>
+            );
+
+          case 'video':
+            if (!block.url) return null;
+            return (
+              <section key={index} className="py-10 bg-white">
+                <div className="container px-4 md:px-6 max-w-4xl mx-auto">
+                  <div className="rounded-xl overflow-hidden shadow-md border border-slate-200">
+                    <video src={block.url} poster={block.poster} controls className="w-full max-h-[70vh]" />
+                  </div>
+                </div>
+              </section>
+            );
+
+          case 'youtube': {
+            if (!block.url) return null;
+            const embedUrl = block.url
+              .replace('watch?v=', 'embed/')
+              .replace('youtu.be/', 'youtube.com/embed/')
+              .replace('vimeo.com/', 'player.vimeo.com/video/');
+            return (
+              <section key={index} className="py-10 bg-white">
+                <div className="container px-4 md:px-6 max-w-4xl mx-auto">
+                  <div className="aspect-video rounded-xl overflow-hidden shadow-md border border-slate-200">
+                    <iframe src={embedUrl} className="w-full h-full" allowFullScreen title={block.title || 'Embedded Video'} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" />
+                  </div>
+                  {block.title && <p className="text-center text-sm text-slate-500 mt-2">{block.title}</p>}
+                </div>
+              </section>
+            );
+          }
+
+          case 'links':
+            return (
+              <section key={index} className="py-12 bg-slate-50">
+                <div className="container px-4 md:px-6 max-w-4xl mx-auto">
+                  {block.title && <h3 className="text-2xl font-bold text-slate-900 mb-6">{block.title}</h3>}
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {block.links?.map((link: any, i: number) => (
+                      <Link key={i} href={link.href} className="group flex items-start gap-3 p-4 bg-white rounded-xl border border-slate-200 hover:border-blue-300 hover:shadow-md transition-all">
+                        <div className="mt-0.5 h-8 w-8 shrink-0 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                          <ExternalLink className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-slate-900 group-hover:text-blue-700 transition-colors">{link.label}</p>
+                          {link.description && <p className="text-sm text-slate-500 mt-0.5">{link.description}</p>}
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            );
 
           default:
             return <div key={index}>Unknown block type: {block.type}</div>;

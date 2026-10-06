@@ -59,7 +59,8 @@ export async function PUT(
       allowComments,
       components,
       attachments,
-      sidebar
+      sidebar,
+      tags
     } = body;
 
     // Check if slug is taken by another project
@@ -83,6 +84,7 @@ export async function PUT(
           excerpt,
           content: content || [],
           sidebar: sidebar !== undefined ? sidebar : undefined,
+          tags: Array.isArray(tags) ? tags : undefined,
           featuredImage,
           category,
           difficulty,

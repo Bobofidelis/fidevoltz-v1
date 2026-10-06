@@ -73,10 +73,12 @@ export async function GET(request: NextRequest) {
             OR: [
               { title: { contains: query, mode: 'insensitive' } },
               { category: { contains: query, mode: 'insensitive' } },
+              { excerpt: { contains: query, mode: 'insensitive' } },
+              { tags: { has: query } },
             ],
           },
           take: 6,
-          select: { id: true, title: true, slug: true, status: true, category: true },
+          select: { id: true, title: true, slug: true, status: true, category: true, tags: true },
         });
 
         results.pages = await prisma.page.findMany({
@@ -137,7 +139,7 @@ export async function GET(request: NextRequest) {
         take: 10,
       });
 
-      // Projects: match title, excerpt, or category
+      // Projects: match title, excerpt, category, difficulty, or tags
       results.projects = await prisma.projectPost.findMany({
         where: {
           status: 'PUBLISHED',
@@ -145,6 +147,8 @@ export async function GET(request: NextRequest) {
             { title: { contains: query, mode: 'insensitive' } },
             { excerpt: { contains: query, mode: 'insensitive' } },
             { category: { contains: query, mode: 'insensitive' } },
+            { difficulty: { contains: query, mode: 'insensitive' } },
+            { tags: { has: query } },
           ],
         },
         take: 10,

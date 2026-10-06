@@ -69,6 +69,8 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
   const [allowComments, setAllowComments] = useState(initialData?.allowComments ?? true);
   const [status, setStatus] = useState(initialData?.status || "DRAFT");
   const [featured, setFeatured] = useState(initialData?.featured ?? false);
+  const [tags, setTags] = useState<string[]>(initialData?.tags || []);
+  const [tagInput, setTagInput] = useState("");
 
   // Blocks State
   const [blocks, setBlocks] = useState<Block[]>(
@@ -233,6 +235,7 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
       featuredImage,
       allowComments,
       featured,
+      tags,
       status,
       content: blocks,
       sidebar: sidebarBlocks,
@@ -531,17 +534,51 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                           <SelectContent>
                             <SelectItem value="javascript">JavaScript</SelectItem>
                             <SelectItem value="typescript">TypeScript</SelectItem>
-                            <SelectItem value="cpp">C++ (Arduino)</SelectItem>
                             <SelectItem value="python">Python</SelectItem>
+                            <SelectItem value="cpp">C++ (Arduino)</SelectItem>
+                            <SelectItem value="c">C</SelectItem>
+                            <SelectItem value="csharp">C# (.NET)</SelectItem>
+                            <SelectItem value="java">Java</SelectItem>
                             <SelectItem value="html">HTML</SelectItem>
                             <SelectItem value="css">CSS</SelectItem>
+                            <SelectItem value="scss">SCSS</SelectItem>
                             <SelectItem value="yaml">YAML</SelectItem>
-                            <SelectItem value="bash">Bash / Shell</SelectItem>
                             <SelectItem value="json">JSON</SelectItem>
+                            <SelectItem value="bash">Bash / Shell</SelectItem>
                             <SelectItem value="sql">SQL</SelectItem>
                             <SelectItem value="markdown">Markdown</SelectItem>
+                            <SelectItem value="php">PHP</SelectItem>
+                            <SelectItem value="rust">Rust</SelectItem>
+                            <SelectItem value="go">Go</SelectItem>
+                            <SelectItem value="ruby">Ruby</SelectItem>
+                            <SelectItem value="swift">Swift</SelectItem>
+                            <SelectItem value="kotlin">Kotlin</SelectItem>
+                            <SelectItem value="dart">Dart (Flutter)</SelectItem>
+                            <SelectItem value="micropython">MicroPython</SelectItem>
+                            <SelectItem value="matlab">MATLAB</SelectItem>
+                            <SelectItem value="asm">Assembly (ASM)</SelectItem>
+                            <SelectItem value="verilog">Verilog / SystemVerilog</SelectItem>
+                            <SelectItem value="vhdl">VHDL</SelectItem>
+                            <SelectItem value="gcode">G-code (CNC/3D Print)</SelectItem>
+                            <SelectItem value="dockerfile">Dockerfile</SelectItem>
+                            <SelectItem value="ini">INI / Config</SelectItem>
+                            <SelectItem value="xml">XML</SelectItem>
+                            <SelectItem value="graphql">GraphQL</SelectItem>
+                            <SelectItem value="r">R</SelectItem>
+                            <SelectItem value="lua">Lua</SelectItem>
+                            <SelectItem value="haskell">Haskell</SelectItem>
+                            <SelectItem value="elixir">Elixir</SelectItem>
+                            <SelectItem value="scala">Scala</SelectItem>
                           </SelectContent>
                         </Select>
+                        <div className="mt-2">
+                          <Input
+                            placeholder="Or type a custom language..."
+                            value={!['javascript','typescript','python','cpp','c','csharp','java','html','css','scss','yaml','bash','json','sql','markdown','php','rust','go','ruby','swift','kotlin','dart','micropython','matlab','asm','verilog','vhdl','gcode','dockerfile','ini','xml','graphql','r','lua','haskell','elixir','scala'].includes(block.content.language) ? block.content.language : ''}
+                            onChange={e => updateBlock(block.id, { ...block.content, language: e.target.value })}
+                            className="h-8 text-xs font-mono"
+                          />
+                        </div>
                         <Textarea 
                           value={block.content.code}
                           onChange={(e) => updateBlock(block.id, { ...block.content, code: e.target.value })}
@@ -1024,7 +1061,18 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                               </div>
                               <div className="space-y-2">
                                 <Label className="text-slate-700">SEO Tags / Keywords</Label>
-                                <Input className="bg-slate-50" value={block.content.tags || ""} onChange={(e) => updateBlock(block.id, { ...block.content, tags: e.target.value })} placeholder="Arduino, VVVF, Elevator" />
+                                <Input 
+                                  className="bg-slate-50" 
+                                  value={block.content.tags || tags.join(', ')} 
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    updateBlock(block.id, { ...block.content, tags: val });
+                                    // Also sync back to top-level tags state
+                                    const newTags = val.split(',').map((t: string) => t.trim()).filter(Boolean);
+                                    setTags(newTags);
+                                  }} 
+                                  placeholder="Arduino, VVVF, Elevator" 
+                                />
                               </div>
                               <div className="space-y-2 md:col-span-2">
                                 <Label className="text-slate-700">Meta Description (150-160 chars)</Label>
@@ -1243,6 +1291,50 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                   <Label htmlFor="comments" className="font-medium cursor-pointer">Allow Comments</Label>
                   <p className="text-xs text-slate-400">Let readers leave comments on this project</p>
                 </div>
+              </div>
+
+              {/* Tags / Keywords */}
+              <div className="space-y-3 p-4 rounded-xl border border-slate-200 bg-slate-50/50">
+                <div>
+                  <Label className="font-semibold text-slate-800">Tags / Keywords</Label>
+                  <p className="text-xs text-slate-500 mt-0.5">Press Enter or comma to add. These sync automatically with the SEO & Campaign block tags.</p>
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    value={tagInput}
+                    onChange={e => setTagInput(e.target.value)}
+                    onKeyDown={e => {
+                      if ((e.key === 'Enter' || e.key === ',') && tagInput.trim()) {
+                        e.preventDefault();
+                        const newTag = tagInput.trim().replace(/,$/, '');
+                        if (newTag && !tags.includes(newTag)) setTags([...tags, newTag]);
+                        setTagInput('');
+                      } else if (e.key === 'Backspace' && !tagInput && tags.length) {
+                        setTags(tags.slice(0, -1));
+                      }
+                    }}
+                    placeholder="e.g. Arduino, VVVF, Elevator (press Enter)"
+                    className="flex-1 bg-white"
+                  />
+                  <Button type="button" variant="outline" size="sm" className="shrink-0"
+                    onClick={() => {
+                      const newTag = tagInput.trim().replace(/,$/, '');
+                      if (newTag && !tags.includes(newTag)) setTags([...tags, newTag]);
+                      setTagInput('');
+                    }}>
+                    Add
+                  </Button>
+                </div>
+                {tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {tags.map(tag => (
+                      <span key={tag} className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 text-xs rounded-full font-medium border border-blue-200">
+                        {tag}
+                        <button type="button" onClick={() => setTags(tags.filter(t => t !== tag))} className="hover:text-red-500 transition-colors">×</button>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

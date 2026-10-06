@@ -67,6 +67,9 @@ export default async function DynamicPage({ params }: PageProps) {
   const mainClass = `${mainCols} bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden min-w-0`;
 
   if (sidebarBlocks.length > 0) {
+    const heroBlock = blocks.find((b: any) => b.type === 'hero');
+    const bodyBlocks = blocks.filter((b: any) => b.type !== 'hero');
+
     const sidebarElement = (
       <aside className={asideClass}>
         <PublicSidebarRenderer blocks={sidebarBlocks} slug={page.slug} />
@@ -74,25 +77,28 @@ export default async function DynamicPage({ params }: PageProps) {
     );
     const mainElement = (
       <div className={mainClass}>
-        <PageRenderer content={blocks} />
+        <PageRenderer content={bodyBlocks} />
       </div>
     );
 
     return (
-      <main className="min-h-screen bg-slate-50 py-10">
-        <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
-            {sidebarSide === 'left' ? (
-              <>
-                {sidebarElement}
-                {mainElement}
-              </>
-            ) : (
-              <>
-                {mainElement}
-                {sidebarElement}
-              </>
-            )}
+      <main className="min-h-screen bg-slate-50">
+        {heroBlock && <PageRenderer content={[heroBlock]} />}
+        <div className="py-10">
+          <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+              {sidebarSide === 'left' ? (
+                <>
+                  {sidebarElement}
+                  {mainElement}
+                </>
+              ) : (
+                <>
+                  {mainElement}
+                  {sidebarElement}
+                </>
+              )}
+            </div>
           </div>
         </div>
       </main>

@@ -48,7 +48,8 @@ export async function POST(request: NextRequest) {
       allowComments,
       components,   // Array of { name, quantity, productId? }
       attachments,   // Array of { name, url, type, size? }
-      sidebar
+      sidebar,
+      tags
     } = body;
 
     // Validation
@@ -69,6 +70,7 @@ export async function POST(request: NextRequest) {
         excerpt,
         content: content || [], // Ensure it's an array or object
         sidebar: sidebar || null,
+        tags: Array.isArray(tags) ? tags : [],
         featuredImage,
         category,
         difficulty,

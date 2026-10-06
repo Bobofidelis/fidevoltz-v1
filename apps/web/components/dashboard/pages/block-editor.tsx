@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Editor } from "@/components/editor";
-import { Plus, Trash2, GripVertical, ChevronUp, ChevronDown, Layout, AlignLeft, Grid, HelpCircle, FormInput } from "lucide-react";
+import { Plus, Trash2, GripVertical, ChevronUp, ChevronDown, Layout, AlignLeft, Grid, HelpCircle, FormInput, Image, Video, Youtube, Link as LinkIcon } from "lucide-react";
 import { useState, createContext, useContext } from "react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
@@ -34,6 +34,10 @@ interface BlockEditorProps {
 const BLOCK_TYPES = [
   { type: 'hero',            label: 'Hero Section',   icon: Layout   },
   { type: 'text',            label: 'Rich Text',      icon: AlignLeft },
+  { type: 'image',           label: 'Image',          icon: Image    },
+  { type: 'video',           label: 'Video',          icon: Video    },
+  { type: 'youtube',         label: 'YouTube',        icon: Youtube  },
+  { type: 'links',           label: 'Link List',      icon: LinkIcon },
   { type: 'grid',            label: 'Feature Grid',   icon: Grid     },
   { type: 'faq',             label: 'FAQ Accordion',  icon: HelpCircle },
   { type: 'form',            label: 'Special Form',   icon: FormInput },
@@ -118,6 +122,14 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
       newBlock = { ...newBlock, title: '', subtitle: '', badge: '', backgroundImage: '' };
     } else if (type === 'text') {
       newBlock = { ...newBlock, content: '' };
+    } else if (type === 'image') {
+      newBlock = { ...newBlock, url: '', alt: '', caption: '' };
+    } else if (type === 'video') {
+      newBlock = { ...newBlock, url: '', poster: '' };
+    } else if (type === 'youtube') {
+      newBlock = { ...newBlock, url: '', title: '' };
+    } else if (type === 'links') {
+      newBlock = { ...newBlock, title: 'Quick Links', links: [{ label: 'Link 1', href: '#', description: '' }] };
     } else if (type === 'grid') {
       newBlock = { ...newBlock, columns: 3, items: [{ title: 'Example Feature', content: 'Feature description here', icon: 'Lightbulb' }] };
     } else if (type === 'faq') {
@@ -222,6 +234,106 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
                         <div className="space-y-2">
                           <Label>Rich Text Content</Label>
                           <Editor value={block.content || ''} onChange={content => updateBlock(block.id, { content })} />
+                        </div>
+                      )}
+
+                      {/* ── IMAGE ── */}
+                      {block.type === 'image' && (
+                        <div className="space-y-4">
+                          <Label className="text-base font-bold">Image</Label>
+                          <MediaPicker mediaType="IMAGE" onChange={(media: any) => updateBlock(block.id, { ...block, url: media.url })}>
+                            <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 cursor-pointer hover:bg-slate-50 hover:border-blue-400 transition-all text-center">
+                              {block.url ? (
+                                <div className="space-y-2">
+                                  <img src={block.url} alt={block.alt || ''} className="max-h-48 mx-auto rounded-lg object-cover" />
+                                  <p className="text-xs text-blue-600 font-medium">Click to replace image</p>
+                                </div>
+                              ) : (
+                                <div className="py-4">
+                                  <Image className="h-10 w-10 mx-auto mb-2 text-slate-300" />
+                                  <p className="text-sm font-medium text-slate-600">Click to select image from media library</p>
+                                </div>
+                              )}
+                            </div>
+                          </MediaPicker>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label className="text-xs">Alt Text</Label>
+                              <Input placeholder="Describe the image" value={block.alt || ''} onChange={e => updateBlock(block.id, { ...block, alt: e.target.value })} />
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-xs">Caption (optional)</Label>
+                              <Input placeholder="Caption text" value={block.caption || ''} onChange={e => updateBlock(block.id, { ...block, caption: e.target.value })} />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-xs">Or paste image URL directly</Label>
+                            <Input placeholder="https://..." value={block.url || ''} onChange={e => updateBlock(block.id, { ...block, url: e.target.value })} />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* ── VIDEO ── */}
+                      {block.type === 'video' && (
+                        <div className="space-y-4">
+                          <Label className="text-base font-bold">Video</Label>
+                          <div className="space-y-2">
+                            <Label className="text-xs">Video URL or Embed URL</Label>
+                            <Input placeholder="https://... (MP4, WebM, or embed URL)" value={block.url || ''} onChange={e => updateBlock(block.id, { ...block, url: e.target.value })} />
+                          </div>
+                          {block.url && (
+                            <video src={block.url} controls className="w-full max-h-64 rounded-lg border" />
+                          )}
+                          <div className="space-y-2">
+                            <Label className="text-xs">Poster Image URL (thumbnail, optional)</Label>
+                            <Input placeholder="https://... (shown before video plays)" value={block.poster || ''} onChange={e => updateBlock(block.id, { ...block, poster: e.target.value })} />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* ── YOUTUBE ── */}
+                      {block.type === 'youtube' && (
+                        <div className="space-y-4 p-5 bg-red-50/50 border border-red-100 rounded-xl">
+                          <Label className="text-base font-bold text-red-900">YouTube / Video Embed</Label>
+                          <div className="space-y-2">
+                            <Label className="text-xs text-red-700">Video URL</Label>
+                            <Input placeholder="https://www.youtube.com/watch?v=... or any video URL" value={block.url || ''} onChange={e => updateBlock(block.id, { ...block, url: e.target.value })} className="border-red-200" />
+                            <p className="text-xs text-slate-500">Supports YouTube, Vimeo, and any embed-compatible URL</p>
+                          </div>
+                          {block.url && (
+                            <div className="aspect-video rounded-lg overflow-hidden border border-red-200">
+                              <iframe src={block.url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')} className="w-full h-full" allowFullScreen title={block.title || 'Video'} />
+                            </div>
+                          )}
+                          <div className="space-y-2">
+                            <Label className="text-xs">Title (accessibility)</Label>
+                            <Input placeholder="Video title" value={block.title || ''} onChange={e => updateBlock(block.id, { ...block, title: e.target.value })} />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* ── LINKS ── */}
+                      {block.type === 'links' && (
+                        <div className="space-y-4">
+                          <div className="space-y-2">
+                            <Label className="text-base font-bold">Link List</Label>
+                            <Input placeholder="Section title" value={block.title || ''} onChange={e => updateBlock(block.id, { ...block, title: e.target.value })} />
+                          </div>
+                          <div className="space-y-3">
+                            {block.links?.map((link: any, i: number) => (
+                              <div key={i} className="grid grid-cols-1 gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                                <div className="flex gap-2">
+                                  <Input className="bg-white" placeholder="Label" value={link.label || ''} onChange={e => { const ls = [...block.links]; ls[i] = {...ls[i], label: e.target.value}; updateBlock(block.id, { ...block, links: ls }); }} />
+                                  <Input className="bg-white" placeholder="URL" value={link.href || ''} onChange={e => { const ls = [...block.links]; ls[i] = {...ls[i], href: e.target.value}; updateBlock(block.id, { ...block, links: ls }); }} />
+                                  <Button type="button" variant="ghost" size="icon" onClick={() => { const ls = block.links.filter((_: any, idx: number) => idx !== i); updateBlock(block.id, { ...block, links: ls }); }}><Trash2 className="h-4 w-4 text-red-500" /></Button>
+                                </div>
+                                <Input className="bg-white text-xs" placeholder="Description (optional)" value={link.description || ''} onChange={e => { const ls = [...block.links]; ls[i] = {...ls[i], description: e.target.value}; updateBlock(block.id, { ...block, links: ls }); }} />
+                              </div>
+                            ))}
+                            <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => { const ls = [...(block.links||[]), {label:'New Link', href:'#', description:''}]; updateBlock(block.id, { ...block, links: ls }); }}>
+                              <Plus className="h-4 w-4 mr-2" /> Add Link
+                            </Button>
+                          </div>
                         </div>
                       )}
 
