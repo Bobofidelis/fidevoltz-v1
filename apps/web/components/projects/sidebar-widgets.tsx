@@ -353,7 +353,7 @@ export function AdWidget({ zone = "SIDEBAR_RIGHT", slug }: { zone?: AdZone; slug
   if (!slug) return null;
   return (
     <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm">
-      <AdSlot page={`projects/${slug}`} zone={zone} className="w-full" />
+      <AdSlot page={slug} zone={zone} className="w-full" />
     </div>
   );
 }

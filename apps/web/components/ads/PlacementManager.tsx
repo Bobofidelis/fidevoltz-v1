@@ -99,11 +99,18 @@ export function PlacementManager({ placements, setPlacements }: PlacementManager
       {/* Help text */}
       <div className="flex items-start gap-2 p-3 bg-blue-50 border border-blue-100 rounded-lg text-sm text-blue-700">
         <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
-        <div>
-          <strong>How placements work:</strong> Select which page and zone this ad should appear in.
-          Choose <em>"All Project Pages"</em> to show this ad on every tutorial/project. 
-          The zone determines where on the page it renders. 
-          Your ad must be <strong>Active</strong> to display.
+        <div className="space-y-1">
+          <p><strong>How placements work:</strong> The <em>Page</em> value must match the page the ad appears on:</p>
+          <ul className="list-disc list-inside text-xs space-y-0.5 text-blue-600 mt-1">
+            <li><strong>all</strong> → shows on every page sitewide</li>
+            <li><strong>home</strong> → home page ( / )</li>
+            <li><strong>about</strong> → the About page ( /about )</li>
+            <li><strong>contact</strong> → the Contact page ( /contact )</li>
+            <li><strong>projects</strong> → all tutorial/project pages ( /projects/* )</li>
+            <li><strong>store</strong> → store ( /store )</li>
+            <li>Custom: use the page slug exactly as it appears in the URL (e.g. <code>services</code> for /services)</li>
+          </ul>
+          <p className="text-xs mt-1">The zone determines <em>where</em> on the page it renders. Your ad must be <strong>Active</strong> to display.</p>
         </div>
       </div>
 

@@ -72,6 +72,7 @@ export default async function DynamicPage({ params }: PageProps) {
 
     const sidebarElement = (
       <aside className={asideClass}>
+        {/* slug passed as-is so AdWidget targets 'about', 'contact' etc. matching PlacementManager values */}
         <PublicSidebarRenderer blocks={sidebarBlocks} slug={page.slug} />
       </aside>
     );

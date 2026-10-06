@@ -240,35 +240,93 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
                       {/* ── IMAGE ── */}
                       {block.type === 'image' && (
                         <div className="space-y-4">
-                          <Label className="text-base font-bold">Image</Label>
-                          <MediaPicker mediaType="IMAGE" onChange={(media: any) => updateBlock(block.id, { ...block, url: media.url })}>
-                            <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 cursor-pointer hover:bg-slate-50 hover:border-blue-400 transition-all text-center">
-                              {block.url ? (
-                                <div className="space-y-2">
-                                  <img src={block.url} alt={block.alt || ''} className="max-h-48 mx-auto rounded-lg object-cover" />
-                                  <p className="text-xs text-blue-600 font-medium">Click to replace image</p>
-                                </div>
-                              ) : (
-                                <div className="py-4">
-                                  <Image className="h-10 w-10 mx-auto mb-2 text-slate-300" />
-                                  <p className="text-sm font-medium text-slate-600">Click to select image from media library</p>
-                                </div>
-                              )}
-                            </div>
-                          </MediaPicker>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label className="text-xs">Alt Text</Label>
-                              <Input placeholder="Describe the image" value={block.alt || ''} onChange={e => updateBlock(block.id, { ...block, alt: e.target.value })} />
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-xs">Caption (optional)</Label>
-                              <Input placeholder="Caption text" value={block.caption || ''} onChange={e => updateBlock(block.id, { ...block, caption: e.target.value })} />
-                            </div>
+                          <div className="flex items-center justify-between">
+                            <Label className="text-base font-bold">Images</Label>
+                            <MediaPicker mediaType="IMAGE" multiple={true} onChange={(media: any) => {
+                              const mediaArray = Array.isArray(media) ? media : [media];
+                              const newImages = mediaArray.map((m: any) => ({
+                                url: m.secureUrl || m.url,
+                                alt: '',
+                                caption: ''
+                              }));
+                              const currentImages = block.images || (block.url ? [{ url: block.url, alt: block.alt || '', caption: block.caption || '' }] : []);
+                              updateBlock(block.id, { 
+                                ...block, 
+                                images: [...currentImages, ...newImages],
+                                url: currentImages.length === 0 && newImages.length > 0 ? newImages[0].url : block.url
+                              });
+                            }}>
+                              <Button type="button" variant="outline" size="sm">
+                                <Plus className="h-4 w-4 mr-2" /> Add Images
+                              </Button>
+                            </MediaPicker>
                           </div>
-                          <div className="space-y-2">
-                            <Label className="text-xs">Or paste image URL directly</Label>
-                            <Input placeholder="https://..." value={block.url || ''} onChange={e => updateBlock(block.id, { ...block, url: e.target.value })} />
+                          
+                          <div className="space-y-4">
+                            {(() => {
+                              const images = block.images || (block.url ? [{ url: block.url, alt: block.alt || '', caption: block.caption || '' }] : []);
+                              if (images.length === 0) {
+                                return (
+                                  <div className="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center bg-slate-50">
+                                    <Image className="h-10 w-10 mx-auto mb-2 text-slate-300" />
+                                    <p className="text-sm font-medium text-slate-600">No images added yet</p>
+                                    <p className="text-xs text-slate-400 mt-1">Click "Add Images" to select from media library</p>
+                                  </div>
+                                );
+                              }
+                              return (
+                                <div className="grid gap-4">
+                                  {images.map((img: any, i: number) => (
+                                    <div key={i} className="flex flex-col sm:flex-row gap-4 p-4 bg-slate-50 border border-slate-200 rounded-xl relative group">
+                                      <div className="w-full sm:w-40 h-32 shrink-0 rounded-lg bg-slate-200 overflow-hidden relative">
+                                        <img src={img.url} className="w-full h-full object-cover" alt="" />
+                                      </div>
+                                      <div className="flex-1 space-y-3">
+                                        <div className="space-y-1.5">
+                                          <Label className="text-xs text-slate-500">Image URL</Label>
+                                          <Input placeholder="https://..." value={img.url} onChange={e => {
+                                            const newImages = [...images];
+                                            newImages[i].url = e.target.value;
+                                            updateBlock(block.id, { ...block, images: newImages });
+                                          }} className="h-8 text-xs bg-white" />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3">
+                                          <div className="space-y-1.5">
+                                            <Label className="text-xs text-slate-500">Alt Text</Label>
+                                            <Input placeholder="Describe image" value={img.alt || ''} onChange={e => {
+                                              const newImages = [...images];
+                                              newImages[i].alt = e.target.value;
+                                              updateBlock(block.id, { ...block, images: newImages });
+                                            }} className="h-8 text-xs bg-white" />
+                                          </div>
+                                          <div className="space-y-1.5">
+                                            <Label className="text-xs text-slate-500">Caption</Label>
+                                            <Input placeholder="Optional caption" value={img.caption || ''} onChange={e => {
+                                              const newImages = [...images];
+                                              newImages[i].caption = e.target.value;
+                                              updateBlock(block.id, { ...block, images: newImages });
+                                            }} className="h-8 text-xs bg-white" />
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <Button 
+                                        type="button" 
+                                        variant="ghost" 
+                                        size="icon"
+                                        onClick={() => {
+                                          const newImages = [...images];
+                                          newImages.splice(i, 1);
+                                          updateBlock(block.id, { ...block, images: newImages });
+                                        }}
+                                        className="absolute -top-2 -right-2 bg-white border border-slate-200 shadow-sm text-red-500 hover:text-red-600 hover:bg-red-50 h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  ))}
+                                </div>
+                              );
+                            })()}
                           </div>
                         </div>
                       )}

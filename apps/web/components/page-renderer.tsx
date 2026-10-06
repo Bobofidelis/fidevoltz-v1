@@ -532,18 +532,32 @@ export function PageRenderer({ content }: PageRendererProps) {
             );
           }
 
-          case 'image':
-            if (!block.url) return null;
+          case 'image': {
+            const images = block.images || (block.url ? [{ url: block.url, alt: block.alt || '', caption: block.caption || '' }] : []);
+            if (images.length === 0) return null;
+            
             return (
               <section key={index} className="py-10 bg-white">
                 <div className="container px-4 md:px-6 max-w-4xl mx-auto">
-                  <figure className="space-y-3">
-                    <img src={block.url} alt={block.alt || ''} className="w-full rounded-xl shadow-md object-cover" loading="lazy" />
-                    {block.caption && <figcaption className="text-center text-sm text-slate-500 italic">{block.caption}</figcaption>}
-                  </figure>
+                  {images.length === 1 ? (
+                    <figure className="space-y-3">
+                      <img src={images[0].url} alt={images[0].alt || ''} className="w-full rounded-xl shadow-md object-cover" loading="lazy" />
+                      {images[0].caption && <figcaption className="text-center text-sm text-slate-500 italic">{images[0].caption}</figcaption>}
+                    </figure>
+                  ) : (
+                    <div className={`grid gap-4 ${images.length === 2 ? 'sm:grid-cols-2' : 'sm:grid-cols-2 md:grid-cols-3'}`}>
+                      {images.map((img: any, i: number) => (
+                        <figure key={i} className="space-y-2">
+                          <img src={img.url} alt={img.alt || ''} className="w-full h-48 md:h-64 rounded-xl shadow-sm object-cover" loading="lazy" />
+                          {img.caption && <figcaption className="text-center text-xs text-slate-500 italic">{img.caption}</figcaption>}
+                        </figure>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </section>
             );
+          }
 
           case 'video':
             if (!block.url) return null;

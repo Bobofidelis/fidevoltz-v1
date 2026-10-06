@@ -159,7 +159,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
       <div className="space-y-4">
         {/* Custom sidebar blocks from the editor come first */}
         {hasCustomSidebar && (
-          <PublicSidebarRenderer blocks={sidebarBlocks} slug={project.slug} />
+          <PublicSidebarRenderer blocks={sidebarBlocks} slug={`projects/${project.slug}`} />
         )}
         {/* Default project sidebar (components, downloads, CTA, share) always renders */}
         <ProjectSidebar project={project} />
