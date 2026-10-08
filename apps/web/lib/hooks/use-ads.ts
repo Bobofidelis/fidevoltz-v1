@@ -183,7 +183,7 @@ export function usePageAds(page: string) {
   return useQuery({
     queryKey: ['page-ads', page],
     queryFn: async () => {
-      const response = await fetch(`/api/ads?page=${page}`);
+      const response = await fetch(`/api/promotions?page=${page}`);
       if (!response.ok) throw new Error('Failed to fetch ads');
       const result = await response.json();
       return result.data || [];
@@ -196,7 +196,7 @@ export function usePageAds(page: string) {
 // Track ad click
 export async function trackAdClick(adId: string) {
   try {
-    await fetch(`/api/ads/click/${adId}`, {
+    await fetch(`/api/promotions/click/${adId}`, {
       method: 'POST',
     });
   } catch (error) {

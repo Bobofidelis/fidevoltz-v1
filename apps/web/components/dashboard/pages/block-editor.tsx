@@ -41,7 +41,6 @@ const BLOCK_TYPES = [
   { type: 'grid',            label: 'Feature Grid',   icon: Grid     },
   { type: 'faq',             label: 'FAQ Accordion',  icon: HelpCircle },
   { type: 'form',            label: 'Special Form',   icon: FormInput },
-  { type: 'sidebar_section', label: 'Sidebar Layout', icon: Layout   },
 ];
 
 const ALLOWED_ICONS = ['Lightbulb', 'Cpu', 'Globe', 'Briefcase', 'FileQuestion', 'MessageCircle', 'LifeBuoy'];
@@ -275,52 +274,52 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
                                 );
                               }
                               return (
-                                <div className="grid gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                   {images.map((img: any, i: number) => (
-                                    <div key={i} className="flex flex-col sm:flex-row gap-4 p-4 bg-slate-50 border border-slate-200 rounded-xl relative group">
-                                      <div className="w-full sm:w-40 h-32 shrink-0 rounded-lg bg-slate-200 overflow-hidden relative">
-                                        <img src={img.url} className="w-full h-full object-cover" alt="" />
+                                    <div key={i} className="flex flex-col gap-3 p-3 bg-white border border-slate-200 rounded-xl relative group shadow-sm hover:border-blue-300 transition-colors">
+                                      <div className="w-full h-40 shrink-0 rounded-lg bg-slate-100 overflow-hidden relative flex items-center justify-center p-1">
+                                        <img src={img.url} className="max-w-full max-h-full object-contain" alt="Preview" />
                                       </div>
                                       <div className="flex-1 space-y-3">
                                         <div className="space-y-1.5">
-                                          <Label className="text-xs text-slate-500">Image URL</Label>
+                                          <Label className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Image URL</Label>
                                           <Input placeholder="https://..." value={img.url} onChange={e => {
                                             const newImages = [...images];
                                             newImages[i].url = e.target.value;
                                             updateBlock(block.id, { ...block, images: newImages });
-                                          }} className="h-8 text-xs bg-white" />
+                                          }} className="h-8 text-xs bg-slate-50 border-slate-200" />
                                         </div>
-                                        <div className="grid grid-cols-2 gap-3">
+                                        <div className="grid grid-cols-2 gap-2">
                                           <div className="space-y-1.5">
-                                            <Label className="text-xs text-slate-500">Alt Text</Label>
+                                            <Label className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Alt Text</Label>
                                             <Input placeholder="Describe image" value={img.alt || ''} onChange={e => {
                                               const newImages = [...images];
                                               newImages[i].alt = e.target.value;
                                               updateBlock(block.id, { ...block, images: newImages });
-                                            }} className="h-8 text-xs bg-white" />
+                                            }} className="h-8 text-xs bg-slate-50 border-slate-200" />
                                           </div>
                                           <div className="space-y-1.5">
-                                            <Label className="text-xs text-slate-500">Caption</Label>
+                                            <Label className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Caption</Label>
                                             <Input placeholder="Optional caption" value={img.caption || ''} onChange={e => {
                                               const newImages = [...images];
                                               newImages[i].caption = e.target.value;
                                               updateBlock(block.id, { ...block, images: newImages });
-                                            }} className="h-8 text-xs bg-white" />
+                                            }} className="h-8 text-xs bg-slate-50 border-slate-200" />
                                           </div>
                                         </div>
                                       </div>
                                       <Button 
                                         type="button" 
-                                        variant="ghost" 
+                                        variant="destructive" 
                                         size="icon"
                                         onClick={() => {
                                           const newImages = [...images];
                                           newImages.splice(i, 1);
                                           updateBlock(block.id, { ...block, images: newImages });
                                         }}
-                                        className="absolute -top-2 -right-2 bg-white border border-slate-200 shadow-sm text-red-500 hover:text-red-600 hover:bg-red-50 h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                        className="absolute -top-3 -right-3 h-7 w-7 rounded-full opacity-0 group-hover:opacity-100 shadow-md transition-all scale-90 hover:scale-100 bg-red-500 hover:bg-red-600 text-white"
                                       >
-                                        <Trash2 className="h-4 w-4" />
+                                        <Trash2 className="h-3.5 w-3.5" />
                                       </Button>
                                     </div>
                                   ))}
@@ -562,6 +561,9 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
                       {/* ── SIDEBAR SECTION ── */}
                       {block.type === 'sidebar_section' && (
                         <div className="space-y-8">
+                          <div className="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-xl text-sm">
+                            <strong>Deprecated Block:</strong> Please avoid using this nested Sidebar Layout. Instead, use the global <strong>"Edit Public Sidebar"</strong> button at the bottom of the screen to configure your page's sidebar.
+                          </div>
                           {/* Layout Settings Panel */}
                           <div className="p-5 bg-blue-50/50 border border-blue-100 rounded-xl space-y-4">
                             <h4 className="text-sm font-bold text-slate-800 flex items-center gap-2 mb-2">

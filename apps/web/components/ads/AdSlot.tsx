@@ -40,14 +40,14 @@ export function AdSlot({ page, zone, className = "" }: AdSlotProps) {
   };
 
   return (
-    <div className={`ad-slot ad-zone-${zone.toLowerCase()} relative ${className}`}>
+    <div className={`promo-container promo-zone-${zone.toLowerCase()} relative ${className}`}>
       {ad.customHtml ? (
         // Custom HTML ad (e.g., Google AdSense code)
         <div dangerouslySetInnerHTML={{ __html: ad.customHtml }} />
       ) : (
         // Standard image + text ad
         <div
-          className="ad-container max-w-2xl mx-auto cursor-pointer rounded-xl overflow-hidden border border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all duration-200 bg-white"
+          className="promo-content max-w-2xl mx-auto cursor-pointer rounded-xl overflow-hidden border border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all duration-200 bg-white"
           onClick={handleClick}
           role="button"
           tabIndex={0}
