@@ -13,6 +13,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism';
+import DOMPurify from 'isomorphic-dompurify';
 
 interface Block {
   id: string;
@@ -49,7 +50,7 @@ function renderBlock(block: Block, slug?: string) {
 
           <div
             className="prose-rte max-w-none text-slate-700 leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: block.content.toString() }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(block.content.toString()) }}
           />
         </>
       );
@@ -104,7 +105,7 @@ function renderBlock(block: Block, slug?: string) {
           </div>
           <div className="flex-1 space-y-2">
             {title && <h4 className="font-bold text-lg">{title}</h4>}
-            <div dangerouslySetInnerHTML={{ __html: text ? text.replace(/\n/g, "<br/>") : "" }} />
+            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(text ? text.replace(/\n/g, "<br/>") : "") }} />
           </div>
         </div>
       );

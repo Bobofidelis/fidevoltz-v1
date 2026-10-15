@@ -7,18 +7,26 @@ import { UserDetailsModal } from '@/components/admin/user-details-modal';
 import { SendMessageModal } from '@/components/admin/send-message-modal';
 import { EditUserModal } from '@/components/admin/edit-user-modal';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, UserCheck, UserPlus, Shield } from 'lucide-react';
+import { Users, UserCheck, UserPlus, Shield, Loader2 } from 'lucide-react';
 import { useUsers, useUserDetails } from '@/lib/hooks/use-admin-users';
 import { redirect } from 'next/navigation';
 
 export default function UsersManagementPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [messageUserId, setMessageUserId] = useState<string | null>(null);
   const [editUserId, setEditUserId] = useState<string | null>(null);
 
   const { data } = useUsers({});
   const { data: editUser } = useUserDetails(editUserId || '');
+
+  if (status === 'loading') {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
+      </div>
+    );
+  }
 
   if (!session || session.user.role !== 'ADMIN') {
     redirect('/dashboard');
@@ -28,6 +36,17 @@ export default function UsersManagementPage() {
   const totalUsers = data?.total || 0;
   const activeUsers = stats.find((s: any) => s.status === 'active')?._count || 0;
   const adminCount = stats.find((s: any) => s.role === 'ADMIN')?._count || 0;
+  const newThisMonth = data?.users
+    ? data.users.filter((u: any) => {
+        if (!u.createdAt) return false;
+        const created = new Date(u.createdAt);
+        const now = new Date();
+        return (
+          created.getMonth() === now.getMonth() &&
+          created.getFullYear() === now.getFullYear()
+        );
+      }).length
+    : '—';
 
   return (
     <div className="container max-w-7xl mx-auto p-6 space-y-6">
@@ -88,8 +107,7 @@ export default function UsersManagementPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">
-              {/* Calculate new users this month */}
-              0
+              {newThisMonth}
             </div>
           </CardContent>
         </Card>

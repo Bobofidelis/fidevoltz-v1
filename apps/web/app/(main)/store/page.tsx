@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { useState, useMemo, useEffect, useRef } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useState, useMemo, useEffect, useRef, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { NewArrivals } from "@/components/store/new-arrivals";
 import { StoreSidebar } from "@/components/store/store-sidebar";
 import { StoreProductGrid } from "@/components/store/product-grid";
@@ -12,7 +14,7 @@ import { SearchSuggestions } from "@/components/store/search-suggestions";
 import { useApiQuery } from "@/lib/hooks/use-api-query";
 import type { Product, PaginatedResponse } from "@fidevoltz/types";
 
-export default function StorePage() {
+function StoreContent() {
   // Use React Query to fetch products - public endpoint
   const { data, isLoading } = useApiQuery<PaginatedResponse<Product>>({
     endpoint: '/api/products',
@@ -50,10 +52,12 @@ export default function StorePage() {
         price: Number(p.price),
         image: p.image || p.images?.[0] || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400',
         category: p.category?.name || 'Uncategorized',
+        categoryId: p.categoryId || (p.category as any)?.id,
         brand: 'Generic',
         badge,
         stock,
         inStock: stock > 0, // Product is in stock if stock > 0
+        createdAt: p.createdAt,
       };
     }) || [];
   }, [data]);
@@ -65,6 +69,9 @@ export default function StorePage() {
 
   const brands = ["Arduino", "Espressif", "Raspberry Pi", "Adafruit", "SparkFun", "Generic", "TechTools", "SolderMaster"];
 
+  const searchParams = useSearchParams();
+  const categoryParam = searchParams.get('category');
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
@@ -73,6 +80,39 @@ export default function StorePage() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   
   const searchRef = useRef<HTMLDivElement>(null);
+
+  const prevCategoryRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (categoryParam !== prevCategoryRef.current) {
+      prevCategoryRef.current = categoryParam;
+      if (categoryParam) {
+        const paramLower = categoryParam.toLowerCase();
+        const paramSlug = paramLower.replace(/\s+/g, '-');
+        const matched = categoriesData?.find((c) =>
+          c.id === categoryParam ||
+          c.name.toLowerCase() === paramLower ||
+          c.name.toLowerCase().replace(/\s+/g, '-') === paramSlug ||
+          c.name.toLowerCase().includes(paramLower)
+        );
+        setSelectedCategories([matched?.name || categoryParam]);
+      } else {
+        setSelectedCategories([]);
+      }
+    } else if (categoryParam && categoriesData && categoriesData.length > 0) {
+      const paramLower = categoryParam.toLowerCase();
+      const paramSlug = paramLower.replace(/\s+/g, '-');
+      const matched = categoriesData.find((c) =>
+        c.id === categoryParam ||
+        c.name.toLowerCase() === paramLower ||
+        c.name.toLowerCase().replace(/\s+/g, '-') === paramSlug ||
+        c.name.toLowerCase().includes(paramLower)
+      );
+      if (matched && !selectedCategories.includes(matched.name)) {
+        setSelectedCategories([matched.name]);
+      }
+    }
+  }, [categoryParam, categoriesData, selectedCategories]);
 
   const toggleFilter = (item: string, current: string[], setter: (val: string[]) => void) => {
     if (current.includes(item)) {
@@ -93,8 +133,23 @@ export default function StorePage() {
       }
 
       // Categories
-      if (selectedCategories.length > 0 && !(product.category && selectedCategories.includes(product.category))) {
-        return false;
+      if (selectedCategories.length > 0) {
+        const matchesCategory = selectedCategories.some((selectedCat) => {
+          const catLower = selectedCat.toLowerCase();
+          const catSlug = catLower.replace(/\s+/g, '-');
+          const prodCatName = product.category ? product.category.toLowerCase() : "";
+          const prodCatSlug = prodCatName.replace(/\s+/g, '-');
+          const prodCatId = (product as any).categoryId || "";
+
+          return (
+            prodCatName === catLower ||
+            prodCatSlug === catSlug ||
+            prodCatId === selectedCat ||
+            prodCatName.includes(catLower)
+          );
+        });
+
+        if (!matchesCategory) return false;
       }
 
       // Brands
@@ -119,7 +174,11 @@ export default function StorePage() {
     }).sort((a, b) => {
       if (sortBy === "Price: Low to High") return a.price - b.price;
       if (sortBy === "Price: High to Low") return b.price - a.price;
-      if (sortBy === "Newest") return parseInt(b.id) - parseInt(a.id);
+      if (sortBy === "Newest") {
+        const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return timeB - timeA;
+      }
       return 0; // Featured default
     });
   }, [allProducts, searchQuery, selectedCategories, selectedBrands, priceRange, sortBy]);
@@ -224,12 +283,18 @@ export default function StorePage() {
                       <Button 
                         variant={selectedCategories.length === 0 ? "default" : "ghost"} 
                         size="sm" 
-                        className={`rounded-md h-8 text-xs ${selectedCategories.length === 0 ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'}`}
+                        className={`rounded-md h-8 text-xs ${selectedCategories.length === 0 ? 'bg-white shadow-sm text-slate-900 font-medium' : 'text-slate-500 hover:text-slate-900'}`}
                         onClick={() => setSelectedCategories([])}
                       >
                         All
                       </Button>
-                      {categories.length > 0 ? (
+                      {categoriesLoading ? (
+                        <div className="flex items-center gap-1.5 px-2">
+                          <Skeleton className="h-6 w-14 rounded-md" />
+                          <Skeleton className="h-6 w-16 rounded-md" />
+                          <Skeleton className="h-6 w-12 rounded-md" />
+                        </div>
+                      ) : categories.length > 0 ? (
                         categories.map(cat => (
                           <Button
                             key={cat}
@@ -246,19 +311,23 @@ export default function StorePage() {
                       )}
                    </div>
                    
-                   {/* Sort Dropdown Hook Component could be better but simplified to Select for now or Button toggles */}
-                   <div className="h-6 w-px bg-slate-200 mx-2 flex-shrink-0" />
+                   {/* Sort Dropdown */}
+                   <div className="h-6 w-px bg-slate-200 mx-1 flex-shrink-0" />
 
-                   <select 
-                      className="bg-transparent text-sm font-medium text-slate-600 focus:outline-none cursor-pointer hover:text-slate-900"
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value)}
-                   >
-                     <option>Featured</option>
-                     <option>Price: Low to High</option>
-                     <option>Price: High to Low</option>
-                     <option>Newest</option>
-                   </select>
+                   <div className="flex items-center gap-1.5 text-xs text-slate-500 flex-shrink-0">
+                     <span className="hidden sm:inline">Sort:</span>
+                     <select 
+                        aria-label="Sort products"
+                        className="bg-white border border-slate-200 rounded-md px-2.5 py-1.5 text-xs font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer hover:text-slate-900 transition-colors"
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
+                     >
+                       <option value="Featured">Featured</option>
+                       <option value="Price: Low to High">Price: Low to High</option>
+                       <option value="Price: High to Low">Price: High to Low</option>
+                       <option value="Newest">Newest</option>
+                     </select>
+                   </div>
                 </div>
              </div>
              
@@ -284,10 +353,6 @@ export default function StorePage() {
           </div>
 
           <div className="flex flex-col lg:flex-row gap-8">
-            {/* We removed the Sidebar to focus on the Sticky Top Bar which is "Close to Content" 
-                But for Layout stability, we can keep the Grid full width now.
-             */}
-
             {/* Product Grid - Full Width */}
             <div className="flex-1">
               <StoreProductGrid 
@@ -296,7 +361,8 @@ export default function StorePage() {
                 sortBy={sortBy}
                 onSortChange={setSortBy}
                 onReset={resetFilters}
-                hideHeader={true} // Add this prop to hide the redundant header in grid if exists
+                hideHeader={true}
+                isLoading={isLoading}
               />
             </div>
           </div>
@@ -305,4 +371,22 @@ export default function StorePage() {
     </div>
   );
 }
+
+export default function StorePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+            <p className="text-sm text-slate-500">Loading store...</p>
+          </div>
+        </div>
+      }
+    >
+      <StoreContent />
+    </Suspense>
+  );
+}
+
 

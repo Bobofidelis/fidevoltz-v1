@@ -1,14 +1,16 @@
 "use client";
 
-import { useCartStore } from "@/store/cart-store";
+import { useState } from "react";
+import { useCartStore, FREE_SHIPPING_THRESHOLD } from "@/store/cart-store";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, CheckSquare, Square, Tag } from "lucide-react";
+import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, CheckSquare, Square, Tag, Loader2, Info, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { formatNaira } from "@/lib/utils/currency";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 export default function CartPage() {
   const { 
@@ -61,8 +63,41 @@ export default function CartPage() {
   const allSelected = items.length > 0 && selectedItems.length === items.length;
   const hasSelection = selectedItems.length > 0;
   
-  const FREE_SHIPPING_THRESHOLD = 50;
   const shippingProgress = Math.min((subtotal / FREE_SHIPPING_THRESHOLD) * 100, 100);
+
+  const [couponCode, setCouponCode] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponFeedback, setCouponFeedback] = useState<{
+    type: "info" | "error";
+    message: string;
+  } | null>(null);
+
+  const handleApplyCoupon = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const trimmed = couponCode.trim();
+    if (!trimmed) {
+      toast.error("Please enter a coupon code");
+      setCouponFeedback({
+        type: "error",
+        message: "Please enter a coupon code",
+      });
+      return;
+    }
+
+    setCouponLoading(true);
+    setCouponFeedback(null);
+
+    setTimeout(() => {
+      setCouponLoading(false);
+      toast.info("Coupon feature coming soon", {
+        description: "Promo code validation will be available in an upcoming update.",
+      });
+      setCouponFeedback({
+        type: "info",
+        message: `Coupon "${trimmed.toUpperCase()}" feature is coming soon!`,
+      });
+    }, 400);
+  };
 
   const handleSelectAll = () => {
     if (allSelected) {
@@ -82,7 +117,15 @@ export default function CartPage() {
               <h1 className="text-4xl font-bold text-slate-900">Shopping Cart</h1>
               <p className="text-slate-600 mt-2">{getItemCount()} items in your cart</p>
             </div>
-            <Button variant="outline" className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600" onClick={clearCart}>
+            <Button 
+              variant="outline" 
+              className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600" 
+              onClick={() => {
+                if (window.confirm('Are you sure you want to empty your cart?')) {
+                  clearCart();
+                }
+              }}
+            >
               Empty Cart
             </Button>
           </div>
@@ -154,7 +197,7 @@ export default function CartPage() {
                         <div className="flex-1 flex flex-col justify-between">
                           <div className="flex justify-between items-start">
                             <div>
-                              <Link href={`/store/product/${item.slug}`}>
+                              <Link href={`/store/product/${item.productId || item.id}`}>
                                 <h3 className="font-bold text-lg text-slate-900 hover:text-blue-600 transition-colors line-clamp-2">
                                   {item.name}
                                 </h3>
@@ -286,13 +329,51 @@ export default function CartPage() {
                     </div>
 
                     <div className="mb-6">
-                      <div className="flex gap-2">
-                        <div className="relative flex-1">
-                          <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                          <Input placeholder="Coupon code" className="pl-9 h-10 text-sm" />
+                      <form onSubmit={handleApplyCoupon} className="space-y-2">
+                        <div className="flex gap-2">
+                          <div className="relative flex-1">
+                            <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                            <Input
+                              placeholder="Coupon code"
+                              value={couponCode}
+                              onChange={(e) => {
+                                setCouponCode(e.target.value);
+                                if (couponFeedback) setCouponFeedback(null);
+                              }}
+                              disabled={couponLoading}
+                              className="pl-9 h-10 text-sm"
+                            />
+                          </div>
+                          <Button 
+                            type="submit" 
+                            variant="secondary" 
+                            className="h-10 px-4 min-w-[80px]"
+                            disabled={couponLoading || !couponCode.trim()}
+                          >
+                            {couponLoading ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              "Apply"
+                            )}
+                          </Button>
                         </div>
-                        <Button variant="secondary" className="h-10">Apply</Button>
-                      </div>
+                        {couponFeedback && (
+                          <div
+                            className={`flex items-start gap-2 p-2.5 rounded-lg text-xs transition-all ${
+                              couponFeedback.type === "error"
+                                ? "bg-red-50 text-red-700 border border-red-200"
+                                : "bg-blue-50 text-blue-700 border border-blue-200"
+                            }`}
+                          >
+                            {couponFeedback.type === "error" ? (
+                              <AlertCircle className="h-4 w-4 shrink-0 text-red-500 mt-0.5" />
+                            ) : (
+                              <Info className="h-4 w-4 shrink-0 text-blue-500 mt-0.5" />
+                            )}
+                            <span>{couponFeedback.message}</span>
+                          </div>
+                        )}
+                      </form>
                     </div>
 
                     <Link href="/checkout">

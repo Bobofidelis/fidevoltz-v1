@@ -167,7 +167,7 @@ function ContactForm() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleGeneralSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="general-name">Name</Label>
                   <Input 
@@ -230,7 +230,7 @@ function ContactForm() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleServiceSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="service-name">Name</Label>
                   <Input 
@@ -253,7 +253,7 @@ function ContactForm() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="service-type">Project Type</Label>
                   <Select value={serviceForm.projectType} onValueChange={(value) => setServiceForm({ ...serviceForm, projectType: value })} required>
@@ -314,7 +314,7 @@ function ContactForm() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handlePartnerSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="partner-name">Name</Label>
                   <Input 
@@ -336,7 +336,7 @@ function ContactForm() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="partner-email">Email</Label>
                   <Input 

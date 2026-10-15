@@ -14,7 +14,7 @@ export async function POST(
     console.log('[REVIEW REPLY API] Session:', session ? 'EXISTS' : 'NULL');
     console.log('[REVIEW REPLY API] User role:', session?.user?.role);
 
-    if (!session || !session.user || session.user.role !== 'ADMIN') {
+    if (!session || !session.user || (session.user.role !== 'ADMIN' && session.user.role !== 'EDITOR')) {
       console.error('[REVIEW REPLY API] Unauthorized');
       return NextResponse.json<ApiResponse>(
         { success: false, error: 'Unauthorized' },

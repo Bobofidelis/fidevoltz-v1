@@ -1,10 +1,19 @@
-import Image from "next/image";
+import { Metadata } from "next";
 import { HeroSection } from "@/components/landing/hero-section";
 import { FeaturesSection } from "@/components/landing/features-section";
 import { LatestProjects } from "@/components/landing/latest-projects";
 import { FeaturedProducts } from "@/components/landing/featured-products";
 import { ServicesSection } from "@/components/landing/services-section";
 import { AdSlot } from "@/components/ads/AdSlot";
+
+export const metadata: Metadata = {
+  title: 'Home',
+  description: 'Build amazing electronics projects with step-by-step tutorials, premium components, and a thriving community of makers.',
+  openGraph: {
+    title: 'FideVoltz - Electronics Tutorials & Store',
+    description: 'Build amazing electronics projects with step-by-step tutorials, premium components, and a thriving community of makers.',
+  },
+};
 
 export default function Home() {
   return (

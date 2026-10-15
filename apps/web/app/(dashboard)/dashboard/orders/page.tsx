@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useOrders } from '@/lib/hooks/use-orders';
 import { OrdersStats } from '@/components/orders/orders-stats';
@@ -10,18 +10,31 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { formatCurrency, formatOrderNumber, ORDER_STATUS_CONFIG } from '@/lib/utils/order-helpers';
-import { Search, Filter, Eye, Loader2 } from 'lucide-react';
+import { Search, Filter, Eye, Loader2, X } from 'lucide-react';
 import { format } from 'date-fns';
 import Link from 'next/link';
 
 export default function OrdersPage() {
   const { data: session } = useSession();
+  const [searchInput, setSearchInput] = useState('');
   const [filters, setFilters] = useState({
     page: 1,
     limit: 10,
     status: 'all',
     search: '',
   });
+
+  // Debounce search input by 300ms
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFilters((prev) => {
+        if (prev.search === searchInput) return prev;
+        return { ...prev, search: searchInput, page: 1 };
+      });
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   const { data, isLoading } = useOrders({
     ...filters,
@@ -34,6 +47,11 @@ export default function OrdersPage() {
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value, page: 1 }));
+  };
+
+  const handleClearFilters = () => {
+    setSearchInput('');
+    setFilters({ page: 1, limit: 10, status: 'all', search: '' });
   };
 
   return (
@@ -59,13 +77,22 @@ export default function OrdersPage() {
             {isAdmin && (
               <div className="flex-1">
                 <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                   <Input
                     placeholder="Search by order ID, customer name or email..."
-                    value={filters.search}
-                    onChange={(e) => handleFilterChange('search', e.target.value)}
-                    className="pl-10"
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    className="pl-10 pr-9"
                   />
+                  {searchInput && (
+                    <button
+                      onClick={() => setSearchInput('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-slate-700 transition-colors"
+                      aria-label="Clear search"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
                 </div>
               </div>
             )}
@@ -89,10 +116,10 @@ export default function OrdersPage() {
               </SelectContent>
             </Select>
 
-            {filters.status !== 'all' || filters.search ? (
+            {filters.status !== 'all' || searchInput ? (
               <Button
                 variant="outline"
-                onClick={() => setFilters({ page: 1, limit: 10, status: 'all', search: '' })}
+                onClick={handleClearFilters}
               >
                 Clear Filters
               </Button>
@@ -114,24 +141,24 @@ export default function OrdersPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full min-w-[760px]">
                 <thead className="bg-slate-50 border-b">
                   <tr>
-                    <th className="text-left p-4 font-medium">Order</th>
-                    {isAdmin && <th className="text-left p-4 font-medium">Customer</th>}
-                    <th className="text-left p-4 font-medium">Date</th>
-                    <th className="text-left p-4 font-medium">Status</th>
-                    <th className="text-left p-4 font-medium">Total</th>
-                    <th className="text-left p-4 font-medium">Items</th>
-                    <th className="text-right p-4 font-medium">Actions</th>
+                    <th className="text-left p-4 font-medium whitespace-nowrap">Order</th>
+                    {isAdmin && <th className="text-left p-4 font-medium whitespace-nowrap">Customer</th>}
+                    <th className="text-left p-4 font-medium whitespace-nowrap">Date</th>
+                    <th className="text-left p-4 font-medium whitespace-nowrap">Status</th>
+                    <th className="text-left p-4 font-medium whitespace-nowrap">Total</th>
+                    <th className="text-left p-4 font-medium whitespace-nowrap">Items</th>
+                    <th className="text-right p-4 font-medium whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {orders.map((order: any) => (
-                    <tr key={order.id} className="border-b hover:bg-slate-50">
+                    <tr key={order.id} className="border-b hover:bg-slate-50 transition-colors">
                       <td className="p-4">
                         <div>
-                          <p className="font-medium">{formatOrderNumber(order.id)}</p>
+                          <p className="font-medium font-mono text-sm">{formatOrderNumber(order.id)}</p>
                           {order.trackingNumber && (
                             <p className="text-xs text-muted-foreground">
                               Tracking: {order.trackingNumber}
@@ -142,24 +169,24 @@ export default function OrdersPage() {
                       {isAdmin && (
                         <td className="p-4">
                           <div>
-                            <p className="font-medium">{order.user.name || 'N/A'}</p>
-                            <p className="text-sm text-muted-foreground">{order.user.email}</p>
+                            <p className="font-medium">{order.user?.name || 'Guest'}</p>
+                            <p className="text-sm text-muted-foreground">{order.user?.email || 'N/A'}</p>
                           </div>
                         </td>
                       )}
-                      <td className="p-4 text-sm">
+                      <td className="p-4 text-sm whitespace-nowrap">
                         {format(new Date(order.createdAt), 'MMM d, yyyy')}
                       </td>
-                      <td className="p-4">
+                      <td className="p-4 whitespace-nowrap">
                         <OrderStatusBadge status={order.status} />
                       </td>
-                      <td className="p-4 font-medium">
+                      <td className="p-4 font-medium whitespace-nowrap">
                         {formatCurrency(order.totalAmount)}
                       </td>
-                      <td className="p-4 text-sm text-muted-foreground">
+                      <td className="p-4 text-sm text-muted-foreground whitespace-nowrap">
                         {order.items.length} item{order.items.length !== 1 ? 's' : ''}
                       </td>
-                      <td className="p-4 text-right">
+                      <td className="p-4 text-right whitespace-nowrap">
                         <Link href={`/dashboard/orders/${order.id}`}>
                           <Button variant="outline" size="sm">
                             <Eye className="h-4 w-4 mr-2" />

@@ -29,12 +29,8 @@ export default async function DynamicPage({ params }: PageProps) {
   try {
     page = await prisma.page.findUnique({ where: { slug } });
   } catch (error: any) {
-    return (
-      <div className="p-10 text-red-500">
-        <h1>Error Rendering Page</h1>
-        <pre className="mt-4 bg-slate-100 p-4 rounded">{error.message}</pre>
-      </div>
-    );
+    console.error('Failed to render page:', error);
+    notFound();
   }
 
   if (!page || !page.isPublished) notFound();
@@ -107,8 +103,12 @@ export default async function DynamicPage({ params }: PageProps) {
   }
 
   return (
-    <main className="min-h-screen">
-      <PageRenderer content={blocks} />
+    <main className="min-h-screen bg-slate-50">
+      <div className="container max-w-5xl mx-auto px-4 py-10">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+          <PageRenderer content={blocks} />
+        </div>
+      </div>
     </main>
   );
 }

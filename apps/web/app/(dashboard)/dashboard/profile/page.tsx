@@ -14,6 +14,7 @@ import { ProfileForm } from "@/components/profile/profile-form";
 import { PasswordForm } from "@/components/profile/password-form";
 import { AdminSettings } from "@/components/profile/admin-settings";
 import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 export default function ProfilePage() {
   const { data: session } = useSession();
@@ -110,7 +111,7 @@ export default function ProfilePage() {
 
       {/* Tabbed Interface - Enhanced */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 h-auto p-1 bg-slate-100">
+        <TabsList className={cn('grid w-full h-auto p-1 bg-slate-100', isAdmin ? 'grid-cols-4' : 'grid-cols-3')}>
           <TabsTrigger 
             value="profile" 
             className="gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm py-3"

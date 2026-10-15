@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { Metadata } from "next";
 // import { Inter } from "next/font/google";
 import "./globals.css";
@@ -12,37 +13,33 @@ import { Providers } from "@/components/providers";
 import { prisma } from "@/lib/prisma";
 import { hexToHsl } from "@/lib/utils";
 
-export async function generateMetadata(): Promise<Metadata> {
+const getBrandingSettings = cache(async () => {
   try {
-    const settings = await prisma.siteSettings.findMany({
-      where: { category: 'branding' },
-    });
-    
-    const branding = settings.reduce((acc: any, s) => {
-      acc[s.key] = s.value;
-      return acc;
-    }, {});
-    
-    const siteName = branding['branding.siteName'] || "FideVoltz";
-    const tagline = branding['branding.tagline'] || "Electronics Tutorials & Store";
-    const favicon = branding['branding.favicon'] || "/favicon.ico";
-    
-    return {
-      title: {
-        default: `${siteName} - ${tagline}`,
-        template: `%s | ${siteName}`,
-      },
-      description: tagline,
-      icons: {
-        icon: favicon,
-      },
-    };
-  } catch (error) {
-    return {
-      title: "FideVoltz - Electronics Tutorials & Store",
-      description: "Learn electronics and buy components.",
-    };
+    const settings = await prisma.siteSettings.findMany({ where: { category: 'branding' } });
+    return settings.reduce((acc: any, s) => ({ ...acc, [s.key]: s.value }), {});
+  } catch {
+    return {};
   }
+});
+
+export async function generateMetadata(): Promise<Metadata> {
+  const branding = await getBrandingSettings();
+  
+  const siteName = branding['branding.siteName'] || "FideVoltz";
+  const tagline = branding['branding.tagline'] || "Electronics Tutorials & Store";
+  const favicon = branding['branding.favicon'] || "/favicon.ico";
+  
+  return {
+    metadataBase: new URL('https://fidevoltz.vercel.app'),
+    title: {
+      default: `${siteName} - ${tagline}`,
+      template: `%s | ${siteName}`,
+    },
+    description: tagline,
+    icons: {
+      icon: favicon,
+    },
+  };
 }
 
 export default async function RootLayout({
@@ -50,16 +47,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  let branding: any = {};
-  try {
-    const settings = await prisma.siteSettings.findMany({
-      where: { category: 'branding' },
-    });
-    branding = settings.reduce((acc: any, s) => {
-      acc[s.key] = s.value;
-      return acc;
-    }, {});
-  } catch (e) {}
+  const branding = await getBrandingSettings();
 
   const primaryColor = branding['branding.primaryColor'] || "#3B82F6";
   const primaryHsl = hexToHsl(primaryColor);
@@ -74,6 +62,7 @@ export default async function RootLayout({
         `}} />
       </head>
       <body className="font-sans antialiased" suppressHydrationWarning>
+        <TopLoader />
         <Providers>
           <AnalyticsTracker />
           <ThemeProvider

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { usePageAds, trackAdClick } from "@/lib/hooks/use-ads";
+import { useState, useEffect, useRef } from "react";
+import { usePageAds, trackAdClick, trackAdImpression } from "@/lib/hooks/use-ads";
 
 interface AdSlotProps {
   page: string;
@@ -9,9 +9,13 @@ interface AdSlotProps {
   className?: string;
 }
 
+// Track impressions once per ad per page load
+const trackedImpressions = new Set<string>();
+
 export function AdSlot({ page, zone, className = "" }: AdSlotProps) {
   const { data: ads, isLoading } = usePageAds(page);
   const [adIndex, setAdIndex] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Filter ads for this specific zone
   const zoneAds = ads?.filter((ad: any) =>
@@ -27,10 +31,46 @@ export function AdSlot({ page, zone, className = "" }: AdSlotProps) {
     return () => clearInterval(interval);
   }, [zoneAds.length]);
 
-  // Don't render anything while loading or if no ads for this zone
-  if (isLoading || zoneAds.length === 0) return null;
+  const ad = zoneAds.length > 0 ? zoneAds[adIndex % zoneAds.length] : null;
 
-  const ad = zoneAds[adIndex % zoneAds.length];
+  // Track impression when ad enters viewport (once per ad per page load)
+  useEffect(() => {
+    if (!ad?.id || trackedImpressions.has(ad.id)) return;
+
+    const element = containerRef.current;
+    if (!element) return;
+
+    if (typeof IntersectionObserver === "undefined") {
+      trackedImpressions.add(ad.id);
+      trackAdImpression(ad.id);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry && entry.isIntersecting) {
+          if (!trackedImpressions.has(ad.id)) {
+            trackedImpressions.add(ad.id);
+            trackAdImpression(ad.id);
+          }
+          observer.disconnect();
+        }
+      },
+      {
+        threshold: 0.2, // Fire when 20% visible
+      }
+    );
+
+    observer.observe(element);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [ad?.id]);
+
+  // Don't render anything while loading or if no ads for this zone
+  if (isLoading || !ad) return null;
 
   const handleClick = () => {
     trackAdClick(ad.id);
@@ -40,7 +80,7 @@ export function AdSlot({ page, zone, className = "" }: AdSlotProps) {
   };
 
   return (
-    <div className={`promo-container promo-zone-${zone.toLowerCase()} relative ${className}`}>
+    <div ref={containerRef} className={`promo-container promo-zone-${zone.toLowerCase()} relative ${className}`}>
       {ad.customHtml ? (
         // Custom HTML ad (e.g., Google AdSense code)
         <div dangerouslySetInnerHTML={{ __html: ad.customHtml }} />

@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 import { 
   User, Lock, Bell, Eye, Globe, Settings as SettingsIcon,
   Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin,
-  Youtube, MessageCircle, Send, Palette
+  Youtube, MessageCircle, Send, Palette, Loader2
 } from "lucide-react";
 import { WhatsAppSettings } from "@/components/admin/whatsapp-settings";
 import { 
@@ -273,7 +273,14 @@ export default function SettingsPage() {
 
 
   if (status === "loading" || loadingUserSettings) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-10 w-10 animate-spin text-blue-600 mx-auto" />
+          <p className="text-sm text-muted-foreground">Loading settings...</p>
+        </div>
+      </div>
+    );
   }
 
   if (!user) {
@@ -290,42 +297,42 @@ export default function SettingsPage() {
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-9">
-          <TabsTrigger value="profile">
+        <TabsList className="flex w-full overflow-x-auto justify-start h-auto p-1 gap-1">
+          <TabsTrigger value="profile" className="shrink-0">
             <User className="h-4 w-4 mr-2" />
             Profile
           </TabsTrigger>
-          <TabsTrigger value="security">
+          <TabsTrigger value="security" className="shrink-0">
             <Lock className="h-4 w-4 mr-2" />
             Security
           </TabsTrigger>
-          <TabsTrigger value="notifications">
+          <TabsTrigger value="notifications" className="shrink-0">
             <Bell className="h-4 w-4 mr-2" />
             Notifications
           </TabsTrigger>
           {isAdmin && (
             <>
-              <TabsTrigger value="contact">
+              <TabsTrigger value="contact" className="shrink-0">
                 <Mail className="h-4 w-4 mr-2" />
                 Contact Info
               </TabsTrigger>
-              <TabsTrigger value="social">
+              <TabsTrigger value="social" className="shrink-0">
                 <Globe className="h-4 w-4 mr-2" />
                 Social Media
               </TabsTrigger>
-              <TabsTrigger value="branding">
+              <TabsTrigger value="branding" className="shrink-0">
                 <Palette className="h-4 w-4 mr-2" />
                 Branding
               </TabsTrigger>
-              <TabsTrigger value="email">
+              <TabsTrigger value="email" className="shrink-0">
                 <Send className="h-4 w-4 mr-2" />
                 Email
               </TabsTrigger>
-              <TabsTrigger value="general">
+              <TabsTrigger value="general" className="shrink-0">
                 <SettingsIcon className="h-4 w-4 mr-2" />
                 General
               </TabsTrigger>
-              <TabsTrigger value="whatsapp">
+              <TabsTrigger value="whatsapp" className="shrink-0">
                 <MessageCircle className="h-4 w-4 mr-2" />
                 WhatsApp
               </TabsTrigger>

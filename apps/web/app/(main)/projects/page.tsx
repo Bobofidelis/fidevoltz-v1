@@ -24,7 +24,7 @@ interface ProjectsPageProps {
 export const revalidate = 60; // Revalidate every minute
 
 export default async function ProjectsPage({ searchParams }: ProjectsPageProps) {
-  const { q, category: cat, difficulty: diff, page: p } = await searchParams;
+  const { q, category: cat, difficulty: diff, page: p, tag } = await searchParams;
   
   const query = q || "";
   const category = cat || "All";
@@ -42,6 +42,8 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
     where.OR = [
       { title: { contains: query, mode: "insensitive" } },
       { excerpt: { contains: query, mode: "insensitive" } },
+      { category: { contains: query, mode: "insensitive" } },
+      { tags: { has: query } },
     ];
   }
 
@@ -56,7 +58,6 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
   }
 
   // Handle tag filtering
-  const { tag } = await searchParams;
   if (tag) {
     const allPublished = await prisma.projectPost.findMany({
       where: { status: "PUBLISHED" },
@@ -238,7 +239,12 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                              
                              <div className="pt-5 border-t border-slate-100 flex items-center justify-between mt-auto text-xs text-slate-500">
                                 <div className="flex items-center gap-4">
-                                  <span className="flex items-center gap-1.5 font-medium"><Clock className="h-3.5 w-3.5"/> 5 min read</span>
+                                  <span className="flex items-center gap-1.5 font-medium">
+                                    <Clock className="h-3.5 w-3.5"/>
+                                    {project.publishedAt
+                                      ? new Date(project.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                                      : '5 min read'}
+                                  </span>
                                 </div>
                                 <Link href={`/projects/${project.slug}`} className="text-blue-600 font-semibold hover:text-blue-700 flex items-center gap-1 group/link">
                                   Read Article <ArrowRight className="h-3 w-3 transition-transform group-hover/link:translate-x-1"/>
@@ -261,7 +267,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                 {/* Pagination */}
                 {totalPages > 1 && (
                   <div className="flex justify-center gap-2 pt-12">
-                     <Link href={`?page=${Math.max(1, page - 1)}&q=${query}&category=${category}`}>
+                     <Link href={`?page=${Math.max(1, page - 1)}&q=${query}&category=${category}&difficulty=${difficulty}`}>
                        <Button variant="outline" disabled={page === 1} className="w-10 h-10 p-0 rounded-full">
                           <ArrowRight className="h-4 w-4 rotate-180" />
                        </Button>
@@ -269,7 +275,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                      <span className="flex items-center px-4 text-sm font-medium text-slate-600 bg-white border rounded-full">
                        Page {page} of {totalPages}
                      </span>
-                     <Link href={`?page=${Math.min(totalPages, page + 1)}&q=${query}&category=${category}`}>
+                     <Link href={`?page=${Math.min(totalPages, page + 1)}&q=${query}&category=${category}&difficulty=${difficulty}`}>
                        <Button variant="outline" disabled={page === totalPages} className="w-10 h-10 p-0 rounded-full">
                           <ArrowRight className="h-4 w-4" />
                        </Button>

@@ -1,3 +1,5 @@
+import DOMPurify from 'isomorphic-dompurify';
+
 export interface WysiwygNode {
   type: string;
   content?: WysiwygNode[];
@@ -105,7 +107,7 @@ export function WysiwygRenderer({ content }: WysiwygRendererProps) {
     return (
       <div 
         className="prose prose-slate max-w-none"
-        dangerouslySetInnerHTML={{ __html: content }}
+        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }}
       />
     );
   }

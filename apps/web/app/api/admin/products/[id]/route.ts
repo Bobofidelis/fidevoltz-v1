@@ -109,24 +109,40 @@ export async function DELETE(
 
     const { id } = await params;
     
-    // Check if product exists
-    const product = await prisma.product.findUnique({ where: { id } });
+    // Check if product exists with related order items
+    const product = await prisma.product.findUnique({
+      where: { id },
+      include: {
+        _count: {
+          select: { orderItems: true }
+        }
+      }
+    });
     if (!product) {
-       return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 });
+      return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 });
     }
 
-    // Instead of hard delete, maybe just archive? 
-    // Plan said "add delete", user said "delete". We will hard delete but catch FK errors or use Cascade if configured
-    // Schema has Cascade deletes for some relations, but maybe not all.
-    // Let's try Delete and handle error.
+    if (product._count.orderItems > 0) {
+      return NextResponse.json({
+        success: false,
+        error: 'Cannot delete product because it is associated with existing customer orders. You can change its status to ARCHIVED instead.'
+      }, { status: 400 });
+    }
+
+    // Clean up cart items and project components before deleting
+    await prisma.cartItem.deleteMany({ where: { productId: id } });
+    await prisma.projectComponent.deleteMany({ where: { productId: id } });
 
     await prisma.product.delete({
       where: { id },
     });
 
     return NextResponse.json({ success: true, message: 'Product deleted successfully' });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Delete product error:', error);
-    return NextResponse.json({ success: false, error: 'Failed to delete product' }, { status: 500 });
+    return NextResponse.json({
+      success: false,
+      error: error?.message || 'Failed to delete product'
+    }, { status: 500 });
   }
 }

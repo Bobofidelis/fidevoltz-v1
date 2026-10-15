@@ -13,7 +13,6 @@ import {
   List, Heading2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { nanoid } from "nanoid";
 
 type KnownBlockType = "text" | "markdown" | "code" | "heading" | "image" | "alert" | "sidebar_settings" | "toc" | "latest_posts" | "featured_posts" | "categories" | "ad";
 type BlockType = KnownBlockType | (string & {});
@@ -358,7 +357,7 @@ export function SidebarEditor({
   const selectedBlock = blocks.find(b => b.id === selected);
 
   const addBlock = (type: BlockType) => {
-    const newBlock: Block = { id: nanoid(), type, content: defaultContent(type) };
+    const newBlock: Block = { id: crypto.randomUUID(), type, content: defaultContent(type) };
     setBlocks(prev => [...prev, newBlock]);
     setSelected(newBlock.id);
     setTab("blocks");

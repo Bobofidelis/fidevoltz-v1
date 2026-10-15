@@ -13,13 +13,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth();
 
-    if (!session || !session.user) {
-      return NextResponse.json<ApiResponse>(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
     const { id } = await params;
 
     const order = await prisma.order.findUnique({
@@ -75,12 +68,37 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Users can only view their own orders, admins can view any
-    if (order.userId !== session.user.id && session.user.role !== 'ADMIN') {
-      return NextResponse.json<ApiResponse>(
-        { success: false, error: 'Forbidden' },
-        { status: 403 }
-      );
+    const isOwnerOrAdmin = session?.user && (session.user.role === 'ADMIN' || session.user.id === order.userId);
+
+    if (!isOwnerOrAdmin) {
+      // Return sanitized order data for public tracking
+      return NextResponse.json<ApiResponse>({
+        success: true,
+        data: {
+          id: order.id,
+          status: order.status,
+          trackingNumber: order.trackingNumber,
+          carrier: order.carrier,
+          estimatedDelivery: order.estimatedDelivery,
+          actualDelivery: order.actualDelivery,
+          createdAt: order.createdAt,
+          updatedAt: order.updatedAt,
+          items: order.items.map(item => ({
+            id: item.id,
+            productId: item.productId,
+            quantity: item.quantity,
+            price: Number(item.price),
+            product: item.product,
+          })),
+          history: order.history.map(h => ({
+            id: h.id,
+            status: h.status,
+            createdAt: h.createdAt,
+            note: h.note,
+          })),
+          totalAmount: Number(order.totalAmount),
+        } as any,
+      });
     }
 
     return NextResponse.json<ApiResponse<Order>>(

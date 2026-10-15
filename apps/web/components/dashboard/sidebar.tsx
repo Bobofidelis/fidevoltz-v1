@@ -22,10 +22,10 @@ import {
   Image,
   User,
   Mail,
-  CreditCard
+  CreditCard,
+  FolderTree
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuthStore } from "@/store/auth-store";
 import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { usePublicSettings } from "@/lib/hooks/use-public-settings";
@@ -44,6 +44,7 @@ const sidebarItems = [
   // Admin & Editor - Management
   { icon: Package, label: "Products", href: "/dashboard/products", roles: ["ADMIN", "EDITOR"] },
   { icon: Plus, label: "Add Product", href: "/dashboard/products/add", roles: ["ADMIN", "EDITOR"] },
+  { icon: FolderTree, label: "Categories", href: "/dashboard/categories", roles: ["ADMIN", "EDITOR"] },
   { icon: Box, label: "Inventory", href: "/dashboard/inventory", roles: ["ADMIN", "EDITOR"] },
   { icon: Users, label: "Users", href: "/dashboard/users", roles: ["ADMIN"] },
   

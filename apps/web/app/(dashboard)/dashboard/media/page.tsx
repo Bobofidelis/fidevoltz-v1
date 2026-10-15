@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -10,13 +11,15 @@ import { MediaUpload } from '@/components/media/MediaUpload';
 import Link from 'next/link';
 
 export default function MediaLibraryPage() {
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('all');
   const [showUpload, setShowUpload] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const handleUploadSuccess = () => {
     setShowUpload(false);
-    // Trigger grid refresh
-    window.location.reload();
+    queryClient.invalidateQueries({ queryKey: ['media'] });
+    setRefreshKey((prev) => prev + 1);
   };
 
   return (
@@ -72,7 +75,7 @@ export default function MediaLibraryPage() {
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-4 mb-6">
+            <TabsList className="grid w-full grid-cols-5 mb-6">
               <TabsTrigger value="all">All Media</TabsTrigger>
               <TabsTrigger value="IMAGE" className="flex items-center gap-2">
                 <ImageIcon className="w-4 h-4" />
@@ -93,26 +96,42 @@ export default function MediaLibraryPage() {
             </TabsList>
 
             <TabsContent value="all">
-              <MediaGrid onDelete={() => window.location.reload()} />
+              <MediaGrid
+                key={`all-${refreshKey}`}
+                onDelete={() => queryClient.invalidateQueries({ queryKey: ['media'] })}
+              />
             </TabsContent>
 
             <TabsContent value="IMAGE">
-              <MediaGrid mediaType="IMAGE" onDelete={() => window.location.reload()} />
+              <MediaGrid
+                key={`IMAGE-${refreshKey}`}
+                mediaType="IMAGE"
+                onDelete={() => queryClient.invalidateQueries({ queryKey: ['media'] })}
+              />
             </TabsContent>
 
             <TabsContent value="VIDEO">
-              <MediaGrid mediaType="VIDEO" onDelete={() => window.location.reload()} />
+              <MediaGrid
+                key={`VIDEO-${refreshKey}`}
+                mediaType="VIDEO"
+                onDelete={() => queryClient.invalidateQueries({ queryKey: ['media'] })}
+              />
             </TabsContent>
 
             <TabsContent value="AUDIO">
-              <MediaGrid mediaType="AUDIO" onDelete={() => window.location.reload()} />
-            </TabsContent>
-            <TabsContent value="AUDIO">
-              <MediaGrid mediaType="AUDIO" onDelete={() => window.location.reload()} />
+              <MediaGrid
+                key={`AUDIO-${refreshKey}`}
+                mediaType="AUDIO"
+                onDelete={() => queryClient.invalidateQueries({ queryKey: ['media'] })}
+              />
             </TabsContent>
 
             <TabsContent value="DOCUMENT">
-              <MediaGrid mediaType="DOCUMENT" onDelete={() => window.location.reload()} />
+              <MediaGrid
+                key={`DOCUMENT-${refreshKey}`}
+                mediaType="DOCUMENT"
+                onDelete={() => queryClient.invalidateQueries({ queryKey: ['media'] })}
+              />
             </TabsContent>
           </Tabs>
         </CardContent>

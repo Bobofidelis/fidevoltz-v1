@@ -4,8 +4,9 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import Link from "next/link";
+import { Loader2 } from "lucide-react";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -17,7 +18,7 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/forgot-password`, {
+      const res = await fetch(`/api/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
@@ -46,11 +47,9 @@ export default function ForgotPasswordPage() {
           We've sent a password reset link to <strong>{email}</strong>.
         </p>
         <div className="mt-6">
-          <Link href="/auth/login">
-            <Button variant="outline" className="w-full">
-              Back to sign in
-            </Button>
-          </Link>
+          <Button asChild variant="outline" className="w-full">
+            <Link href="/auth/login">Back to sign in</Link>
+          </Button>
         </div>
       </div>
     );
@@ -83,7 +82,14 @@ export default function ForgotPasswordPage() {
         </div>
 
         <Button type="submit" className="w-full h-11 bg-blue-600 hover:bg-blue-700" disabled={loading}>
-          {loading ? "Sending link..." : "Send reset link"}
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Sending link...
+            </>
+          ) : (
+            "Send reset link"
+          )}
         </Button>
 
         <div className="text-center">

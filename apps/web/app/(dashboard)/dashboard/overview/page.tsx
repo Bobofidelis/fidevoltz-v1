@@ -12,21 +12,32 @@ import { useOverviewStats, useActivityFeed, useNotifications } from "@/lib/hooks
 import Link from "next/link";
 
 export default function OverviewPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const user = session?.user;
-  const isAdmin = user?.role === "ADMIN";
+  const isStaff = user?.role === "ADMIN" || user?.role === "EDITOR";
 
   const { data: stats, isLoading: statsLoading } = useOverviewStats();
   const { data: activities, isLoading: activitiesLoading } = useActivityFeed(15);
   const { data: notifications } = useNotifications(5);
 
-  // Show user-friendly dashboard for non-admin users
-  if (!isAdmin) {
+  if (status === "loading" || (isStaff && statsLoading)) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-10 w-10 animate-spin text-blue-600 mx-auto" />
+          <p className="text-sm text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show user-friendly dashboard for non-staff users
+  if (!isStaff) {
     return (
       <div className="space-y-6 p-6">
         <div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Welcome, {user?.name}!
+            Welcome, {user?.name || "User"}!
           </h1>
           <p className="text-muted-foreground mt-2">
             Your personal dashboard
@@ -82,14 +93,6 @@ export default function OverviewPage() {
             </Card>
           </Link>
         </div>
-      </div>
-    );
-  }
-
-  if (statsLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
       </div>
     );
   }
@@ -189,7 +192,7 @@ export default function OverviewPage() {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Link href="/dashboard/projects/add">
+        <Link href="/dashboard/products/add">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">

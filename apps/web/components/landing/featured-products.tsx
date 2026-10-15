@@ -2,9 +2,10 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { FadeIn } from "@/components/ui/motion";
 import Link from "next/link";
-import { ShoppingCart, Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
 import { useRef } from "react";
 import { useCartStore } from "@/store/cart-store";
 import { useApiQuery } from "@/lib/hooks/use-api-query";
@@ -30,8 +31,6 @@ export function FeaturedProducts() {
     price: Number(p.price),
     image: p.image || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400',
     category: p.category?.name || 'Uncategorized',
-    rating: 4.8, // Mock rating
-    reviewCount: 120, // Mock reviews
     badge: (p.stock || 0) < 5 ? 'Low Stock' : 'Best Seller'
   })) || [];
 
@@ -47,6 +46,10 @@ export function FeaturedProducts() {
       });
     }
   };
+
+  if (!isLoading && products.length === 0) {
+    return null; // Don't show the section if there are no products
+  }
 
   return (
     <section className="py-24 bg-white overflow-hidden">
@@ -140,13 +143,9 @@ export function FeaturedProducts() {
                         </h3>
                       </Link>
                       
-                      {/* Rating */}
+                      {/* Category */}
                       <div className="flex items-center gap-2 mb-3">
-                        <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          <span className="text-sm font-medium text-slate-900">{product.rating}</span>
-                        </div>
-                        <span className="text-sm text-slate-500">({product.reviewCount})</span>
+                        <Badge variant="secondary" className="text-xs">{product.category}</Badge>
                       </div>
 
                       {/* Price */}

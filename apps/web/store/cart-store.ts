@@ -43,8 +43,8 @@ interface CartState {
 }
 
 const TAX_RATE = 0.08; // 8% tax
-const FREE_SHIPPING_THRESHOLD = 50;
-const SHIPPING_COST = 5.99;
+export const FREE_SHIPPING_THRESHOLD = 50000; // Free shipping over ₦50,000
+export const SHIPPING_COST = 3500; // ₦3,500 standard delivery
 
 export const useCartStore = create<CartState>()(
   persist(

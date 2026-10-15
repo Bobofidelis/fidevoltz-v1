@@ -3,7 +3,10 @@ import { toast } from 'sonner';
 
 // Get all advertisements
 export function useAds(filters?: { status?: string; type?: string; page?: string }) {
-  const queryString = new URLSearchParams(filters as any).toString();
+  const cleanFilters = Object.fromEntries(
+    Object.entries(filters || {}).filter(([_, v]) => v !== undefined && v !== null && v !== '')
+  );
+  const queryString = new URLSearchParams(cleanFilters as Record<string, string>).toString();
   
   return useQuery({
     queryKey: ['ads', filters],
@@ -203,3 +206,15 @@ export async function trackAdClick(adId: string) {
     console.error('Failed to track ad click:', error);
   }
 }
+
+// Track ad impression
+export async function trackAdImpression(adId: string) {
+  try {
+    await fetch(`/api/ads/${adId}/impression`, {
+      method: 'POST',
+    });
+  } catch (error) {
+    console.error('Failed to track ad impression:', error);
+  }
+}
+

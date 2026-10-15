@@ -25,7 +25,7 @@ export function useAdminComments(filters?: {
       const result = await response.json();
       return result.data;
     },
-    enabled: !!session && session.user.role === 'ADMIN',
+    enabled: !!session && (session.user.role === 'ADMIN' || session.user.role === 'EDITOR'),
     refetchInterval: 5000,
   });
 }

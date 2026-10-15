@@ -5,6 +5,7 @@ import { Zap } from "lucide-react";
 import { SocialMediaLinks } from "./social-media-links";
 import { usePublicSettings } from "@/lib/hooks/use-public-settings";
 
+// Note: Dynamic CMS pages ([slug]) handle routes like /careers, /shipping, /returns, /faq, /privacy, /terms, and /cookies
 const footerLinks = {
   product: [
     { label: "Tutorials", href: "/projects" },
@@ -19,7 +20,7 @@ const footerLinks = {
     { label: "Careers", href: "/careers" },
   ],
   support: [
-    { label: "Help Center", href: "/support" },
+    { label: "Help Center", href: "/help" },
     { label: "Shipping Info", href: "/shipping" },
     { label: "Returns", href: "/returns" },
     { label: "FAQ", href: "/faq" },

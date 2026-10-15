@@ -1,6 +1,12 @@
+import { Metadata } from 'next';
 import { Zap } from "lucide-react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+
+export const metadata: Metadata = {
+  title: 'Maintenance Mode | FideVoltz',
+  robots: { index: false, follow: false },
+};
 
 export default async function MaintenancePage() {
   // Fetch site settings for branding

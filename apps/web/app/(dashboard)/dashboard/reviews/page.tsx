@@ -43,7 +43,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 export default function ReviewsPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedReview, setSelectedReview] = useState<any>(null);
@@ -62,9 +62,9 @@ export default function ReviewsPage() {
   const filteredReviews = reviews.filter((review: any) => {
     const search = searchQuery.toLowerCase();
     return (
-      review.product.name.toLowerCase().includes(search) ||
-      review.user.name?.toLowerCase().includes(search) ||
-      review.comment.toLowerCase().includes(search)
+      (review.product?.name || '').toLowerCase().includes(search) ||
+      (review.user?.name || '').toLowerCase().includes(search) ||
+      (review.comment || '').toLowerCase().includes(search)
     );
   });
 
@@ -134,7 +134,16 @@ export default function ReviewsPage() {
     );
   };
 
-  if (!session || session.user.role !== 'ADMIN') {
+  if (status === 'loading') {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
+  const isAllowed = session?.user?.role === 'ADMIN' || session?.user?.role === 'EDITOR';
+  if (!session || !isAllowed) {
     return (
       <div className="flex items-center justify-center h-96">
         <p className="text-muted-foreground">Unauthorized</p>

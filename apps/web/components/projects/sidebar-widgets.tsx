@@ -326,7 +326,7 @@ export function CategoriesWidget({ title = "Categories" }: { title?: string }) {
           {categories.map((cat) => (
             <Link
               key={cat.name}
-              href={`/projects?category=${encodeURIComponent(cat.name.toLowerCase())}`}
+              href={`/projects?category=${encodeURIComponent(cat.name)}`}
               className="flex justify-between items-center px-3 py-2 rounded-lg hover:bg-slate-50 group transition-colors"
             >
               <span className="text-sm text-slate-600 group-hover:text-blue-600 flex items-center gap-2 transition-colors">

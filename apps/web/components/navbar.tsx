@@ -40,6 +40,7 @@ const NAV_LINKS = [
 export function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -71,7 +72,7 @@ export function Navbar() {
       {/* Gradient accent line */}
       <div className="h-[2px] w-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
 
-      <div className="container flex h-15 items-center justify-between px-4 md:px-6 py-2.5">
+      <div className="container flex h-16 items-center justify-between px-4 md:px-6 py-2.5">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 group">
           {logo ? (
@@ -133,11 +134,13 @@ export function Navbar() {
           </Button>
 
           {/* Notifications */}
-          <Button variant="ghost" size="icon" className="relative h-10 w-10 hover:bg-slate-100 rounded-xl" asChild>
-            <Link href="/dashboard/notifications">
-              <Bell className="h-5 w-5 text-slate-600" />
-            </Link>
-          </Button>
+          {user && (
+            <Button variant="ghost" size="icon" className="relative h-10 w-10 hover:bg-slate-100 rounded-xl" asChild>
+              <Link href="/dashboard/notifications">
+                <Bell className="h-5 w-5 text-slate-600" />
+              </Link>
+            </Button>
+          )}
 
           {/* Divider */}
           <div className="hidden md:block h-6 w-px bg-slate-200 mx-1" />
@@ -238,7 +241,7 @@ export function Navbar() {
 
           {/* Mobile menu */}
           {mounted ? (
-            <Sheet>
+            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
                 <Button size="icon" variant="ghost" className="md:hidden h-9 w-9 hover:bg-slate-100 rounded-lg">
                   <Menu className="h-5 w-5 text-slate-600" />
@@ -264,6 +267,7 @@ export function Navbar() {
                       <Link
                         key={href}
                         href={href}
+                        onClick={() => setMobileOpen(false)}
                         className={cn(
                           "flex items-center px-3 py-2.5 rounded-lg text-base font-medium transition-colors",
                           isActive
@@ -275,9 +279,44 @@ export function Navbar() {
                       </Link>
                     );
                   })}
+                  <div className="px-3 mt-2">
+                    <GlobalSearch />
+                  </div>
                   <hr className="border-slate-200 my-3" />
+                  {user && (
+                    <>
+                      <div className="px-3 py-2">
+                        <div className="flex items-center gap-3 mb-3">
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage src={user.avatar ? (user.avatar.startsWith('http') ? user.avatar : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '')}${user.avatar}`) : `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`} alt={user.name || 'User'} />
+                            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-sm">{user.name?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-semibold text-sm text-slate-900">{user.name}</p>
+                            <p className="text-xs text-slate-500">{user.email}</p>
+                          </div>
+                        </div>
+                      </div>
+                      <Link href="/dashboard/overview" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50">
+                        <LayoutDashboard className="h-5 w-5" /> Dashboard
+                      </Link>
+                      <Link href="/dashboard/orders" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50">
+                        <ShoppingBag className="h-5 w-5" /> My Orders
+                      </Link>
+                      <Link href="/dashboard/profile" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50">
+                        <User className="h-5 w-5" /> Profile
+                      </Link>
+                      <hr className="border-slate-200 my-3" />
+                      <button onClick={() => { signOut({ callbackUrl: '/' }); setMobileOpen(false); }} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-base font-medium text-red-600 hover:text-red-700 hover:bg-red-50 w-full text-left">
+                        <LogOut className="h-5 w-5" /> Log Out
+                      </button>
+                    </>
+                  )}
                   {!user && (
-                    <Link href={`/auth/login?returnUrl=${encodeURIComponent(pathname)}`}>
+                    <Link
+                      href={`/auth/login?returnUrl=${encodeURIComponent(pathname)}`}
+                      onClick={() => setMobileOpen(false)}
+                    >
                       <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600">Sign In</Button>
                     </Link>
                   )}

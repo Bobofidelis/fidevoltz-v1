@@ -23,10 +23,16 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    const now = new Date();
+
     // Get all ACTIVE ads with placements for the specified page
     const ads = await prisma.advertisement.findMany({
       where: {
         status: 'ACTIVE',
+        AND: [
+          { OR: [{ startDate: null }, { startDate: { lte: now } }] },
+          { OR: [{ endDate: null }, { endDate: { gte: now } }] },
+        ],
         placements: {
           some: {
             page: { in: pageVariants },

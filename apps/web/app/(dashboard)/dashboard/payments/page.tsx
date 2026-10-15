@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,10 +9,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { CreditCard, Plus, Save, Trash2 } from "lucide-react";
+import { CreditCard, Plus, Save, Trash2, AlertTriangle } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function PaymentSettingsPage() {
+  const { data: session, status } = useSession();
   const [gateways, setGateways] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
@@ -28,8 +30,10 @@ export default function PaymentSettingsPage() {
   });
 
   useEffect(() => {
-    fetchGateways();
-  }, []);
+    if (session?.user?.role === 'ADMIN') {
+      fetchGateways();
+    }
+  }, [session]);
 
   const fetchGateways = async () => {
     try {
@@ -110,7 +114,21 @@ export default function PaymentSettingsPage() {
     }
   };
 
-  if (isLoading) return <div className="p-10 text-center">Loading payment settings...</div>;
+  if (status === "loading" || (isLoading && session?.user?.role === 'ADMIN')) {
+    return <div className="p-10 text-center">Loading payment settings...</div>;
+  }
+
+  if (!session || session?.user?.role !== 'ADMIN') {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center space-y-4">
+          <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto" />
+          <h2 className="text-xl font-semibold">Access Denied</h2>
+          <p className="text-muted-foreground">You don't have permission to access payment settings.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-10 max-w-5xl">

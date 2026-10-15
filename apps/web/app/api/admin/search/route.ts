@@ -5,7 +5,7 @@ import { auth } from '@/lib/auth';
 export async function GET(request: NextRequest) {
   try {
     const session = await auth();
-    if (session?.user?.role !== 'ADMIN') {
+    if (session?.user?.role !== 'ADMIN' && session?.user?.role !== 'EDITOR') {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 });
     }
 

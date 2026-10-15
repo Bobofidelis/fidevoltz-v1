@@ -52,7 +52,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 export default function AdminCommentsPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [flaggedOnly, setFlaggedOnly] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -80,10 +80,10 @@ export default function AdminCommentsPage() {
   const filteredComments = comments.filter((comment: any) => {
     const search = searchQuery.toLowerCase();
     return (
-      comment.content.toLowerCase().includes(search) ||
-      comment.user?.name?.toLowerCase().includes(search) ||
-      comment.user?.email?.toLowerCase().includes(search) ||
-      comment.post?.title?.toLowerCase().includes(search)
+      (comment.content || '').toLowerCase().includes(search) ||
+      (comment.user?.name || '').toLowerCase().includes(search) ||
+      (comment.user?.email || '').toLowerCase().includes(search) ||
+      (comment.post?.title || '').toLowerCase().includes(search)
     );
   });
 
@@ -169,7 +169,16 @@ export default function AdminCommentsPage() {
     );
   };
 
-  if (!session || session.user.role !== 'ADMIN') {
+  if (status === 'loading') {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
+  const isAllowed = session?.user?.role === 'ADMIN' || session?.user?.role === 'EDITOR';
+  if (!session || !isAllowed) {
     return (
       <div className="flex items-center justify-center h-96">
         <p className="text-muted-foreground">Unauthorized</p>

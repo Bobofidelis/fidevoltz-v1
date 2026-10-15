@@ -15,8 +15,8 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     const where: any = {
-      ...(category && { category }),
-      ...(published !== null && { status: published === 'true' ? 'PUBLISHED' : 'DRAFT' }),
+      status: published === 'false' ? 'DRAFT' : 'PUBLISHED',
+      ...(category && { category: { equals: category, mode: 'insensitive' } }),
       ...(featuredParam === 'true' && { featured: true, status: 'PUBLISHED' }),
     };
 

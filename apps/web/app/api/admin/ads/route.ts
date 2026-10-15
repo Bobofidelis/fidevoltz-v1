@@ -56,20 +56,38 @@ export async function GET(request: NextRequest) {
     });
 
     // Get statistics
-    const stats = {
-      total: await prisma.advertisement.count(),
-      active: await prisma.advertisement.count({ where: { status: 'ACTIVE' } }),
-      draft: await prisma.advertisement.count({ where: { status: 'DRAFT' } }),
-      paused: await prisma.advertisement.count({ where: { status: 'PAUSED' } }),
-      totalImpressions: await prisma.advertisement.aggregate({
+    const [
+      total,
+      active,
+      draft,
+      paused,
+      totalImpressions,
+      totalClicks,
+      totalRevenue,
+    ] = await Promise.all([
+      prisma.advertisement.count(),
+      prisma.advertisement.count({ where: { status: 'ACTIVE' } }),
+      prisma.advertisement.count({ where: { status: 'DRAFT' } }),
+      prisma.advertisement.count({ where: { status: 'PAUSED' } }),
+      prisma.advertisement.aggregate({
         _sum: { impressions: true },
       }),
-      totalClicks: await prisma.advertisement.aggregate({
+      prisma.advertisement.aggregate({
         _sum: { clicks: true },
       }),
-      totalRevenue: await prisma.advertisement.aggregate({
+      prisma.advertisement.aggregate({
         _sum: { revenue: true },
       }),
+    ]);
+
+    const stats = {
+      total,
+      active,
+      draft,
+      paused,
+      totalImpressions,
+      totalClicks,
+      totalRevenue,
     };
 
     return NextResponse.json<ApiResponse>({

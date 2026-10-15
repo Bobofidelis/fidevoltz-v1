@@ -8,9 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { User, Mail, Calendar, Shield, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useProfile } from "@/lib/hooks/use-profile";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
+  const { data: profile } = useProfile();
 
   if (status === "loading") {
     return (
@@ -34,9 +36,15 @@ export default function ProfilePage() {
   }
 
   const user = session.user;
-  const avatarSrc = (user as any).avatar?.startsWith("http")
-    ? (user as any).avatar
+  const avatarSrc = (profile?.avatar || (user as any).avatar)?.startsWith("http")
+    ? (profile?.avatar || (user as any).avatar)
     : `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`;
+
+  const memberSince = profile?.createdAt
+    ? new Date(profile.createdAt).getFullYear()
+    : (user as any).createdAt
+    ? new Date((user as any).createdAt).getFullYear()
+    : new Date().getFullYear();
 
   return (
     <div className="container py-10 max-w-4xl">
@@ -61,7 +69,7 @@ export default function ProfilePage() {
             </div>
             <div className="flex items-center gap-2 text-sm text-slate-600">
               <Calendar className="h-4 w-4 flex-shrink-0" />
-              <span>Member since {new Date().getFullYear()}</span>
+              <span>Member since {memberSince}</span>
             </div>
           </CardContent>
         </Card>
@@ -94,7 +102,7 @@ export default function ProfilePage() {
                 <Link href="/dashboard/profile">
                   <Button className="w-full sm:w-auto">Edit Profile</Button>
                 </Link>
-                <Link href="/auth/change-password">
+                <Link href="/dashboard/settings">
                   <Button variant="outline" className="w-full sm:w-auto">Change Password</Button>
                 </Link>
               </div>

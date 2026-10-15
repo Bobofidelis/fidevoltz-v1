@@ -5,10 +5,14 @@ import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+
+const safeRedirect = (url: string) => {
+  return url.startsWith('/') && !url.startsWith('//') ? url : '/dashboard/overview';
+};
 
 function LoginPageContent() {
   const [email, setEmail] = useState("");
@@ -17,7 +21,8 @@ function LoginPageContent() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const returnUrl = searchParams.get("returnUrl") || "/";
+  const callbackUrl = searchParams.get('callbackUrl');
+  const returnUrl = searchParams.get('returnUrl') || callbackUrl || '/dashboard/overview';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,8 +39,7 @@ function LoginPageContent() {
         toast.error("Invalid credentials. Please check your email and password.");
       } else if (result?.ok) {
         toast.success("Successfully logged in!");
-        // Use returnUrl or default to dashboard
-        const redirectUrl = returnUrl && returnUrl !== "/" ? returnUrl : "/dashboard/overview";
+        const redirectUrl = safeRedirect(returnUrl);
         router.push(redirectUrl);
         router.refresh();
       }
@@ -97,6 +101,7 @@ function LoginPageContent() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
               >
                 {showPassword ? (
@@ -110,7 +115,14 @@ function LoginPageContent() {
         </div>
 
         <Button type="submit" className="w-full h-11 bg-blue-600 hover:bg-blue-700" disabled={loading}>
-          {loading ? "Signing in..." : "Sign in"}
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Signing in...
+            </>
+          ) : (
+            "Sign in"
+          )}
         </Button>
       </form>
     </div>

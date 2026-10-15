@@ -101,6 +101,12 @@ export async function generateMetadata(
 }
 
 
+const colSpanMap: Record<string, { main: string; aside: string }> = {
+  narrow: { main: 'lg:col-span-9 xl:col-span-10', aside: 'lg:col-span-3 xl:col-span-2' },
+  normal: { main: 'lg:col-span-8 xl:col-span-9', aside: 'lg:col-span-4 xl:col-span-3' },
+  wide: { main: 'lg:col-span-7 xl:col-span-8', aside: 'lg:col-span-5 xl:col-span-4' },
+};
+
 export default async function ProjectDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const project = await getProject(slug);
@@ -130,7 +136,8 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
     console.error("Failed to parse project content", e);
   }
 
-  const projectUrl = `https://fidevoltz.com/projects/${project.slug}`;
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://fidevoltz.vercel.app';
+  const projectUrl = `${baseUrl}/projects/${project.slug}`;
 
   // Parse sidebar settings
   const sidebarBlocks = Array.isArray(project.sidebar) ? (project.sidebar as any[]) : [];
@@ -139,16 +146,13 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   const scrollMode: "sticky" | "scroll" = settingsBlock?.content?.scrollMode === "scroll" ? "scroll" : "sticky";
   const sidebarWidth: "narrow" | "normal" | "wide" = settingsBlock?.content?.width || "normal";
   
-  // Column span mapping
-  const widthMap = { narrow: 3, normal: 4, wide: 5 };
-  const sidebarColSpan = widthMap[sidebarWidth];
-  const contentColSpan = 12 - sidebarColSpan;
+  const colSpans = colSpanMap[sidebarWidth] || colSpanMap.normal;
 
   // Sticky: sidebar sticks at the top as user scrolls (natural, no own scrollbar)
   // Scroll: sidebar just flows normally with the page
   const asideClass = scrollMode === "sticky"
-    ? `lg:col-span-${sidebarColSpan} min-w-0 lg:sticky lg:top-20 lg:self-start`
-    : `lg:col-span-${sidebarColSpan} min-w-0`;
+    ? `${colSpans.aside} min-w-0 lg:sticky lg:top-20 lg:self-start`
+    : `${colSpans.aside} min-w-0`;
 
   // Whether there are any custom sidebar blocks to show above the defaults
   const hasCustomSidebar = sidebarBlocks.filter((b: any) => b.type !== 'sidebar_settings').length > 0;
@@ -245,7 +249,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             {sidebarSide === "left" && sidebarAside}
 
             {/* Main Content */}
-            <div className={`lg:col-span-${contentColSpan} xl:col-span-${contentColSpan} space-y-8`}>
+            <div className={`${colSpans.main} space-y-8`}>
                
                {/* Excerpt/Intro */}
                {project.excerpt && (

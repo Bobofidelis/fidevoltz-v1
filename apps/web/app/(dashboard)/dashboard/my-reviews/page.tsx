@@ -21,7 +21,7 @@ export default function MyReviewsPage() {
       return result.data;
     },
     enabled: !!session,
-    refetchInterval: 5000, // Refetch every 5 seconds
+    refetchInterval: 60000, // Refetch every 1 minute
   });
 
   const renderStars = (rating: number) => {

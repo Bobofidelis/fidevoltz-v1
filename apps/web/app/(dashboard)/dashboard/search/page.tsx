@@ -2,11 +2,28 @@
 
 import { useState, Suspense, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Search, Package, FileText, User, ShoppingCart } from "lucide-react";
+
+function getResultHref(result: any): string {
+  if (result.url) return result.url;
+  switch (result.type) {
+    case 'product':
+      return `/dashboard/products/${result.id}/edit`;
+    case 'project':
+      return `/dashboard/projects/${result.id}/edit`;
+    case 'user':
+      return `/dashboard/users`;
+    case 'order':
+      return `/dashboard/orders/${result.id}`;
+    default:
+      return '/dashboard';
+  }
+}
 
 function SearchPageContent() {
   const searchParams = useSearchParams();
@@ -96,23 +113,26 @@ function SearchPageContent() {
             <div className="space-y-3">
               {results.map((result) => {
                 const Icon = result.icon;
+                const href = getResultHref(result);
                 return (
-                  <Card key={result.id} className="hover:bg-slate-50 transition-colors cursor-pointer">
-                    <CardContent className="p-4">
-                      <div className="flex items-start gap-4">
-                        <div className="p-2 rounded-lg bg-slate-100">
-                          <Icon className="h-5 w-5 text-slate-600" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-semibold">{result.title}</h4>
-                            <Badge variant="secondary">{result.category}</Badge>
+                  <Link key={result.id} href={href} className="block group">
+                    <Card className="hover:bg-slate-50 transition-colors cursor-pointer">
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-4">
+                          <div className="p-2 rounded-lg bg-slate-100 group-hover:bg-slate-200 transition-colors">
+                            <Icon className="h-5 w-5 text-slate-600" />
                           </div>
-                          <p className="text-sm text-muted-foreground">{result.description}</p>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="font-semibold group-hover:text-blue-600 transition-colors">{result.title}</h4>
+                              <Badge variant="secondary">{result.category}</Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground">{result.description}</p>
+                          </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                  </Link>
                 );
               })}
             </div>

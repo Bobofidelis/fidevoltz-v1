@@ -20,6 +20,7 @@ import { BarChart } from "@/components/analytics/BarChart";
 import { PieChart } from "@/components/analytics/PieChart";
 import { StatCardSkeleton, ChartSkeleton, TableSkeleton } from "@/components/dashboard/SkeletonLoader";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 export default function AnalyticsPage() {
   const [dateRange, setDateRange] = useState("all");
@@ -60,7 +61,7 @@ export default function AnalyticsPage() {
   // Show error state
   if (analyticsError) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <p className="text-red-600 text-lg font-semibold">Failed to load analytics</p>
           <p className="text-muted-foreground mt-2">
@@ -128,6 +129,63 @@ export default function AnalyticsPage() {
     topActiveUsers: [],
   };
 
+  const handleExportCSV = () => {
+    try {
+      const rows: string[][] = [
+        ["Report", "Analytics Overview Summary"],
+        ["Date Range", dateRange],
+        ["Exported At", new Date().toLocaleString()],
+        [],
+        ["Metric", "Value"],
+        ["Total Revenue", `$${safeAnalytics.overview.totalRevenue.toLocaleString()}`],
+        ["Total Orders", safeAnalytics.overview.totalOrders.toString()],
+        ["Average Order Value", `$${safeAnalytics.overview.avgOrderValue.toFixed(2)}`],
+        ["Unique Visitors", safeAnalytics.overview.uniqueVisitors.toString()],
+        ["Total Page Views", safeAnalytics.overview.totalPageViews.toString()],
+        ["New Users", safeAnalytics.overview.newUsers.toString()],
+        ["Unique Users", safeAnalytics.overview.uniqueUsers.toString()],
+        ["Conversion Rate", `${safeAnalytics.overview.conversionRate.toFixed(2)}%`],
+        ["Total Profit", `$${(safeProfitData.summary?.totalProfit ?? 0).toLocaleString()}`],
+        ["Total Cost", `$${(safeProfitData.summary?.totalCost ?? 0).toLocaleString()}`],
+        ["Profit Margin", `${(safeProfitData.summary?.profitMargin ?? 0).toFixed(2)}%`],
+      ];
+
+      if (safeAnalytics.topProducts && safeAnalytics.topProducts.length > 0) {
+        rows.push([]);
+        rows.push(["Top Performing Products"]);
+        rows.push(["Product Name", "Sales / Orders", "Revenue"]);
+        safeAnalytics.topProducts.forEach((p: any) => {
+          rows.push([
+            p.name || p.title || "Product",
+            (p.sales || p.orders || p.quantity || 0).toString(),
+            `$${(p.revenue || 0).toLocaleString()}`,
+          ]);
+        });
+      }
+
+      const csvContent =
+        "data:text/csv;charset=utf-8," +
+        rows
+          .map((row) =>
+            row.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(",")
+          )
+          .join("\r\n");
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `analytics-${dateRange}-${format(new Date(), "yyyy-MM-dd")}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success("Analytics exported successfully as CSV");
+    } catch (err) {
+      console.error("Export error:", err);
+      toast.error("Failed to export analytics");
+    }
+  };
+
   return (
     <div className="space-y-6 p-6">
       {/* Header */}
@@ -156,7 +214,7 @@ export default function AnalyticsPage() {
               <SelectItem value="all">All Time</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleExportCSV} disabled={analyticsLoading}>
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
