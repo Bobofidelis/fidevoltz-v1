@@ -59,7 +59,7 @@ const sidebarItems = [
   { icon: Headphones, label: "Support", href: "/dashboard/support", roles: ["ADMIN", "EDITOR"] },
   { icon: MessageSquare, label: "Comments", href: "/dashboard/comments", roles: ["ADMIN", "EDITOR"] },
   { icon: Mail, label: "Contact Submissions", href: "/dashboard/contact-submissions", roles: ["ADMIN"] },
-  { icon: Globe, label: "SEO & Ads", href: "/dashboard/seo", roles: ["ADMIN"] },
+  { icon: Globe, label: "SEO & Ads", href: "/dashboard/seo-ads", roles: ["ADMIN"] },
   { icon: BarChart3, label: "Analytics", href: "/dashboard/analytics", roles: ["ADMIN"] },
   { icon: CreditCard, label: "Payment Methods", href: "/dashboard/payments", roles: ["ADMIN"] },
   
@@ -90,7 +90,7 @@ export function DashboardSidebar({ className, onNavClick }: DashboardSidebarProp
 
   // Filter sidebar items based on user role
   const visibleItems = sidebarItems.filter(item => 
-    user && item.roles.includes(user.role)
+    user?.role ? item.roles.includes(user.role) : false
   );
 
   return (
@@ -111,7 +111,7 @@ export function DashboardSidebar({ className, onNavClick }: DashboardSidebarProp
       <div className="flex-1 overflow-y-auto py-6 px-4">
         <nav className="space-y-1">
           {visibleItems.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = pathname === item.href || (item.href === "/dashboard/seo-ads" && pathname.startsWith("/dashboard/seo-ads"));
             return (
               <Link
                 key={item.href}

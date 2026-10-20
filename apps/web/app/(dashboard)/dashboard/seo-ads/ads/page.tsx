@@ -71,7 +71,7 @@ export default function AdsManagementPage() {
       {/* Breadcrumb */}
       <Breadcrumb
         items={[
-          { label: "SEO & Ads", href: "/dashboard/seo" },
+          { label: "SEO & Ads", href: "/dashboard/seo-ads" },
           { label: "Advertisements" },
         ]}
       />
@@ -79,7 +79,7 @@ export default function AdsManagementPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/dashboard/seo">
+          <Link href="/dashboard/seo-ads">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back

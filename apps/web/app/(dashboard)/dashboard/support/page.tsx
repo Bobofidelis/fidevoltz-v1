@@ -69,6 +69,8 @@ export default function AdminSupportPage() {
   const tickets = data?.tickets || [];
   const stats = data?.stats || { total: 0, open: 0, inProgress: 0, resolved: 0, closed: 0 };
 
+  const displayTicket = tickets?.find((t: any) => t.id === selectedTicket?.id) || selectedTicket;
+
   // Filter by search
   const filteredTickets = tickets.filter((ticket: any) => {
     const search = searchQuery.toLowerCase();
@@ -81,10 +83,12 @@ export default function AdminSupportPage() {
   });
 
   const handleStatusChange = (ticketId: string, status: string) => {
+    setSelectedTicket((prev: any) => (prev && prev.id === ticketId ? { ...prev, status } : prev));
     updateTicket.mutate({ ticketId, status });
   };
 
   const handlePriorityChange = (ticketId: string, priority: string) => {
+    setSelectedTicket((prev: any) => (prev && prev.id === ticketId ? { ...prev, priority } : prev));
     updateTicket.mutate({ ticketId, priority });
   };
 
@@ -95,7 +99,7 @@ export default function AdminSupportPage() {
   };
 
   const handleReply = () => {
-    if (!selectedTicket || !replyMessage.trim()) return;
+    if (!displayTicket || !replyMessage.trim()) return;
 
     if (replyMessage.trim().length < 5) {
       toast.error('Message must be at least 5 characters');
@@ -103,10 +107,21 @@ export default function AdminSupportPage() {
     }
 
     replyToTicket.mutate(
-      { ticketId: selectedTicket.id, message: replyMessage },
+      { ticketId: displayTicket.id, message: replyMessage },
       {
-        onSuccess: () => {
+        onSuccess: (res: any) => {
           setReplyMessage('');
+          if (res?.data) {
+            setSelectedTicket((prev: any) => {
+              if (!prev) return null;
+              const existingMessages = prev.messages || [];
+              const alreadyExists = existingMessages.some((m: any) => m.id === res.data.id);
+              return {
+                ...prev,
+                messages: alreadyExists ? existingMessages : [...existingMessages, res.data],
+              };
+            });
+          }
         },
       }
     );
@@ -336,14 +351,14 @@ export default function AdminSupportPage() {
       </Card>
 
       {/* Ticket Details Modal */}
-      {selectedTicket && (
+      {displayTicket && (
         <Dialog open={showDetailsModal} onOpenChange={setShowDetailsModal}>
           <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>{selectedTicket.subject}</DialogTitle>
+              <DialogTitle>{displayTicket.subject}</DialogTitle>
               <div className="flex gap-2 mt-2">
-                {getStatusBadge(selectedTicket.status)}
-                {getPriorityBadge(selectedTicket.priority)}
+                {getStatusBadge(displayTicket.status)}
+                {getPriorityBadge(displayTicket.priority)}
               </div>
             </DialogHeader>
 
@@ -351,10 +366,10 @@ export default function AdminSupportPage() {
               {/* User Info */}
               <div className="bg-gray-50 p-3 rounded">
                 <p className="text-sm">
-                  <span className="font-semibold">From:</span> {selectedTicket.user?.name || 'Guest'} ({selectedTicket.userEmail})
+                  <span className="font-semibold">From:</span> {displayTicket.user?.name || 'Guest'} ({displayTicket.userEmail})
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
-                  Created {formatDistanceToNow(new Date(selectedTicket.createdAt), { addSuffix: true })}
+                  Created {formatDistanceToNow(new Date(displayTicket.createdAt), { addSuffix: true })}
                 </p>
               </div>
 
@@ -363,8 +378,8 @@ export default function AdminSupportPage() {
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Status</label>
                   <Select
-                    value={selectedTicket.status}
-                    onValueChange={(value) => handleStatusChange(selectedTicket.id, value)}
+                    value={displayTicket.status}
+                    onValueChange={(value) => handleStatusChange(displayTicket.id, value)}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -381,8 +396,8 @@ export default function AdminSupportPage() {
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Priority</label>
                   <Select
-                    value={selectedTicket.priority}
-                    onValueChange={(value) => handlePriorityChange(selectedTicket.id, value)}
+                    value={displayTicket.priority}
+                    onValueChange={(value) => handlePriorityChange(displayTicket.id, value)}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -401,15 +416,15 @@ export default function AdminSupportPage() {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-sm font-semibold mb-2">Original Request:</p>
                 <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                  {selectedTicket.description}
+                  {displayTicket.description}
                 </p>
               </div>
 
               {/* Messages */}
-              {selectedTicket.messages && selectedTicket.messages.length > 0 && (
+              {displayTicket.messages && displayTicket.messages.length > 0 && (
                 <div className="space-y-3">
                   <h4 className="font-semibold text-sm">Conversation</h4>
-                  {selectedTicket.messages.map((msg: any) => (
+                  {displayTicket.messages.map((msg: any) => (
                     <div
                       key={msg.id}
                       className={cn(
@@ -432,7 +447,7 @@ export default function AdminSupportPage() {
               )}
 
               {/* Reply Form */}
-              {selectedTicket.status !== 'CLOSED' && (
+              {displayTicket.status !== 'CLOSED' && (
                 <div className="space-y-2 pt-4 border-t">
                   <label className="text-sm font-medium">Admin Reply</label>
                   <Textarea

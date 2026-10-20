@@ -1,4 +1,0 @@
-import { useCreateAd } from \"@/lib/hooks/use-ads\";
-import { MediaPicker } from \"@/components/media/MediaPicker\";
-import { PlacementManager } from \"@/components/ads/PlacementManager\";
-import { Loader2, ArrowLeft, Eye, Upload } from \"lucide-react\";

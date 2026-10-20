@@ -21,7 +21,7 @@ export function RoleGuard({ children, allowedRoles, redirectTo = "/dashboard/ove
       return;
     }
 
-    if (status === "authenticated" && user && !allowedRoles.includes(user.role)) {
+    if (status === "authenticated" && user && (!user.role || !allowedRoles.includes(user.role as "ADMIN" | "EDITOR" | "USER"))) {
       router.push(redirectTo);
     }
   }, [user, status, allowedRoles, redirectTo, router]);
@@ -31,7 +31,7 @@ export function RoleGuard({ children, allowedRoles, redirectTo = "/dashboard/ove
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
 
-  if (!user || !allowedRoles.includes(user.role)) {
+  if (!user || !user.role || !allowedRoles.includes(user.role as "ADMIN" | "EDITOR" | "USER")) {
     return null;
   }
 

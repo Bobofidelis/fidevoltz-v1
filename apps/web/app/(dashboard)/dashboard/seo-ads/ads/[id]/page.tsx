@@ -125,7 +125,7 @@ export default function AdDetailsPage({ params }: { params: Promise<{ id: string
       {/* Breadcrumb */}
       <Breadcrumb
         items={[
-          { label: "SEO & Ads", href: "/dashboard/seo" },
+          { label: "SEO & Ads", href: "/dashboard/seo-ads" },
           { label: "Advertisements", href: "/dashboard/seo-ads/ads" },
           { label: ad.name },
         ]}

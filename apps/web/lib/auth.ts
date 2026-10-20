@@ -88,43 +88,58 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   callbacks: {
     async jwt({ token, user, trigger, session }) {
-      // Handle session update trigger (when update() is called)
+      // Handle session update trigger
       if (trigger === "update" && session?.user) {
-        console.log("🔄 JWT callback - Session update triggered");
-        
-        // Fetch fresh user data from database
         const updatedUser = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: {
-            id: true,
-            email: true,
-            name: true,
-            role: true,
-            avatar: true,
-          },
+          select: { id: true, email: true, name: true, role: true, avatar: true, isBanned: true },
         });
-
         if (updatedUser) {
-          console.log("✅ JWT callback - Updated user data:", updatedUser.email);
+          if (updatedUser.isBanned) return null; // Force sign out
           token.id = updatedUser.id;
           token.role = updatedUser.role as Role;
           token.image = updatedUser.avatar;
-          token.avatar = updatedUser.avatar; // Update this too
+          token.avatar = updatedUser.avatar;
           token.name = updatedUser.name;
+          token.lastChecked = Date.now();
         }
       }
       
       if (user) {
-        console.log("🎫 JWT callback - Adding user to token:", user.email);
         token.id = user.id;
         token.role = user.role as Role;
-        token.image = user.image || (user as any).avatar; // Handle both
+        token.image = user.image || (user as any).avatar;
         token.avatar = (user as any).avatar || user.image;
+        token.lastChecked = Date.now();
       }
+      
+      // Periodic role/ban refresh (every 5 minutes)
+      const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
+      const lastChecked = (token.lastChecked as number) || 0;
+      if (token.id && Date.now() - lastChecked > REFRESH_INTERVAL) {
+        try {
+          const freshUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { role: true, isBanned: true, status: true },
+          });
+          if (!freshUser || freshUser.isBanned || freshUser.status !== 'active') {
+            // Return empty token to force sign out
+            return { ...token, role: null, expired: true };
+          }
+          token.role = freshUser.role as Role;
+          token.lastChecked = Date.now();
+        } catch {
+          // Don't break auth if DB is temporarily unavailable
+        }
+      }
+      
       return token;
     },
     async session({ session, token }) {
-      console.log("📝 Session callback - Creating session for:", token.email);
+      if (token.expired) {
+        // Force re-auth by not setting user data
+        return { ...session, user: { ...session.user, role: null } };
+      }
       if (session?.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as Role;
@@ -132,7 +147,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         (session.user as any).avatar = token.avatar as string | null; // Pass to client
         session.user.name = token.name as string | null;
       }
-      console.log("✅ Session created with role:", session.user.role);
       return session;
     },
   },

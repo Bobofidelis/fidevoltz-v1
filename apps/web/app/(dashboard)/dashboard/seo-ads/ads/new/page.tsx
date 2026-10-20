@@ -67,7 +67,7 @@ export default function CreateAdPage() {
       {/* Breadcrumb */}
       <Breadcrumb
         items={[
-          { label: "SEO & Ads", href: "/dashboard/seo" },
+          { label: "SEO & Ads", href: "/dashboard/seo-ads" },
           { label: "Advertisements", href: "/dashboard/seo-ads/ads" },
           { label: "Create New Ad" },
         ]}

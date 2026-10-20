@@ -79,8 +79,11 @@ export function AdSlot({ page, zone, className = "" }: AdSlotProps) {
     }
   };
 
+  const adContainerId = `ad-${ad.id}`;
+  const scopedCss = ad.customCss ? `#${adContainerId} { ${ad.customCss} }` : "";
+
   return (
-    <div ref={containerRef} className={`promo-container promo-zone-${zone.toLowerCase()} relative ${className}`}>
+    <div ref={containerRef} id={adContainerId} className={`promo-container promo-zone-${zone.toLowerCase()} relative ${className}`}>
       {ad.customHtml ? (
         // Custom HTML ad (e.g., Google AdSense code)
         <div dangerouslySetInnerHTML={{ __html: ad.customHtml }} />
@@ -126,7 +129,7 @@ export function AdSlot({ page, zone, className = "" }: AdSlotProps) {
 
       {/* Custom CSS injection */}
       {ad.customCss && (
-        <style dangerouslySetInnerHTML={{ __html: ad.customCss }} />
+        <style dangerouslySetInnerHTML={{ __html: scopedCss }} />
       )}
     </div>
   );

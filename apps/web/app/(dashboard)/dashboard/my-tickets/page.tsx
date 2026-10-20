@@ -42,6 +42,8 @@ export default function MyTicketsPage() {
   const createTicket = useCreateTicket();
   const replyToTicket = useReplyToTicket();
 
+  const displayTicket = tickets?.find((t: any) => t.id === selectedTicket?.id) || selectedTicket;
+
   const handleCreateTicket = () => {
     if (!subject.trim() || !description.trim()) return;
 
@@ -59,13 +61,24 @@ export default function MyTicketsPage() {
   };
 
   const handleReply = () => {
-    if (!selectedTicket || !replyMessage.trim()) return;
+    if (!displayTicket || !replyMessage.trim()) return;
 
     replyToTicket.mutate(
-      { ticketId: selectedTicket.id, message: replyMessage },
+      { ticketId: displayTicket.id, message: replyMessage },
       {
-        onSuccess: () => {
+        onSuccess: (res: any) => {
           setReplyMessage('');
+          if (res?.data) {
+            setSelectedTicket((prev: any) => {
+              if (!prev) return null;
+              const existingMessages = prev.messages || [];
+              const alreadyExists = existingMessages.some((m: any) => m.id === res.data.id);
+              return {
+                ...prev,
+                messages: alreadyExists ? existingMessages : [...existingMessages, res.data],
+              };
+            });
+          }
         },
       }
     );
@@ -280,14 +293,14 @@ export default function MyTicketsPage() {
       </Dialog>
 
       {/* Ticket Details Modal */}
-      {selectedTicket && (
+      {displayTicket && (
         <Dialog open={showDetailsModal} onOpenChange={setShowDetailsModal}>
           <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>{selectedTicket.subject}</DialogTitle>
+              <DialogTitle>{displayTicket.subject}</DialogTitle>
               <div className="flex gap-2 mt-2">
-                {getStatusBadge(selectedTicket.status)}
-                {getPriorityBadge(selectedTicket.priority)}
+                {getStatusBadge(displayTicket.status)}
+                {getPriorityBadge(displayTicket.priority)}
               </div>
             </DialogHeader>
 
@@ -295,18 +308,18 @@ export default function MyTicketsPage() {
               {/* Original Message */}
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                  {selectedTicket.description}
+                  {displayTicket.description}
                 </p>
                 <p className="text-xs text-gray-500 mt-2">
-                  {formatDistanceToNow(new Date(selectedTicket.createdAt), { addSuffix: true })}
+                  {formatDistanceToNow(new Date(displayTicket.createdAt), { addSuffix: true })}
                 </p>
               </div>
 
               {/* Messages */}
-              {selectedTicket.messages && selectedTicket.messages.length > 0 && (
+              {displayTicket.messages && displayTicket.messages.length > 0 && (
                 <div className="space-y-3">
                   <h4 className="font-semibold text-sm">Conversation</h4>
-                  {selectedTicket.messages.map((msg: any) => (
+                  {displayTicket.messages.map((msg: any) => (
                     <div
                       key={msg.id}
                       className={cn(
@@ -329,7 +342,7 @@ export default function MyTicketsPage() {
               )}
 
               {/* Reply Form */}
-              {selectedTicket.status !== 'CLOSED' && (
+              {displayTicket.status !== 'CLOSED' && (
                 <div className="space-y-2 pt-4 border-t">
                   <label className="text-sm font-medium">Add Reply</label>
                   <Textarea

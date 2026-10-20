@@ -223,7 +223,17 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
   };
 
   // Submit
-  const handleSubmit = async () => {
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
+
+    if (!title.trim()) {
+      toast.error("Project title is required");
+      setActiveTab("content");
+      return;
+    }
+
     setLoading(true);
 
     const payload = {
@@ -269,9 +279,23 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
     }
   };
 
+  const handleFormKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    if (e.key === "Enter") {
+      const target = e.target as HTMLElement;
+      // Never submit from textareas, rich text editor, or contenteditable elements
+      if (
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable ||
+        target.closest("[contenteditable='true']")
+      ) {
+        return;
+      }
+    }
+  };
+
   return (
     <div className="relative">
-      {/* ── Floating Action Pill ── outside the form so it NEVER accidentally submits ── */}
+      {/* ── Floating Action Pill ── connected to form via form="editor-form" ── */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 md:left-auto md:transform-none md:right-8 z-50 flex items-center gap-2 sm:gap-3 bg-white/95 backdrop-blur-md px-4 sm:px-5 py-3 sm:py-3.5 rounded-full shadow-2xl border border-slate-200 w-[95%] md:w-auto overflow-x-auto">
         <Button type="button" variant="ghost" size="sm" className="rounded-full hover:bg-slate-100 shrink-0" onClick={() => router.back()}>Cancel</Button>
         
@@ -322,16 +346,16 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
         </span>
 
         <Button 
-          type="button" 
+          type="submit" 
+          form="editor-form"
           disabled={loading} 
           className="gap-2 shadow-md px-6 rounded-full shrink-0 bg-blue-600 hover:bg-blue-700 text-white ml-auto"
-          onClick={handleSubmit}
         >
           {loading ? "Saving..." : initialData ? "Update Project" : "Create Project"}
         </Button>
       </div>
 
-    <form className="space-y-8 pb-24">
+    <form id="editor-form" onSubmit={handleSubmit} onKeyDown={handleFormKeyDown} className="space-y-8 pb-24">
 
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
@@ -577,6 +601,11 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                             value={!['javascript','typescript','python','cpp','c','csharp','java','html','css','scss','yaml','bash','json','sql','markdown','php','rust','go','ruby','swift','kotlin','dart','micropython','matlab','asm','verilog','vhdl','gcode','dockerfile','ini','xml','graphql','r','lua','haskell','elixir','scala'].includes(block.content.language) ? block.content.language : ''}
                             onChange={e => updateBlock(block.id, { ...block.content, language: e.target.value })}
                             className="h-8 text-xs font-mono"
+                            onKeyDown={e => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                              }
+                            }}
                           />
                         </div>
                         <Textarea 
@@ -972,7 +1001,7 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                         </div>
                         <div className="flex justify-between items-center relative z-10">
                            <p className="text-xs text-orange-600/80 italic flex items-center gap-1">
-                            <span>💡</span> Manage ad creatives in your <a href="/dashboard/seo" className="underline font-semibold" target="_blank" rel="noreferrer">Ads Manager</a>
+                            <span>💡</span> Manage ad creatives in your <a href="/dashboard/seo-ads/ads" className="underline font-semibold" target="_blank" rel="noreferrer">Ads Manager</a>
                           </p>
                         </div>
                         </div>
@@ -1311,6 +1340,8 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                         setTagInput('');
                       } else if (e.key === 'Backspace' && !tagInput && tags.length) {
                         setTags(tags.slice(0, -1));
+                      } else if (e.key === 'Enter') {
+                        e.preventDefault();
                       }
                     }}
                     placeholder="e.g. Arduino, VVVF, Elevator (press Enter)"
@@ -1367,6 +1398,11 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                           className="pl-9"
                           value={productSearch}
                           onChange={(e) => searchProducts(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                            }
+                          }}
                         />
                       </div>
                       <div className="max-h-[300px] overflow-y-auto space-y-2">
@@ -1446,11 +1482,23 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                   placeholder="File Name (e.g. Datasheet.pdf)" 
                   value={newAttachment.name}
                   onChange={(e) => setNewAttachment({ ...newAttachment, name: e.target.value })}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addAttachment();
+                    }
+                  }}
                 />
                 <Input 
                   placeholder="File URL" 
                   value={newAttachment.url}
                   onChange={(e) => setNewAttachment({ ...newAttachment, url: e.target.value })}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addAttachment();
+                    }
+                  }}
                 />
                 {/* 
                      For robust document upload, we would ideally use a generic file uploader 
