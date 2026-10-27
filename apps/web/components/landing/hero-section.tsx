@@ -61,7 +61,7 @@ export function HeroSection() {
                 </Button>
               </Link>
               <Link href="/store">
-                <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 group">
+                <Button size="lg" variant="ghost" className="border border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white group">
                   <Package className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
                   Browse Products
                 </Button>

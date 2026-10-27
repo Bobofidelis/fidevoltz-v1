@@ -2,6 +2,7 @@ import { cache } from "react";
 import type { Metadata } from "next";
 // import { Inter } from "next/font/google";
 import "./globals.css";
+import "katex/dist/katex.min.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TopLoader } from "@/components/ui/top-loader";

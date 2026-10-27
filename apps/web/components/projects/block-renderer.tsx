@@ -11,9 +11,36 @@ import { TableOfContents, LatestPostsWidget, FeaturedPostsWidget, CategoriesWidg
 
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import DOMPurify from 'isomorphic-dompurify';
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
+
+function renderMathInHtml(html: string): string {
+  if (!html) return '';
+  // Display math: $$...$$
+  let result = html.replace(/\$\$([\s\S]*?)\$\$/g, (_, tex) => {
+    try {
+      const cleanTex = tex.trim().replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+      return katex.renderToString(cleanTex, { displayMode: true, throwOnError: false });
+    } catch {
+      return `<span class="math-error">${tex}</span>`;
+    }
+  });
+  // Inline math: $...$  (but not \$ escaped dollars)
+  result = result.replace(/(?<!\$)\$(?!\$)((?:[^$\\]|\\.)+)\$/g, (_, tex) => {
+    try {
+      const cleanTex = tex.trim().replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+      return katex.renderToString(cleanTex, { displayMode: false, throwOnError: false });
+    } catch {
+      return `<span class="math-error">${tex}</span>`;
+    }
+  });
+  return result;
+}
 
 interface Block {
   id: string;
@@ -44,22 +71,22 @@ export function BlockRenderer({ blocks, slug }: BlockRendererProps) {
 
 function renderBlock(block: Block, slug?: string) {
   switch (block.type) {
-    case "text":
+    case "text": {
+      const processedHtml = renderMathInHtml(DOMPurify.sanitize(block.content ? block.content.toString() : ""));
       return (
-        <>
-
-          <div
-            className="prose-rte max-w-none text-slate-700 leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(block.content.toString()) }}
-          />
-        </>
+        <div
+          className="prose-rte max-w-none text-slate-700 leading-relaxed"
+          dangerouslySetInnerHTML={{ __html: processedHtml }}
+        />
       );
+    }
 
     case "markdown":
       return (
         <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed my-4">
           <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
+            remarkPlugins={[remarkGfm, remarkMath]}
+            rehypePlugins={[rehypeKatex]}
             components={{
               code({ node, inline, className, children, ...props }: any) {
                 const match = /language-(\w+)/.exec(className || '');
@@ -105,7 +132,7 @@ function renderBlock(block: Block, slug?: string) {
           </div>
           <div className="flex-1 space-y-2">
             {title && <h4 className="font-bold text-lg">{title}</h4>}
-            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(text ? text.replace(/\n/g, "<br/>") : "") }} />
+            <div dangerouslySetInnerHTML={{ __html: renderMathInHtml(DOMPurify.sanitize(text ? text.replace(/\n/g, "<br/>") : "")) }} />
           </div>
         </div>
       );
