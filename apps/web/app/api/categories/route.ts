@@ -8,6 +8,12 @@ export async function GET() {
       select: {
         id: true,
         name: true,
+        slug: true,
+        _count: {
+          select: {
+            products: true,
+          },
+        },
       },
       orderBy: {
         name: 'asc',
