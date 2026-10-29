@@ -121,7 +121,7 @@ export function AdSlot({ page, zone, className = "" }: AdSlotProps) {
             </div>
           )}
           {/* Ad indicator */}
-          <div className="absolute top-2 right-2 bg-black/40 text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-widest">
+          <div className="absolute top-2 right-2 bg-black/40 text-white text-[11px] font-bold px-1.5 py-0.5 rounded uppercase tracking-widest">
             Ad
           </div>
         </div>

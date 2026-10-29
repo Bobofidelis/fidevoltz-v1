@@ -272,7 +272,7 @@ export default function ProductDetailPage() {
                 </div>
 
                 {/* Zoom Hint */}
-                <div className="absolute bottom-3 right-3 px-2 py-1 rounded-md bg-slate-900/60 text-white text-[10px] backdrop-blur-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                <div className="absolute bottom-3 right-3 px-2 py-1 rounded-md bg-slate-900/60 text-white text-[11px] backdrop-blur-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                   Hover to zoom
                 </div>
               </div>
@@ -323,9 +323,15 @@ export default function ProductDetailPage() {
 
                 {/* Rating display */}
                 <div className="flex items-center gap-1">
-                  <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                  <span className="text-xs font-bold text-slate-800">4.8</span>
-                  <span className="text-xs text-slate-400">(14 reviews)</span>
+                  <Star className={`h-4 w-4 ${product.reviewCount ? "fill-amber-400 text-amber-400" : "text-slate-300"}`} />
+                  {product.reviewCount ? (
+                    <>
+                      <span className="text-sm font-bold text-slate-800">{product.rating}</span>
+                      <span className="text-sm text-slate-500">({product.reviewCount} review{product.reviewCount === 1 ? "" : "s"})</span>
+                    </>
+                  ) : (
+                    <span className="text-sm text-slate-500">No reviews yet</span>
+                  )}
                 </div>
               </div>
 
@@ -337,7 +343,7 @@ export default function ProductDetailPage() {
               {product.tags && product.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mb-4">
                   {product.tags.map((tag) => (
-                    <Badge key={tag} variant="outline" className="text-[11px] font-normal text-slate-600 bg-white">
+                    <Badge key={tag} variant="outline" className="text-xs font-normal text-slate-600 bg-white">
                       #{tag}
                     </Badge>
                   ))}
@@ -505,14 +511,14 @@ export default function ProductDetailPage() {
                   <Truck className="w-4 h-4 text-blue-600 shrink-0" />
                   <div>
                     <p className="font-bold text-slate-900 leading-tight">Fast Nationwide</p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">Dispatched within 24hrs</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Dispatched within 24hrs</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-white border border-slate-200/80">
                   <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
                   <div>
                     <p className="font-bold text-slate-900 leading-tight">Genuine Tested</p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">100% verified hardware</p>
+                    <p className="text-xs text-slate-500 mt-0.5">100% verified hardware</p>
                   </div>
                 </div>
               </div>
@@ -664,7 +670,7 @@ export default function ProductDetailPage() {
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-3.5 z-40 md:hidden shadow-[0_-4px_16px_rgba(0,0,0,0.08)]">
         <div className="flex items-center gap-3">
           <div className="flex flex-col shrink-0">
-            <span className="text-[10px] text-slate-400 uppercase font-semibold">Unit Price</span>
+            <span className="text-[11px] text-slate-400 uppercase font-semibold">Unit Price</span>
             <span className="text-lg font-extrabold text-slate-900">
               {formatCurrency(Number(product.price))}
             </span>

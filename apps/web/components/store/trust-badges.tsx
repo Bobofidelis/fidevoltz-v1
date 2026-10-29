@@ -31,7 +31,7 @@ export function TrustBadges() {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 my-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 my-6">
       {badges.map((b, i) => {
         const Icon = b.icon;
         return (
@@ -46,7 +46,7 @@ export function TrustBadges() {
               <h4 className="text-sm font-semibold text-slate-900 leading-tight">
                 {b.title}
               </h4>
-              <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">
+              <p className="text-xs text-slate-600 mt-0.5 line-clamp-1">
                 {b.description}
               </p>
             </div>

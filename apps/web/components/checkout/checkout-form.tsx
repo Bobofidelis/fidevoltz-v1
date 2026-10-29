@@ -28,7 +28,7 @@ const addressSchema = z.object({
 type AddressFormValues = z.infer<typeof addressSchema>;
 
 export function CheckoutForm() {
-  const { items, selectedItems, clearCart, getSelectedTotal, getSelectedSubtotal, getSelectedTax, getSelectedShipping } = useCartStore();
+  const { items, selectedItems, removeSelectedItems, getSelectedTotal, getSelectedSubtotal, getSelectedTax, getSelectedShipping } = useCartStore();
   const router = useRouter();
   
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -136,7 +136,8 @@ export function CheckoutForm() {
       
       if (result.success) {
         toast.success("Order placed successfully!");
-        clearCart();
+        // Only the checked-out items leave the cart; unselected items stay for later
+        removeSelectedItems();
         router.push(`/orders/${result.data.orderId}`);
       } else {
         toast.error(result.error || "Failed to place order");
@@ -184,7 +185,7 @@ export function CheckoutForm() {
                     >
                       <div className="flex justify-between items-start mb-2">
                         <h4 className="font-semibold text-slate-900">{addr.name}</h4>
-                        {addr.isDefault && <span className="bg-slate-200 text-slate-700 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">Default</span>}
+                        {addr.isDefault && <span className="bg-slate-200 text-slate-700 text-[11px] px-2 py-0.5 rounded-full font-bold uppercase">Default</span>}
                       </div>
                       <p className="text-sm text-slate-600">{addr.address}</p>
                       <p className="text-sm text-slate-600">{addr.city}, {addr.state}</p>
@@ -307,7 +308,7 @@ export function CheckoutForm() {
                       </div>
                       <p className="text-xs text-slate-500">{gateway.description || `Pay securely with ${gateway.name}`}</p>
                       {gateway.isTestMode && (
-                        <div className="mt-2 inline-block bg-yellow-100 text-yellow-800 text-[10px] px-2 py-0.5 rounded font-bold uppercase">
+                        <div className="mt-2 inline-block bg-yellow-100 text-yellow-800 text-[11px] px-2 py-0.5 rounded font-bold uppercase">
                           Test Mode
                         </div>
                       )}

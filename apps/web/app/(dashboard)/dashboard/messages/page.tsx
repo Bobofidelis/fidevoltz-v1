@@ -224,12 +224,12 @@ function NonAdminMessagesView({
                                 {isFromAdmin ? (msg.sender?.name || 'Admin') : 'You'}
                               </span>
                               {isFromAdmin && (
-                                <Badge variant="outline" className="text-[10px] py-0 px-1.5 bg-purple-100 text-purple-700 border-purple-300">
+                                <Badge variant="outline" className="text-[11px] py-0 px-1.5 bg-purple-100 text-purple-700 border-purple-300">
                                   Admin
                                 </Badge>
                               )}
                             </div>
-                            <span className="text-[11px] text-gray-500 whitespace-nowrap">
+                            <span className="text-xs text-gray-500 whitespace-nowrap">
                               {formatDistanceToNow(new Date(msg.createdAt), { addSuffix: true })}
                             </span>
                           </div>

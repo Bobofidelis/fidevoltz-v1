@@ -18,7 +18,8 @@ import {
   Search,
   ShoppingCart,
   Package,
-  Upload
+  Upload,
+  Table2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +34,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { MediaPicker } from "@/components/media/MediaPicker";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
+import { SymbolInput } from "@/components/ui/symbol-picker";
+import { TableBlockEditor, DEFAULT_TABLE_CONTENT } from "@/components/projects/table-block-editor";
 import { ProductLinkPicker } from "@/components/projects/product-link-picker";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -46,7 +49,7 @@ interface ProjectEditorProps {
 }
 
 
-type BlockType = "text" | "markdown" | "image" | "video" | "youtube" | "code" | "heading" | "project_kit" | "bom" | "ad" | "alert" | "campaign_data";
+type BlockType = "text" | "markdown" | "image" | "video" | "youtube" | "code" | "heading" | "project_kit" | "bom" | "table" | "ad" | "alert" | "campaign_data";
 
 interface Block {
   id: string;
@@ -115,7 +118,7 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
     const newBlock: Block = {
       id: crypto.randomUUID(),
       type,
-      content: type === "bom" ? { title: "Hardware Requirements", items: [] } : type === "project_kit" ? { title: "📦 THE FIDEVOLTZ PROJECT KIT", productLink: "" } : type === "image" ? { url: "", layout: "single", size: "default", aspectRatio: "auto", columns: 3 } : type === "ad" ? { zone: "CONTENT_MIDDLE" } : type === "text" || type === "markdown" ? "" 
+      content: type === "bom" ? { title: "Hardware Requirements", items: [] } : type === "table" ? structuredClone(DEFAULT_TABLE_CONTENT) : type === "project_kit" ? { title: "📦 THE FIDEVOLTZ PROJECT KIT", productLink: "" } : type === "image" ? { url: "", layout: "single", size: "default", aspectRatio: "auto", columns: 3 } : type === "ad" ? { zone: "CONTENT_MIDDLE" } : type === "text" || type === "markdown" ? "" 
              : type === "heading" ? { text: "", level: "h2" } 
              : type === "code" ? { code: "", language: "javascript" } 
              : type === "alert" ? { title: "", text: "", type: "info" }
@@ -486,6 +489,7 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                               <SelectItem value="alert">Alert</SelectItem>
                               <SelectItem value="project_kit">Project Kit</SelectItem>
                               <SelectItem value="bom">BOM Table</SelectItem>
+                              <SelectItem value="table">Table</SelectItem>
                               <SelectItem value="ad">Ad Slot</SelectItem>
                             </SelectContent>
                           </Select>
@@ -896,11 +900,18 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                       </div>
                     )}
 
+                    {block.type === "table" && (
+                      <TableBlockEditor
+                        content={block.content}
+                        onChange={(content) => updateBlock(block.id, content)}
+                      />
+                    )}
+
                     {block.type === "bom" && (
                       <div className="space-y-4 bg-slate-50 p-4 rounded-lg border border-slate-200">
                         <div className="space-y-2">
                           <Label>Table Title</Label>
-                          <Input placeholder="Hardware Requirements & Bill of Materials" value={block.content.title} onChange={(e) => updateBlock(block.id, { ...block.content, title: e.target.value })} />
+                          <SymbolInput placeholder="Hardware Requirements & Bill of Materials" value={block.content.title || ""} onValueChange={(v) => updateBlock(block.id, { ...block.content, title: v })} />
                         </div>
                         <div className="space-y-2">
                           <Label>BOM Items</Label>
@@ -908,19 +919,19 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                             {block.content.items?.map((item: any, i: number) => (
                               <div key={i} className="flex gap-2 items-start bg-white p-3 border rounded shadow-sm">
                                 <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 flex-1">
-                                  <Input placeholder="Component Name" value={item.name || ""} onChange={(e) => {
+                                  <SymbolInput placeholder="Component Name" value={item.name || ""} onValueChange={(v) => {
                                     const newItems = [...(block.content.items || [])];
-                                    newItems[i].name = e.target.value;
+                                    newItems[i] = { ...newItems[i], name: v };
                                     updateBlock(block.id, { ...block.content, items: newItems });
                                   }} />
-                                  <Input placeholder="Qty (e.g. 1, 2, 1 dozen, Full Sheet)" value={item.quantity || ""} onChange={(e) => {
+                                  <SymbolInput placeholder="Qty (e.g. 1, 2, 1 dozen, Full Sheet)" value={item.quantity || ""} onValueChange={(v) => {
                                     const newItems = [...(block.content.items || [])];
-                                    newItems[i].quantity = e.target.value;
+                                    newItems[i] = { ...newItems[i], quantity: v };
                                     updateBlock(block.id, { ...block.content, items: newItems });
                                   }} />
-                                  <Input placeholder="Specs/Notes" value={item.specs || ""} onChange={(e) => {
+                                  <SymbolInput placeholder="Specs/Notes" value={item.specs || ""} onValueChange={(v) => {
                                     const newItems = [...(block.content.items || [])];
-                                    newItems[i].specs = e.target.value;
+                                    newItems[i] = { ...newItems[i], specs: v };
                                     updateBlock(block.id, { ...block.content, items: newItems });
                                   }} />
                                   <Input placeholder="Link Text" value={item.linkText || ""} onChange={(e) => {
@@ -1043,6 +1054,9 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                 </Button>
                 <Button type="button" variant="outline" onClick={() => addBlock("bom")} className="gap-2">
                   <ShoppingCart className="h-4 w-4" /> Add BOM Table
+                </Button>
+                <Button type="button" variant="outline" onClick={() => addBlock("table")} className="gap-2">
+                  <Table2 className="h-4 w-4" /> Add Table
                 </Button>
                 <Button type="button" variant="outline" onClick={() => addBlock("ad")} className="gap-2 border-orange-300 text-orange-700 hover:bg-orange-50">
                   <span className="text-xs font-bold">AD</span> Insert Ad Slot
@@ -1446,7 +1460,7 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                         </div>
                         <div>
                           <p className="font-medium text-sm">{comp.name}</p>
-                          {comp.productId && <Badge variant="secondary" className="text-[10px]">Linked Product</Badge>}
+                          {comp.productId && <Badge variant="secondary" className="text-[11px]">Linked Product</Badge>}
                         </div>
                       </div>
                       <div className="flex items-center gap-4">

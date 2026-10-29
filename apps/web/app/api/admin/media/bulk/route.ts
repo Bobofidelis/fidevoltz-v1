@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { mediaUploader } from '@/lib/media/uploader';
 import { unlink } from 'fs/promises';
 import { join } from 'path';
 import type { ApiResponse } from '@fidevoltz/types';
@@ -34,14 +35,18 @@ export async function POST(request: NextRequest) {
         // Get media files to delete
         const mediaToDelete = await prisma.media.findMany({
           where: { id: { in: ids } },
-          select: { id: true, url: true },
+          select: { id: true, url: true, publicId: true, provider: true, type: true },
         });
 
-        // Delete files from filesystem
+        // Delete files from the provider (Cloudinary) or the local filesystem
         for (const media of mediaToDelete) {
           try {
-            const filePath = join(process.cwd(), 'apps', 'web', 'public', media.url);
-            await unlink(filePath);
+            if (media.provider === 'LOCAL') {
+              const filePath = join(process.cwd(), 'public', media.url);
+              await unlink(filePath);
+            } else {
+              await mediaUploader.delete(media.publicId, media.type);
+            }
           } catch (err) {
             console.error('Error deleting file:', err);
           }

@@ -150,7 +150,7 @@ export default function ProjectsPage() {
               <Filter className="h-4 w-4" />
               Filter
               {activeFilterCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 h-4.5 w-4.5 flex items-center justify-center bg-blue-600 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px]">
+                <span className="absolute -top-1.5 -right-1.5 h-4.5 w-4.5 flex items-center justify-center bg-blue-600 text-white text-[11px] font-bold rounded-full min-w-[18px] h-[18px]">
                   {activeFilterCount}
                 </span>
               )}
@@ -296,12 +296,12 @@ export default function ProjectsPage() {
                     {Array.isArray(project.tags) && project.tags.length > 0 && (
                       <div className="flex gap-1 mt-1 flex-wrap ml-6">
                         {project.tags.slice(0, 3).map((tag: string) => (
-                          <span key={tag} className="text-[10px] px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded font-mono">
+                          <span key={tag} className="text-[11px] px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded font-mono">
                             {tag}
                           </span>
                         ))}
                         {project.tags.length > 3 && (
-                          <span className="text-[10px] text-slate-400">+{project.tags.length - 3}</span>
+                          <span className="text-[11px] text-slate-400">+{project.tags.length - 3}</span>
                         )}
                       </div>
                     )}

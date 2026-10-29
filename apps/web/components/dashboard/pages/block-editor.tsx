@@ -282,7 +282,7 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
                                       </div>
                                       <div className="flex-1 space-y-3">
                                         <div className="space-y-1.5">
-                                          <Label className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Image URL</Label>
+                                          <Label className="text-[11px] uppercase font-bold text-slate-500 tracking-wider">Image URL</Label>
                                           <Input placeholder="https://..." value={img.url} onChange={e => {
                                             const newImages = [...images];
                                             newImages[i].url = e.target.value;
@@ -291,7 +291,7 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
                                         </div>
                                         <div className="grid grid-cols-2 gap-2">
                                           <div className="space-y-1.5">
-                                            <Label className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Alt Text</Label>
+                                            <Label className="text-[11px] uppercase font-bold text-slate-500 tracking-wider">Alt Text</Label>
                                             <Input placeholder="Describe image" value={img.alt || ''} onChange={e => {
                                               const newImages = [...images];
                                               newImages[i].alt = e.target.value;
@@ -299,7 +299,7 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
                                             }} className="h-8 text-xs bg-slate-50 border-slate-200" />
                                           </div>
                                           <div className="space-y-1.5">
-                                            <Label className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Caption</Label>
+                                            <Label className="text-[11px] uppercase font-bold text-slate-500 tracking-wider">Caption</Label>
                                             <Input placeholder="Optional caption" value={img.caption || ''} onChange={e => {
                                               const newImages = [...images];
                                               newImages[i].caption = e.target.value;
@@ -499,7 +499,7 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
                                       <Trash2 className="h-3.5 w-3.5" />
                                     </Button>
                                     <div className="space-y-2">
-                                      <Label className="text-[10px] uppercase text-slate-400 font-bold">Question</Label>
+                                      <Label className="text-[11px] uppercase text-slate-400 font-bold">Question</Label>
                                       <Input placeholder="What is your question?" value={q.q || ''} onChange={e => {
                                         const newQuestions = [...cat.questions];
                                         newQuestions[qIndex] = { ...newQuestions[qIndex], q: e.target.value };
@@ -509,7 +509,7 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
                                       }} />
                                     </div>
                                     <div className="space-y-2">
-                                      <Label className="text-[10px] uppercase text-slate-400 font-bold">Answer</Label>
+                                      <Label className="text-[11px] uppercase text-slate-400 font-bold">Answer</Label>
                                       <Textarea placeholder="Provide the answer here..." value={q.a || ''} onChange={e => {
                                         const newQuestions = [...cat.questions];
                                         newQuestions[qIndex] = { ...newQuestions[qIndex], a: e.target.value };

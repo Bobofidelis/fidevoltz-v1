@@ -203,7 +203,7 @@ function FilterSections(props: StoreSidebarProps) {
             >
               In Stock Only
             </label>
-            <p className="text-[11px] text-slate-500">
+            <p className="text-xs text-slate-500">
               Exclude backordered items
             </p>
           </div>
@@ -248,13 +248,13 @@ function FilterSections(props: StoreSidebarProps) {
                       />
                       <label
                         htmlFor={`cat-${category}`}
-                        className="text-xs text-slate-700 group-hover:text-slate-900 cursor-pointer select-none truncate"
+                        className="text-sm text-slate-700 group-hover:text-slate-900 cursor-pointer select-none truncate"
                       >
                         {category}
                       </label>
                     </div>
                     {count !== undefined && (
-                      <span className="text-[11px] text-slate-400 font-medium ml-2">
+                      <span className="text-xs text-slate-500 font-medium ml-2">
                         {count}
                       </span>
                     )}
@@ -289,7 +289,7 @@ function FilterSections(props: StoreSidebarProps) {
                     />
                     <label
                       htmlFor={`price-${range}`}
-                      className="text-xs text-slate-700 group-hover:text-slate-900 cursor-pointer select-none"
+                      className="text-sm text-slate-700 group-hover:text-slate-900 cursor-pointer select-none"
                     >
                       {range}
                     </label>
@@ -324,7 +324,7 @@ function FilterSections(props: StoreSidebarProps) {
                     />
                     <label
                       htmlFor={`brand-${brand}`}
-                      className="text-xs text-slate-700 group-hover:text-slate-900 cursor-pointer select-none"
+                      className="text-sm text-slate-700 group-hover:text-slate-900 cursor-pointer select-none"
                     >
                       {brand}
                     </label>
@@ -369,7 +369,7 @@ function FilterSections(props: StoreSidebarProps) {
                             />
                           ))}
                         </div>
-                        <span className="ml-1 text-[11px] text-slate-600">{r.label}</span>
+                        <span className="ml-1 text-xs text-slate-600">{r.label}</span>
                       </div>
                       {isSelected && <Check className="h-3.5 w-3.5 text-blue-600" />}
                     </button>

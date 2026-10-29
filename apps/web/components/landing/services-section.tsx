@@ -37,13 +37,13 @@ const services = [
 
 export function ServicesSection() {
   return (
-    <section className="py-24 bg-slate-50">
+    <section className="py-12 md:py-16 bg-slate-50">
       <div className="container px-4 md:px-6">
-        <div className="text-center mb-16">
+        <div className="text-center mb-10">
           <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-4">
             More Than Just Tutorials
           </h2>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+          <p className="text-lg text-slate-700 max-w-2xl mx-auto">
             Discover how we can work together to build the future of technology.
           </p>
         </div>
@@ -53,7 +53,7 @@ export function ServicesSection() {
             const Icon = service.icon;
             return (
               <FadeIn key={service.title} delay={index * 0.1}>
-                <div className="group h-full bg-white rounded-2xl p-8 shadow-sm border border-slate-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
+                <div className="group h-full bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
                   <div className={`w-14 h-14 rounded-xl ${service.bg} ${service.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
                     <Icon className="h-7 w-7" />
                   </div>
@@ -62,7 +62,7 @@ export function ServicesSection() {
                     {service.title}
                   </h3>
                   
-                  <p className="text-slate-600 mb-8 flex-grow leading-relaxed">
+                  <p className="text-slate-700 mb-6 flex-grow leading-relaxed">
                     {service.description}
                   </p>
                   

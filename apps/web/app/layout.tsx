@@ -1,6 +1,6 @@
 import { cache } from "react";
 import type { Metadata } from "next";
-// import { Inter } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import "katex/dist/katex.min.css";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -9,7 +9,8 @@ import { TopLoader } from "@/components/ui/top-loader";
 import { AnalyticsTracker } from "@/components/analytics-tracker";
 import { Providers } from "@/components/providers";
 
-// const inter = Inter({ subsets: ["latin"] });
+// Self-hosted at build time by next/font; exposed as a CSS variable for Tailwind's font-sans
+const inter = Inter({ subsets: ["latin"], display: "swap", variable: "--font-inter" });
 
 import { prisma } from "@/lib/prisma";
 import { hexToHsl } from "@/lib/utils";
@@ -54,7 +55,7 @@ export default async function RootLayout({
   const primaryHsl = hexToHsl(primaryColor);
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
       <head>
         <style dangerouslySetInnerHTML={{ __html: `
           :root {

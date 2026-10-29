@@ -28,7 +28,7 @@ const EMPTY: SearchResults = {
 function ResultSection({ title, color, children }: { title: string; color: string; children: React.ReactNode }) {
   return (
     <div>
-      <div className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest mb-1 ${color}`}>
+      <div className={`px-3 py-1.5 text-[11px] font-bold uppercase tracking-widest mb-1 ${color}`}>
         {title}
       </div>
       <div className="space-y-0.5">{children}</div>
@@ -150,7 +150,7 @@ export function GlobalSearch({
         <span className="hidden xl:inline-flex text-sm">
           {context === "dashboard" ? "Search dashboard..." : "Search..."}
         </span>
-        <kbd className="pointer-events-none absolute right-2 top-2 hidden h-6 select-none items-center gap-0.5 rounded-md border border-slate-200 bg-slate-50 px-1.5 font-mono text-[10px] font-medium text-slate-500 xl:flex">
+        <kbd className="pointer-events-none absolute right-2 top-2 hidden h-6 select-none items-center gap-0.5 rounded-md border border-slate-200 bg-slate-50 px-1.5 font-mono text-[11px] font-medium text-slate-500 xl:flex">
           <span className="text-xs">⌘</span>K
         </kbd>
       </Button>

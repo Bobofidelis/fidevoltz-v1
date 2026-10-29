@@ -20,7 +20,7 @@
     --secondary-foreground: 240 5.9% 10%;
 
     --muted: 240 4.8% 95.9%; /* Light grey */
-    --muted-foreground: 240 3.8% 46.1%; /* Medium grey */
+    --muted-foreground: 240 4% 34%; /* Secondary text - dark enough to read, still lighter than body */
 
     --accent: 240 4.8% 95.9%;
     --accent-foreground: 240 5.9% 10%;
@@ -71,19 +71,28 @@
     @apply border-border;
   }
   html {
-    font-size: 14px;
+    /* Standard 16px base so rem-based sizes match the browser default */
+    font-size: 100%;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    line-height: 1.6;
+    text-rendering: optimizeLegibility;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    line-height: 1.25;
   }
   body {
     @apply bg-background text-foreground;
   }
 
   /* Rich Text Editor Global Styles */
-  .prose-rte h2, .rte-editor h2 { font-size: 1.5rem; font-weight: 700; margin: 1.25rem 0 0.75rem; color: #1e293b; }
-  .prose-rte h3, .rte-editor h3 { font-size: 1.25rem; font-weight: 700; margin: 1rem 0 0.5rem; color: #1e293b; }
-  .prose-rte h4, .rte-editor h4 { font-size: 1.1rem; font-weight: 700; margin: 0.75rem 0 0.5rem; color: #1e293b; }
+  .prose-rte h2, .rte-editor h2 { font-size: 1.5rem; font-weight: 700; margin: 1.25rem 0 0.75rem; color: #0f172a; }
+  .prose-rte h3, .rte-editor h3 { font-size: 1.25rem; font-weight: 700; margin: 1rem 0 0.5rem; color: #0f172a; }
+  .prose-rte h4, .rte-editor h4 { font-size: 1.1rem; font-weight: 700; margin: 0.75rem 0 0.5rem; color: #0f172a; }
   .prose-rte p, .rte-editor p { margin: 0.5rem 0; line-height: 1.75; }
   .prose-rte p:first-child, .rte-editor p:first-child { margin-top: 0; }
-  .prose-rte strong, .rte-editor strong { font-weight: 700; }
+  .prose-rte strong, .rte-editor strong { font-weight: 700; color: #0f172a; }
   .prose-rte em, .rte-editor em { font-style: italic; }
   .prose-rte u, .rte-editor u { text-decoration: underline; }
   .prose-rte s, .rte-editor s { text-decoration: line-through; }

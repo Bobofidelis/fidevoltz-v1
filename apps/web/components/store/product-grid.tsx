@@ -115,24 +115,24 @@ export function StoreProductGrid({
   };
 
   return (
-    <div className="flex-1 min-w-0">
+    <div className="flex-1 min-w-0 w-full">
       {/* Grid Toolbar */}
       {!hideHeader && (
         <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/90 shadow-xs mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             {/* Results Count */}
-            <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-500">
+            <div className="flex items-center gap-2 text-base text-slate-700">
               {isLoading ? (
-                <span className="text-slate-400">Loading catalog...</span>
+                <span className="text-slate-500">Loading catalog...</span>
               ) : (
                 <span>
                   Showing{" "}
-                  <strong className="text-slate-900 font-semibold">
+                  <strong className="text-slate-900 font-bold">
                     {products.length === 0 ? 0 : startIndex + 1}–{endIndex}
                   </strong>{" "}
-                  of <strong className="text-slate-900 font-semibold">{products.length}</strong> items
+                  of <strong className="text-slate-900 font-bold">{products.length}</strong> items
                   {totalProducts > products.length && (
-                    <span className="text-slate-400"> (filtered from {totalProducts})</span>
+                    <span className="text-slate-500"> (filtered from {totalProducts})</span>
                   )}
                 </span>
               )}
@@ -197,7 +197,7 @@ export function StoreProductGrid({
           {/* Active Filters Tag Pills */}
           {activeFilters.length > 0 && (
             <div className="flex flex-wrap items-center gap-1.5 pt-3 mt-3 border-t border-slate-100">
-              <span className="text-[11px] font-medium text-slate-400 mr-1">
+              <span className="text-xs font-medium text-slate-400 mr-1">
                 Active filters:
               </span>
               {activeFilters.map((filter) => (
@@ -214,7 +214,7 @@ export function StoreProductGrid({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-6 px-2 text-[11px] text-blue-600 hover:text-blue-800 font-medium"
+                className="h-6 px-2 text-xs text-blue-600 hover:text-blue-800 font-medium"
                 onClick={onReset}
               >
                 Clear all
@@ -262,7 +262,7 @@ export function StoreProductGrid({
           <h3 className="text-xl font-bold text-slate-900 mb-2">
             No matching components found
           </h3>
-          <p className="text-sm text-slate-500 mb-6 max-w-md mx-auto leading-relaxed">
+          <p className="text-sm text-slate-700 mb-6 max-w-md mx-auto leading-relaxed">
             We couldn't find any electronics components matching your current filter selection. Try adjusting your search keywords, category, or price range.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
@@ -279,7 +279,7 @@ export function StoreProductGrid({
       {/* Working Pagination */}
       {!isLoading && totalPages > 1 && (
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-xs">
-          <p className="text-xs text-slate-500">
+          <p className="text-sm text-slate-700">
             Page <span className="font-semibold text-slate-900">{currentPage}</span> of{" "}
             <span className="font-semibold text-slate-900">{totalPages}</span>
           </p>

@@ -91,7 +91,7 @@ export function SortableBlockItem({
         >
           <GripVertical className="h-5 w-5" />
         </div>
-        <Badge variant="outline" className="uppercase text-[10px] tracking-wider">
+        <Badge variant="outline" className="uppercase text-[11px] tracking-wider">
           {type} Block
         </Badge>
       </div>

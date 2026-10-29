@@ -364,7 +364,7 @@ export function PageRenderer({ content }: PageRendererProps) {
                       {block.badge}
                     </Badge>
                   )}
-                  <h1 className="text-4xl md:text-6xl font-bold mb-6 max-w-4xl mx-auto leading-tight">
+                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 max-w-4xl mx-auto leading-tight">
                     {block.title}
                   </h1>
                   {block.subtitle && (

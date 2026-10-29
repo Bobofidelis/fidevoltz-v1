@@ -5,7 +5,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Upload, Image as ImageIcon, Video, Music, Settings, FileText } from 'lucide-react';
+import { Upload, Image as ImageIcon, Video, Music, Settings, FileText, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
 import { MediaGrid } from '@/components/media/MediaGrid';
 import { MediaUpload } from '@/components/media/MediaUpload';
 import Link from 'next/link';
@@ -16,6 +17,26 @@ export default function MediaLibraryPage() {
   const [showUpload, setShowUpload] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
+  const [syncing, setSyncing] = useState(false);
+
+  const handleSync = async () => {
+    try {
+      setSyncing(true);
+      const response = await fetch('/api/admin/media/sync', { method: 'POST' });
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to sync media');
+      }
+      toast.success(data.message);
+      queryClient.invalidateQueries({ queryKey: ['media'] });
+      setRefreshKey((prev) => prev + 1);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to sync media');
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   const handleUploadSuccess = () => {
     setShowUpload(false);
     queryClient.invalidateQueries({ queryKey: ['media'] });
@@ -25,14 +46,18 @@ export default function MediaLibraryPage() {
   return (
     <div className="container mx-auto py-8 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-3xl font-bold">Media Library</h1>
           <p className="text-muted-foreground mt-1">
             Manage your uploaded media files
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={handleSync} disabled={syncing} title="Import assets that exist in Cloudinary but are missing from this library">
+            <RefreshCw className={`w-4 h-4 mr-2 ${syncing ? 'animate-spin' : ''}`} />
+            {syncing ? 'Syncing...' : 'Sync from Cloudinary'}
+          </Button>
           <Button variant="outline" asChild>
             <Link href="/dashboard/media/config">
               <Settings className="w-4 h-4 mr-2" />

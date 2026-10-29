@@ -4,10 +4,17 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Play, Package } from "lucide-react";
 import Link from "next/link";
 import { FadeIn, SlideUp } from "@/components/ui/motion";
+import { useApiQuery } from "@/lib/hooks/use-api-query";
 
 export function HeroSection() {
+  const { data: storefront } = useApiQuery<{ heroBadge: string | null }>({
+    endpoint: "/api/storefront",
+    queryKey: ["storefront"],
+    requireAuth: false,
+  });
+
   return (
-    <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+    <section className="relative min-h-[85vh] py-16 md:py-20 flex items-center overflow-hidden">
       {/* Background with overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 z-10" />
       <div 
@@ -27,17 +34,20 @@ export function HeroSection() {
 
       <div className="container relative z-20 px-4 md:px-6">
         <div className="max-w-4xl">
-          <FadeIn>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 mb-6">
-              <div className="h-2 w-2 rounded-full bg-green-400 animate-pulse" />
-              <span className="text-sm font-medium text-white">
-                Join 10,000+ Makers Building the Future
-              </span>
-            </div>
-          </FadeIn>
+          {/* Badge text is managed in Dashboard → Settings → Storefront */}
+          {storefront?.heroBadge && (
+            <FadeIn>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 mb-6">
+                <div className="h-2 w-2 rounded-full bg-green-400 animate-pulse" />
+                <span className="text-sm font-medium text-white">
+                  {storefront.heroBadge}
+                </span>
+              </div>
+            </FadeIn>
+          )}
 
           <SlideUp delay={0.1}>
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-6 leading-tight">
               Build Amazing
               <span className="block bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
                 Electronics Projects
@@ -46,7 +56,7 @@ export function HeroSection() {
           </SlideUp>
 
           <SlideUp delay={0.2}>
-            <p className="text-xl text-slate-300 mb-8 max-w-2xl">
+            <p className="text-xl text-slate-200 mb-8 max-w-2xl">
               From beginner tutorials to advanced IoT systems. Learn, shop, and create 
               with our comprehensive platform designed for electronics enthusiasts.
             </p>

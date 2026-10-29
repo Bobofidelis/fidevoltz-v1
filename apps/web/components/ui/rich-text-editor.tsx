@@ -42,18 +42,9 @@ import {
   Link as LinkIcon, Undo, Redo, Minus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { SymbolPicker } from '@/components/ui/symbol-picker';
 import { cn } from '@/lib/utils';
 
-const symbolGroups = {
-  "Electronics": ["Ω", "µ", "Ʊ", "℧", "⏚", "⎓", "⎍", "∿"],
-  "Math": ["±", "×", "÷", "√", "∞", "≈", "≠", "≤", "≥", "∑", "∫", "∂", "π", "Δ", "∇"],
-  "Units": ["°", "²", "³", "⁴", "⁻¹", "₀", "₁", "₂", "₃", "ₙ"],
-  "Arrows": ["→", "←", "↑", "↓", "↔", "⇒", "⇐", "⇔"],
-  "Greek": ["α", "β", "γ", "δ", "ε", "θ", "λ", "μ", "ρ", "σ", "τ", "φ", "ω"],
-  "Subscripts": ["₀", "₁", "₂", "₃", "₄", "₅", "ₙ", "ₓ"],
-  "Superscripts": ["⁰", "¹", "²", "³", "⁴", "⁵", "ⁿ", "⁻"],
-};
 
 interface RichTextEditorProps {
   content: string;
@@ -239,46 +230,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
       </ToolbarButton>
 
       {/* Symbol Picker */}
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            title="Insert Symbol (Ω, µ, ±, etc.)"
-            className="h-8 w-8 rounded hover:bg-slate-200 text-slate-700"
-          >
-            <span className="font-serif font-bold text-base leading-none">Ω</span>
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-80 p-3 max-h-80 overflow-y-auto" align="start">
-          <div className="space-y-3">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider pb-1 border-b">
-              Insert Symbol
-            </div>
-            {Object.entries(symbolGroups).map(([group, symbols]) => (
-              <div key={group}>
-                <div className="text-xs font-medium text-slate-600 mb-1.5">{group}</div>
-                <div className="grid grid-cols-8 gap-1">
-                  {symbols.map((sym) => (
-                    <button
-                      key={sym}
-                      type="button"
-                      onClick={() => {
-                        editor.chain().focus().insertContent(sym).run();
-                      }}
-                      className="h-7 w-7 flex items-center justify-center text-sm font-medium rounded hover:bg-slate-100 hover:text-blue-600 text-slate-800 border border-slate-200 transition-colors"
-                      title={sym}
-                    >
-                      {sym}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </PopoverContent>
-      </Popover>
+      <SymbolPicker onSelect={(sym) => editor.chain().focus().insertContent(sym).run()} />
 
       <Divider />
 

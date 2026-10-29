@@ -81,14 +81,14 @@ export function CategoryCards({
   };
 
   return (
-    <div className="relative mb-8">
+    <div className="relative mb-6">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-blue-600" />
             Explore by Category
           </h3>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-600">
             Browse verified electronics components by discipline
           </p>
         </div>
@@ -147,7 +147,7 @@ export function CategoryCards({
               <p
                 className={cn(
                   "text-xs mt-0.5",
-                  selectedCategory === null ? "text-blue-100" : "text-slate-400"
+                  selectedCategory === null ? "text-blue-100" : "text-slate-500 font-medium"
                 )}
               >
                 {totalProductsCount} items
@@ -191,7 +191,7 @@ export function CategoryCards({
                   <p
                     className={cn(
                       "text-xs mt-0.5",
-                      isSelected ? "text-blue-100" : "text-slate-400"
+                      isSelected ? "text-blue-100" : "text-slate-500 font-medium"
                     )}
                   >
                     {cat.count} {cat.count === 1 ? "item" : "items"}

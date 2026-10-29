@@ -567,7 +567,10 @@ export function ProductForm({ initialData, categories }: ProductFormProps) {
                 <Card>
                     <CardHeader>
                         <CardTitle>Technical Specifications</CardTitle>
-                        <CardDescription>Add key-value pairs for technical details (e.g. Voltage: 5V)</CardDescription>
+                        <CardDescription>
+                            Add key-value pairs for technical details (e.g. Voltage: 5V).{" "}
+                            Add a <strong>Brand</strong> specification (e.g. Brand: Espressif) to control which brand this product appears under in the store&apos;s Brands filter.
+                        </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {specKeys.map((spec, index) => (

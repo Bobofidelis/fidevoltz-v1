@@ -30,7 +30,7 @@ const features = [
   {
     icon: Users,
     title: "Global Community",
-    description: "Connect with 50k+ makers worldwide. Share projects, get help, and collaborate.",
+    description: "Connect with fellow makers. Share projects, get help, and collaborate.",
     image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&q=80",
     gradient: "from-green-500 to-emerald-500",
     size: "medium",
@@ -69,13 +69,13 @@ const features = [
 
 export function FeaturesSection() {
   return (
-    <section className="py-16 md:py-24 bg-white">
+    <section className="py-12 md:py-16 bg-white">
       <div className="container px-4 md:px-6">
-        <div className="text-center mb-12 md:mb-16">
+        <div className="text-center mb-8 md:mb-12">
           <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-4">
             Everything You Need to Succeed
           </h2>
-          <p className="text-base md:text-lg text-slate-600 max-w-2xl mx-auto">
+          <p className="text-base md:text-lg text-slate-700 max-w-2xl mx-auto">
             A complete ecosystem for electronics enthusiasts, from learning to building.
           </p>
         </div>

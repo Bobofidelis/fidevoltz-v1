@@ -107,7 +107,7 @@ export function ProjectSearch({ initialQuery, initialCategory, initialDifficulty
 
           {/* Difficulty divider */}
           <div className="h-5 w-px bg-slate-200 mx-1" />
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-0.5">Level</span>
+          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mr-0.5">Level</span>
 
           {/* Difficulty pills */}
           {DIFFICULTY_LEVELS.map((diff) => {
@@ -140,7 +140,7 @@ export function ProjectSearch({ initialQuery, initialCategory, initialDifficulty
           {categories.length > 0 && (
             <>
               <div className="h-5 w-px bg-slate-200 mx-1" />
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-0.5">Topic</span>
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mr-0.5">Topic</span>
             </>
           )}
 

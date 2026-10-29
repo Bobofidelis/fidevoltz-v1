@@ -36,13 +36,13 @@ export async function LatestProjects() {
   // Empty state
   if (projects.length === 0) {
     return (
-      <section className="py-24 bg-slate-50">
+      <section className="py-12 md:py-16 bg-slate-50">
         <div className="container px-4 md:px-6">
           <div className="text-center max-w-2xl mx-auto">
             <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
               Latest Projects
             </h2>
-            <p className="text-lg text-slate-600 mb-8">
+            <p className="text-lg text-slate-700 mb-8">
               No projects available yet. Check back soon for exciting tutorials and guides!
             </p>
             <Link href="/projects">
@@ -57,12 +57,12 @@ export async function LatestProjects() {
   }
 
   return (
-    <section className="py-24 bg-slate-50">
+    <section className="py-12 md:py-16 bg-slate-50">
       <div className="container px-4 md:px-6">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
           <div>
             <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-2">Trending Projects</h2>
-            <p className="text-slate-600">Popular tutorials this week</p>
+            <p className="text-slate-700">Popular tutorials this week</p>
           </div>
           <Link href="/projects">
             <Button variant="outline" className="group border-slate-300 hover:bg-slate-900 hover:text-white hover:border-slate-900">
@@ -106,7 +106,7 @@ export async function LatestProjects() {
                     {project.title}
                   </h3>
                   
-                  <p className="text-slate-600 mb-4 line-clamp-2 flex-1">
+                  <p className="text-slate-700 mb-4 line-clamp-2 flex-1">
                     {project.excerpt}
                   </p>
 

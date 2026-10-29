@@ -431,12 +431,12 @@ export default function AnalyticsPage() {
                           <div className="min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className="font-semibold text-slate-800">{log.user?.name || "System"}</span>
-                              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide ${actionColor}`}>
+                              <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide ${actionColor}`}>
                                 {log.action}
                               </span>
                               <span className="text-slate-500 truncate">{log.resource}</span>
                               {log.resourceId && (
-                                <span className="text-[11px] text-slate-400 truncate hidden sm:inline">
+                                <span className="text-xs text-slate-400 truncate hidden sm:inline">
                                   #{log.resourceId.slice(-6)}
                                 </span>
                               )}

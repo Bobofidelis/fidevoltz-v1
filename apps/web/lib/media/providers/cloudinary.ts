@@ -65,14 +65,50 @@ export class CloudinaryAdapter implements MediaProviderAdapter {
     }
   }
 
-  async delete(publicId: string): Promise<boolean> {
+  async delete(publicId: string, type?: MediaType): Promise<boolean> {
     try {
-      const result = await cloudinary.uploader.destroy(publicId);
-      return result.result === 'ok';
+      // destroy() defaults to resource_type 'image', so videos/raw files must say what they are
+      const resourceTypes = type ? [this.getResourceType(type)] : (['image', 'video', 'raw'] as const);
+      for (const resourceType of resourceTypes) {
+        const result = await cloudinary.uploader.destroy(publicId, { resource_type: resourceType, invalidate: true });
+        if (result.result === 'ok') return true;
+      }
+      return false;
     } catch (error) {
       console.error('[Cloudinary] Delete error:', error);
       return false;
     }
+  }
+
+  /**
+   * List every uploaded asset in the account (images, videos and raw files),
+   * following next_cursor so accounts with more than one page are fully covered.
+   */
+  async listAll(): Promise<MediaUploadResult[]> {
+    const all: MediaUploadResult[] = [];
+    for (const resourceType of ['image', 'video', 'raw'] as const) {
+      let nextCursor: string | undefined;
+      do {
+        const page: any = await cloudinary.api.resources({
+          resource_type: resourceType,
+          type: 'upload',
+          max_results: 500,
+          tags: true,
+          next_cursor: nextCursor,
+        });
+        for (const r of page.resources || []) {
+          all.push(this.mapCloudinaryResponse(r as UploadApiResponse, this.typeFromResource(r)));
+        }
+        nextCursor = page.next_cursor;
+      } while (nextCursor);
+    }
+    return all;
+  }
+
+  private typeFromResource(r: { resource_type: string; format?: string; is_audio?: boolean }): MediaType {
+    if (r.resource_type === 'image') return r.format === 'pdf' ? 'DOCUMENT' : 'IMAGE';
+    if (r.resource_type === 'video') return r.is_audio || this.detectMediaType(r.format) === 'AUDIO' ? 'AUDIO' : 'VIDEO';
+    return 'DOCUMENT';
   }
 
   getUrl(publicId: string, options?: TransformOptions): string {
@@ -127,7 +163,7 @@ export class CloudinaryAdapter implements MediaProviderAdapter {
       height: result.height,
       duration: result.duration,
       bytes: result.bytes,
-      folder: result.folder,
+      folder: result.folder || (result as any).asset_folder || undefined,
       tags: result.tags || [],
     };
   }

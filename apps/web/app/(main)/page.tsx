@@ -24,22 +24,22 @@ export default function Home() {
       <HeroSection />
       
       {/* Content Top Ad */}
-      <AdSlot page="home" zone="CONTENT_TOP" className="container mx-auto px-4 my-8" />
+      <AdSlot page="home" zone="CONTENT_TOP" className="container mx-auto px-4 my-4 md:my-6" />
       
       <LatestProjects />
       <FeaturesSection />
       
       {/* Content Middle Ad */}
-      <AdSlot page="home" zone="CONTENT_MIDDLE" className="container mx-auto px-4 my-8" />
+      <AdSlot page="home" zone="CONTENT_MIDDLE" className="container mx-auto px-4 my-4 md:my-6" />
       
       <ServicesSection />
       <FeaturedProducts />
       
       {/* Content Bottom Ad */}
-      <AdSlot page="home" zone="CONTENT_BOTTOM" className="container mx-auto px-4 my-8" />
+      <AdSlot page="home" zone="CONTENT_BOTTOM" className="container mx-auto px-4 my-4 md:my-6" />
       
       {/* Footer Ad */}
-      <AdSlot page="home" zone="FOOTER" className="container mx-auto px-4 mt-8 mb-4" />
+      <AdSlot page="home" zone="FOOTER" className="container mx-auto px-4 mt-6 mb-4" />
     </div>
   );
 }

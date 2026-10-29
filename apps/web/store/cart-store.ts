@@ -42,7 +42,7 @@ interface CartState {
   getSelectedTotal: () => number;
 }
 
-const TAX_RATE = 0.08; // 8% tax
+export const TAX_RATE = 0.08; // 8% tax
 export const FREE_SHIPPING_THRESHOLD = 50000; // Free shipping over ₦50,000
 export const SHIPPING_COST = 3500; // ₦3,500 standard delivery
 

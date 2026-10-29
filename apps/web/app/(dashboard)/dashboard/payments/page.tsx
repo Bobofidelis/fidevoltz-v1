@@ -243,7 +243,7 @@ export default function PaymentSettingsPage() {
                     <CardTitle className="text-xl flex items-center gap-2">
                       {gateway.name}
                       {gateway.isTestMode && gateway.type !== 'manual' && (
-                        <span className="bg-yellow-100 text-yellow-800 text-[10px] px-2 py-0.5 rounded font-bold uppercase">
+                        <span className="bg-yellow-100 text-yellow-800 text-[11px] px-2 py-0.5 rounded font-bold uppercase">
                           Test Mode
                         </span>
                       )}

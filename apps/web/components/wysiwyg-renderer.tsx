@@ -1,4 +1,4 @@
-import DOMPurify from 'isomorphic-dompurify';
+import { sanitizeHtml } from '@/lib/sanitize';
 
 export interface WysiwygNode {
   type: string;
@@ -107,7 +107,7 @@ export function WysiwygRenderer({ content }: WysiwygRendererProps) {
     return (
       <div 
         className="prose prose-slate max-w-none"
-        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }}
+        dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }}
       />
     );
   }

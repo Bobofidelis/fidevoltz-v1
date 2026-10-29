@@ -55,7 +55,7 @@ export function Navbar() {
   const user = session?.user;
   const cartCount = items.reduce((acc, item) => acc + item.quantity, 0);
 
-  const { data: settingsData } = usePublicSettings("branding");
+  const { data: settingsData, isLoading: brandingLoading } = usePublicSettings("branding");
   const branding = settingsData?.grouped?.branding || {};
   const siteName = branding["branding.siteName"] || "FideVoltz";
   const logo = branding["branding.logo"];
@@ -77,6 +77,9 @@ export function Navbar() {
         <Link href="/" className="flex items-center gap-2.5 group">
           {logo ? (
             <img src={logo} alt={siteName} className="h-8 w-auto" />
+          ) : brandingLoading ? (
+            // Neutral placeholder so the fallback icon doesn't flash before the real logo loads
+            <div className="h-8 w-8 rounded-xl bg-slate-100" />
           ) : (
             <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
               <Zap className="h-4 w-4 text-white" />
@@ -126,7 +129,7 @@ export function Navbar() {
             <Link href="/cart">
               <ShoppingCart className="h-5 w-5 text-slate-600" />
               {cartCount > 0 && (
-                <span className="absolute top-0 right-0 h-4 w-4 transform translate-x-1/4 -translate-y-1/4 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white text-[10px] font-bold flex items-center justify-center shadow-md">
+                <span className="absolute top-0 right-0 h-4 w-4 transform translate-x-1/4 -translate-y-1/4 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white text-[11px] font-bold flex items-center justify-center shadow-md">
                   {cartCount > 9 ? "9+" : cartCount}
                 </span>
               )}

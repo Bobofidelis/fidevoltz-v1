@@ -213,7 +213,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             )}
           </div>
           
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-6 max-w-4xl leading-tight">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 max-w-4xl leading-tight tracking-tight">
             {project.title}
           </h1>
           

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -25,11 +25,11 @@ import type { Product, PaginatedResponse } from "@fidevoltz/types";
 import { toast } from "sonner";
 import { StoreSidebar } from "@/components/store/store-sidebar";
 import { StoreProductGrid, ActiveFilter } from "@/components/store/product-grid";
-import { SearchSuggestions } from "@/components/store/search-suggestions";
+import { SearchSuggestions, MAX_SUGGESTIONS } from "@/components/store/search-suggestions";
 import { TrustBadges } from "@/components/store/trust-badges";
 import { CategoryCards, CategoryItem } from "@/components/store/category-cards";
 import { NewArrivals } from "@/components/store/new-arrivals";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, cn } from "@/lib/utils";
 
 const POPULAR_SEARCH_TERMS = [
   "ESP32",
@@ -41,22 +41,33 @@ const POPULAR_SEARCH_TERMS = [
   "Relay",
 ];
 
-const DEFAULT_BRANDS = [
-  "Arduino",
-  "Espressif",
-  "Raspberry Pi",
-  "Adafruit",
-  "SparkFun",
-  "Generic",
-  "STMicroelectronics",
-  "Texas Instruments",
-];
+// Brand comes from a "Brand" specification set in Dashboard → Products → Specifications,
+// otherwise it is guessed from the product name
+function productBrand(p: Product): string {
+  const specs = (p.specifications || {}) as Record<string, unknown>;
+  const key = Object.keys(specs).find((k) => k.trim().toLowerCase() === "brand");
+  const fromSpecs = key ? String(specs[key] ?? "").trim() : "";
+  if (fromSpecs) return fromSpecs;
+  if (p.brand) return p.brand;
+  const name = p.name || "";
+  if (/arduino/i.test(name)) return "Arduino";
+  if (/esp(32|8266)|espressif/i.test(name)) return "Espressif";
+  if (/raspberry/i.test(name)) return "Raspberry Pi";
+  return "Generic";
+}
 
 function StoreContent() {
   // Fetch products from public endpoint - request limit 100 to populate store catalog
   const { data, isLoading } = useApiQuery<PaginatedResponse<Product>>({
-    endpoint: "/api/products?limit=100",
+    endpoint: "/api/products?limit=500",
     queryKey: ["products", "store", "catalog"],
+    requireAuth: false,
+  });
+
+  // Hero stats (live counts + admin text from Dashboard → Settings → Storefront)
+  const { data: storefront } = useApiQuery<{ storeStats: { value: string; label: string }[] }>({
+    endpoint: "/api/storefront",
+    queryKey: ["storefront"],
     requireAuth: false,
   });
 
@@ -91,11 +102,8 @@ function StoreContent() {
         }
 
         const priceNum = Number(p.price);
-        const originalPrice = p.originalPrice
-          ? Number(p.originalPrice)
-          : priceNum > 15000
-          ? Math.round(priceNum * 1.15)
-          : undefined;
+        // Only show a "was" price when the product really has one
+        const originalPrice = p.originalPrice ? Number(p.originalPrice) : undefined;
 
         return {
           id: p.id,
@@ -113,13 +121,13 @@ function StoreContent() {
             name: "Components",
           },
           categoryId: p.categoryId || p.category?.id,
-          brand: p.brand || (p.name.includes("Arduino") ? "Arduino" : p.name.includes("ESP") ? "Espressif" : p.name.includes("Raspberry") ? "Raspberry Pi" : "Generic"),
+          brand: productBrand(p),
           badge,
           stock,
           minStock,
           inStock: stock > 0,
-          rating: p.rating || 4.8,
-          reviewCount: p.reviewCount || 14,
+          rating: p.rating || 0,
+          reviewCount: p.reviewCount || 0,
           sku: p.sku,
           datasheet: p.datasheet,
           specifications: p.specifications,
@@ -173,10 +181,9 @@ function StoreContent() {
     }));
   }, [categoriesData, categories, categoryCounts]);
 
-  // Brands list: combine default brands with brands from products
+  // Brands list: only brands that real products belong to
   const brands = useMemo(() => {
-    const extracted = Array.from(new Set(allProducts.map((p) => p.brand).filter(Boolean))) as string[];
-    return Array.from(new Set([...DEFAULT_BRANDS, ...extracted]));
+    return (Array.from(new Set(allProducts.map((p) => p.brand).filter(Boolean))) as string[]).sort();
   }, [allProducts]);
 
   // Filter States
@@ -191,6 +198,7 @@ function StoreContent() {
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState("Featured");
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [activeSuggestion, setActiveSuggestion] = useState(-1);
 
   // Newsletter State
   const [newsletterEmail, setNewsletterEmail] = useState("");
@@ -198,6 +206,7 @@ function StoreContent() {
 
   const searchRef = useRef<HTMLDivElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   // Sync category param from URL
   useEffect(() => {
@@ -243,6 +252,36 @@ function StoreContent() {
     setInStockOnly(false);
     setSelectedRating(null);
     setSortBy("Featured");
+  };
+
+  const viewAllResults = () => {
+    setShowSuggestions(false);
+    setActiveSuggestion(-1);
+    resultsRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const count = Math.min(filteredProducts.length, MAX_SUGGESTIONS);
+    if (e.key === "ArrowDown" && count > 0) {
+      e.preventDefault();
+      setShowSuggestions(true);
+      setActiveSuggestion((i) => (i + 1) % count);
+    } else if (e.key === "ArrowUp" && count > 0) {
+      e.preventDefault();
+      setActiveSuggestion((i) => (i <= 0 ? count - 1 : i - 1));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      const product = activeSuggestion >= 0 ? filteredProducts[activeSuggestion] : null;
+      if (product && showSuggestions) {
+        setShowSuggestions(false);
+        router.push(`/store/product/${product.id}`);
+      } else {
+        viewAllResults();
+      }
+    } else if (e.key === "Escape") {
+      setShowSuggestions(false);
+      setActiveSuggestion(-1);
+    }
   };
 
   // Close suggestions when clicking outside
@@ -304,7 +343,7 @@ function StoreContent() {
         }
 
         // Rating filter
-        if (selectedRating !== null && (product.rating || 4.8) < selectedRating) {
+        if (selectedRating !== null && (product.rating || 0) < selectedRating) {
           return false;
         }
 
@@ -439,19 +478,21 @@ function StoreContent() {
   return (
     <div className="min-h-screen bg-slate-50/60 font-sans text-slate-900">
       {/* ================= HERO SECTION ================= */}
-      <section className="relative bg-slate-950 text-white overflow-hidden pt-12 pb-16 md:pt-16 md:pb-20 border-b border-slate-800">
-        {/* Animated Radial Glows */}
-        <div className="absolute -top-32 -left-32 w-96 h-96 bg-blue-600/25 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute top-1/2 -right-32 w-96 h-96 bg-indigo-600/20 rounded-full blur-[110px] pointer-events-none" />
+      <section className="relative z-30 bg-slate-950 text-white pt-12 pb-12 md:pt-16 md:pb-16 border-b border-slate-800">
+        {/* Animated Radial Glows & Grid (contained with overflow-hidden) */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-32 -left-32 w-96 h-96 bg-blue-600/25 rounded-full blur-[100px]" />
+          <div className="absolute top-1/2 -right-32 w-96 h-96 bg-indigo-600/20 rounded-full blur-[110px]" />
 
-        {/* Circuit / High-Tech Grid Pattern */}
-        <div 
-          className="absolute inset-0 opacity-[0.07] pointer-events-none"
-          style={{
-            backgroundImage: `radial-gradient(rgba(255, 255, 255, 0.4) 1px, transparent 1px)`,
-            backgroundSize: '24px 24px',
-          }}
-        />
+          {/* Circuit / High-Tech Grid Pattern */}
+          <div 
+            className="absolute inset-0 opacity-[0.07]"
+            style={{
+              backgroundImage: `radial-gradient(rgba(255, 255, 255, 0.4) 1px, transparent 1px)`,
+              backgroundSize: '24px 24px',
+            }}
+          />
+        </div>
 
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
@@ -463,34 +504,43 @@ function StoreContent() {
                 <span>Verified Electronics Components & Maker Hardware</span>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.12]">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] font-extrabold tracking-tight text-white leading-[1.12]">
                 Power Your Next Build With <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-sky-400">Genuine Hardware</span>
               </h1>
 
-              <p className="text-sm sm:text-base md:text-lg text-slate-300 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal">
+              <p className="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal">
                 Direct source for genuine microcontrollers, sensors, dev boards, and precision tools in Nigeria. Tested for engineering labs, maker studios, and industrial prototyping.
               </p>
 
               {/* Integrated Search Bar with Suggestions */}
-              <div className="relative max-w-xl mx-auto lg:mx-0 pt-2" ref={searchRef}>
+              <div className="relative z-50 max-w-xl mx-auto lg:mx-0 pt-2" ref={searchRef}>
                 <div className="relative flex items-center">
-                  <Search className="absolute left-4 h-5 w-5 text-slate-400 pointer-events-none" />
+                  <Search className="absolute left-4 z-10 h-5 w-5 text-slate-400 pointer-events-none" />
                   <Input
                     placeholder="Search components, sensors, microcontrollers, tools..."
                     value={searchQuery}
                     onChange={(e) => {
                       setSearchQuery(e.target.value);
                       setShowSuggestions(true);
+                      setActiveSuggestion(-1);
                     }}
                     onFocus={() => searchQuery && setShowSuggestions(true)}
-                    className="h-13 pl-12 pr-28 rounded-2xl bg-white/10 border-white/20 text-white placeholder:text-slate-400 focus:bg-white focus:text-slate-900 focus:ring-2 focus:ring-blue-500 shadow-xl backdrop-blur-md text-sm transition-all"
+                    onKeyDown={handleSearchKeyDown}
+                    aria-label="Search the store"
+                    aria-autocomplete="list"
+                    aria-expanded={showSuggestions && !!searchQuery.trim()}
+                    className="h-14 pl-12 pr-28 rounded-2xl bg-white/10 border-white/20 text-white placeholder:text-slate-400 focus:bg-white focus:text-slate-900 focus:ring-2 focus:ring-blue-500 shadow-xl backdrop-blur-md text-base transition-all"
                   />
                   {searchQuery ? (
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => setSearchQuery("")}
-                      className="absolute right-3 h-8 text-xs text-slate-400 hover:text-white"
+                      onClick={() => {
+                        setSearchQuery("");
+                        setShowSuggestions(false);
+                        setActiveSuggestion(-1);
+                      }}
+                      className="absolute right-3 h-8 text-sm text-slate-400 hover:text-blue-500 hover:bg-transparent"
                     >
                       Clear
                     </Button>
@@ -498,34 +548,41 @@ function StoreContent() {
                     <Button
                       size="sm"
                       className="absolute right-2 h-9 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-md"
-                      onClick={() => resultsRef.current?.scrollIntoView({ behavior: "smooth" })}
+                      onClick={viewAllResults}
                     >
                       Explore
                     </Button>
                   )}
+
+                  {/* Suggestions Dropdown - Positioned directly under input, above tags and stats */}
+                  {showSuggestions && (
+                    <SearchSuggestions
+                      products={filteredProducts}
+                      searchQuery={searchQuery}
+                      onSelect={() => setShowSuggestions(false)}
+                      onViewAll={viewAllResults}
+                      activeIndex={activeSuggestion}
+                      onHover={setActiveSuggestion}
+                    />
+                  )}
                 </div>
 
-                {/* Suggestions Dropdown */}
-                {showSuggestions && (
-                  <SearchSuggestions
-                    products={filteredProducts}
-                    searchQuery={searchQuery}
-                    onSelect={() => setShowSuggestions(false)}
-                  />
-                )}
-
                 {/* Popular Keywords Chips */}
-                <div className="flex flex-wrap items-center gap-1.5 mt-3 justify-center lg:justify-start">
-                  <span className="text-[11px] text-slate-400 flex items-center gap-1 font-medium">
-                    <TrendingUp className="h-3 w-3 text-blue-400" />
+                <div className="flex flex-wrap items-center gap-2 mt-3 justify-center lg:justify-start">
+                  <span className="text-sm text-slate-400 flex items-center gap-1 font-medium">
+                    <TrendingUp className="h-3.5 w-3.5 text-blue-400" />
                     Popular:
                   </span>
                   {POPULAR_SEARCH_TERMS.map((term) => (
                     <button
                       key={term}
                       type="button"
-                      onClick={() => setSearchQuery(term)}
-                      className="text-[11px] px-2 py-0.5 rounded-full bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white border border-white/10 transition-colors"
+                      onClick={() => {
+                        setSearchQuery(term);
+                        setShowSuggestions(true);
+                        setActiveSuggestion(-1);
+                      }}
+                      className="text-sm px-2.5 py-1 rounded-full bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white border border-white/10 transition-colors"
                     >
                       {term}
                     </button>
@@ -533,28 +590,17 @@ function StoreContent() {
                 </div>
               </div>
 
-              {/* Key Trust Metrics */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-slate-800/80 max-w-2xl mx-auto lg:mx-0">
-                <div className="flex flex-col">
-                  <span className="text-xl sm:text-2xl font-bold text-white">500+</span>
-                  <span className="text-xs text-slate-400">Components in stock</span>
+              {/* Key Trust Metrics — managed in Dashboard → Settings → Storefront */}
+              {storefront?.storeStats && storefront.storeStats.length > 0 && (
+                <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:justify-center lg:justify-start gap-x-10 gap-y-5 pt-5 border-t border-slate-800/80 max-w-2xl mx-auto lg:mx-0 text-left">
+                  {storefront.storeStats.map((stat) => (
+                    <div key={`${stat.value}-${stat.label}`} className="flex flex-col min-w-0">
+                      <span className="text-2xl lg:text-[1.75rem] leading-tight font-extrabold text-white break-words">{stat.value}</span>
+                      <span className="text-sm text-slate-300">{stat.label}</span>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-xl sm:text-2xl font-bold text-white">Same-Day</span>
-                  <span className="text-xs text-slate-400">Order dispatch</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xl sm:text-2xl font-bold text-white">100%</span>
-                  <span className="text-xs text-slate-400">Tested & verified</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xl sm:text-2xl font-bold text-white flex items-center gap-1">
-                    4.9
-                    <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                  </span>
-                  <span className="text-xs text-slate-400">Maker satisfaction</span>
-                </div>
-              </div>
+              )}
             </div>
 
             {/* Right Hero: Sleek Featured Highlights Card Stack */}
@@ -567,7 +613,7 @@ function StoreContent() {
                       Featured Hardware
                     </span>
                   </div>
-                  <Badge variant="secondary" className="bg-blue-500/20 text-blue-300 text-[10px] border-none">
+                  <Badge variant="secondary" className="bg-blue-500/20 text-blue-300 text-[11px] border-none">
                     Top Sellers
                   </Badge>
                 </div>
@@ -584,7 +630,7 @@ function StoreContent() {
                         style={{ backgroundImage: `url('${p.image || ''}')` }}
                       />
                       <div className="flex-1 min-w-0">
-                        <span className="text-[10px] uppercase font-bold text-blue-400 tracking-wider block">
+                        <span className="text-[11px] uppercase font-bold text-blue-400 tracking-wider block">
                           {p.category?.name || "Hardware"}
                         </span>
                         <h4 className="text-sm font-semibold text-white group-hover:text-blue-300 transition-colors truncate">
@@ -594,7 +640,7 @@ function StoreContent() {
                           <span className="text-sm font-bold text-white">
                             {formatCurrency(Number(p.price))}
                           </span>
-                          <span className="text-[11px] text-emerald-400 flex items-center gap-1 font-medium">
+                          <span className="text-xs text-emerald-400 flex items-center gap-1 font-medium">
                             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
                             In Stock
                           </span>
@@ -620,7 +666,7 @@ function StoreContent() {
       </section>
 
       {/* ================= MAIN CATALOG BODY ================= */}
-      <main className="container mx-auto px-4 sm:px-6 py-8" ref={resultsRef}>
+      <main className="container mx-auto px-4 sm:px-6 py-6 md:py-8" ref={resultsRef}>
         
         {/* Trust Badges Bar */}
         <TrustBadges />
@@ -639,7 +685,7 @@ function StoreContent() {
         )}
 
         {/* Catalog Main Layout (Sidebar + Product Grid) */}
-        <div className="flex flex-col lg:flex-row gap-8 items-start mt-6">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start mt-6">
           
           {/* Sidebar Filter Panel */}
           <StoreSidebar
@@ -674,7 +720,7 @@ function StoreContent() {
         </div>
 
         {/* ================= NEWSLETTER & MAKER COMMUNITY CTA ================= */}
-        <section className="my-16 relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white p-8 sm:p-12 border border-slate-800 shadow-xl">
+        <section className="my-12 relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white p-6 sm:p-10 border border-slate-800 shadow-xl">
           <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
           
           <div className="relative z-10 max-w-3xl mx-auto text-center space-y-4">

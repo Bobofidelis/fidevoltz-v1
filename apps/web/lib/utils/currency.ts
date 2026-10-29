@@ -6,11 +6,13 @@
 export function formatNaira(amount: number | string): string {
   const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
   
+  // Whole amounts show as ₦15,000 (matching the store); kobo amounts keep 2 decimals
+  const decimals = Number.isInteger(Math.round(numAmount * 100) / 100) ? 0 : 2;
   return new Intl.NumberFormat('en-NG', {
     style: 'currency',
     currency: 'NGN',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
   }).format(numAmount);
 }
 

@@ -454,7 +454,7 @@ export function SidebarEditor({
                       <BlockIcon type={block.type} />
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-medium text-slate-700 truncate">{meta?.label || block.type}</p>
-                        <p className="text-[10px] text-slate-400 truncate">
+                        <p className="text-[11px] text-slate-400 truncate">
                           {typeof block.content === "string"
                             ? block.content.replace(/<[^>]+>/g, "").slice(0, 30)
                             : block.content?.text?.slice(0, 30) || block.content?.code?.slice(0, 20) || ""}
@@ -504,7 +504,7 @@ export function SidebarEditor({
                           </div>
                           <div className="min-w-0">
                             <p className="text-sm font-medium text-slate-800 leading-tight">{label}</p>
-                            <p className="text-[11px] text-slate-400 leading-tight mt-0.5 truncate">{desc}</p>
+                            <p className="text-xs text-slate-400 leading-tight mt-0.5 truncate">{desc}</p>
                           </div>
                         </button>
                       ))}
@@ -524,7 +524,7 @@ export function SidebarEditor({
                           </div>
                           <div className="min-w-0">
                             <p className="text-sm font-medium text-slate-800 leading-tight">{label}</p>
-                            <p className="text-[11px] text-slate-400 leading-tight mt-0.5 truncate">{desc}</p>
+                            <p className="text-xs text-slate-400 leading-tight mt-0.5 truncate">{desc}</p>
                           </div>
                         </button>
                       ))}

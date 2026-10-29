@@ -1,4 +1,13 @@
 import type { Config } from "tailwindcss";
+import defaultColors from "tailwindcss/colors";
+import defaultTheme from "tailwindcss/defaultTheme";
+
+// Darker mid-tone greys for text only (backgrounds/borders keep the stock palette).
+// 400 and below are left alone because they are used for text on dark sections.
+const readableText = {
+  slate: { ...defaultColors.slate, 500: "#526077", 600: "#3a4658", 700: "#273344", 800: "#182233" },
+  gray: { ...defaultColors.gray, 500: "#5b6270", 600: "#3f4552", 700: "#2b303b", 800: "#1a1e27" },
+};
 
 const config: Config = {
   darkMode: ["class"],
@@ -16,6 +25,10 @@ const config: Config = {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ["var(--font-inter)", ...defaultTheme.fontFamily.sans],
+      },
+      textColor: readableText,
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

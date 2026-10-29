@@ -1,19 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { withReviewStats } from '@/lib/review-stats';
 import type { ApiResponse, Product, PaginatedResponse } from '@fidevoltz/types';
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '20');
+    const page = Math.max(parseInt(searchParams.get('page') || '1') || 1, 1);
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '20') || 20, 1), 500);
     const search = searchParams.get('search') || '';
     const categoryId = searchParams.get('categoryId') || '';
 
     const skip = (page - 1) * limit;
 
+    // Drafts/archived products are only visible to staff (e.g. the editor's product link picker)
+    const session = await auth();
+    const isStaff = session?.user?.role === 'ADMIN' || session?.user?.role === 'EDITOR';
+
     const where = {
+      ...(!isStaff && { status: { in: ['ACTIVE', 'OUT_OF_STOCK'] as ('ACTIVE' | 'OUT_OF_STOCK')[] } }),
       ...(search && {
         OR: [
           { name: { contains: search, mode: 'insensitive' as const } },
@@ -40,7 +46,7 @@ export async function GET(request: NextRequest) {
       {
         success: true,
         data: {
-          data: products as any,
+          data: (await withReviewStats(products)) as any,
           pagination: {
             page,
             limit,

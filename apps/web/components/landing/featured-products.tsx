@@ -10,7 +10,7 @@ import { useRef } from "react";
 import { useCartStore } from "@/store/cart-store";
 import { useApiQuery } from "@/lib/hooks/use-api-query";
 import { toast } from "sonner";
-import { formatNaira } from "@/lib/utils/currency";
+import { formatCurrency } from "@/lib/utils";
 import type { Product, PaginatedResponse } from "@fidevoltz/types";
 
 export function FeaturedProducts() {
@@ -31,7 +31,8 @@ export function FeaturedProducts() {
     price: Number(p.price),
     image: p.image || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400',
     category: p.category?.name || 'Uncategorized',
-    badge: (p.stock || 0) < 5 ? 'Low Stock' : 'Best Seller'
+    // Only real stock states — no invented "Best Seller" labels
+    badge: (p.stock || 0) === 0 ? 'Out of Stock' : (p.stock || 0) <= (p.minStock || 5) ? 'Low Stock' : undefined
   })) || [];
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -52,14 +53,14 @@ export function FeaturedProducts() {
   }
 
   return (
-    <section className="py-24 bg-white overflow-hidden">
+    <section className="py-12 md:py-16 bg-white overflow-hidden">
       <div className="container px-4 md:px-6">
-        <div className="flex items-end justify-between mb-12">
+        <div className="flex items-end justify-between mb-8">
           <div className="max-w-2xl">
             <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
               Featured Components
             </h2>
-            <p className="text-lg text-slate-600">
+            <p className="text-lg text-slate-700">
               Premium quality electronics components for your next project
             </p>
           </div>
@@ -151,7 +152,7 @@ export function FeaturedProducts() {
                       {/* Price */}
                       <div className="flex items-center justify-between mt-auto">
                         <span className="text-2xl font-bold text-slate-900">
-                          {formatNaira(product.price)}
+                          {formatCurrency(product.price)}
                         </span>
                         <Button 
                           variant="ghost" 

@@ -6,6 +6,7 @@ import { mediaUploader } from '@/lib/media/uploader';
 interface ApiResponse {
   success: boolean;
   media?: any[];
+  total?: number;
   message?: string;
   error?: string;
 }
@@ -26,10 +27,13 @@ export async function GET(request: NextRequest) {
     const type = searchParams.get('type');
     const folder = searchParams.get('folder');
     const provider = searchParams.get('provider');
-    const limit = parseInt(searchParams.get('limit') || '50');
-    const offset = parseInt(searchParams.get('offset') || '0');
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '500') || 500, 1), 1000);
+    const offset = Math.max(parseInt(searchParams.get('offset') || '0') || 0, 0);
 
     const where: any = {};
+    // Regular users (avatar picker) only see their own uploads; staff see the whole library
+    const isStaff = session.user.role === 'ADMIN' || session.user.role === 'EDITOR';
+    if (!isStaff) where.createdById = session.user.id;
     if (type) where.type = type;
     if (folder) where.folder = folder;
     if (provider) where.provider = provider;
@@ -55,6 +59,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json<ApiResponse>({
       success: true,
       media,
+      total,
       message: `Found ${total} media items`,
     });
   } catch (error) {
@@ -139,7 +144,7 @@ export async function POST(request: NextRequest) {
         console.log('[UPLOAD] Uploading to provider...');
         const result = await mediaUploader.upload(file, {
           folder: folder || undefined,
-          tags: tags ? JSON.parse(tags) : [],
+          tags: parseTags(tags),
           type: mediaType,
         });
 
@@ -215,4 +220,16 @@ function getMediaType(mimeType: string): 'IMAGE' | 'VIDEO' | 'AUDIO' | 'DOCUMENT
   if (mimeType.startsWith('audio/')) return 'AUDIO';
   if (mimeType.startsWith('application/') || mimeType.startsWith('text/')) return 'DOCUMENT';
   return 'IMAGE'; // Default
+}
+
+// Tags arrive either as a JSON array string or a comma-separated list
+function parseTags(raw: string | null): string[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parsed.map(String).filter(Boolean);
+  } catch {
+    // fall through to comma-separated
+  }
+  return raw.split(',').map((t) => t.trim()).filter(Boolean);
 }

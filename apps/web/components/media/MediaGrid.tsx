@@ -26,6 +26,8 @@ export function MediaGrid({
   const [media, setMedia] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [totalCount, setTotalCount] = useState<number | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
     loadMedia();
@@ -39,7 +41,7 @@ export function MediaGrid({
       const params = new URLSearchParams();
       if (mediaType) params.append('type', mediaType);
 
-      const response = await fetch(`/api/admin/media?${params.toString()}`);
+      const response = await fetch(`/api/admin/media?${params.toString()}&limit=500`);
       const data = await response.json();
 
       if (!response.ok || !data.success) {
@@ -47,12 +49,41 @@ export function MediaGrid({
       }
 
       setMedia(data.media || []);
+      setTotalCount(typeof data.total === 'number' ? data.total : (data.media?.length || 0));
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load media';
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLoadMore = async () => {
+    try {
+      setLoadingMore(true);
+      const params = new URLSearchParams();
+      if (mediaType) params.append('type', mediaType);
+      params.append('limit', '100');
+      params.append('offset', media.length.toString());
+
+      const response = await fetch(`/api/admin/media?${params.toString()}`);
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to load more media');
+      }
+
+      const nextBatch = data.media || [];
+      setMedia((prev) => [...prev, ...nextBatch]);
+      if (typeof data.total === 'number') {
+        setTotalCount(data.total);
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load more media';
+      toast.error(errorMessage);
+    } finally {
+      setLoadingMore(false);
     }
   };
 
@@ -72,6 +103,7 @@ export function MediaGrid({
 
       toast.success('Media deleted successfully');
       setMedia((prev) => prev.filter((m) => m.id !== mediaId));
+      setTotalCount((prev) => (prev !== null ? Math.max(0, prev - 1) : null));
       
       if (onDelete) {
         onDelete(mediaId);
@@ -147,7 +179,11 @@ export function MediaGrid({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-xs text-slate-500">{media.length} file{media.length !== 1 ? 's' : ''}</p>
+        <p className="text-sm text-slate-500">
+          {totalCount !== null && totalCount > media.length
+            ? `Showing ${media.length} of ${totalCount} items`
+            : `${media.length} item${media.length !== 1 ? 's' : ''}`}
+        </p>
         <Button type="button" variant="ghost" size="sm" onClick={loadMedia} className="gap-1 text-xs h-7">
           <RefreshCw className="w-3 h-3" /> Refresh
         </Button>
@@ -213,7 +249,7 @@ export function MediaGrid({
                 {/* Type Badge */}
                 {!selectable && (
                   <div className="absolute top-2 left-2">
-                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${getTypeColor(item.type)}`}>
+                    <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded ${getTypeColor(item.type)}`}>
                       {item.type}
                     </span>
                   </div>
@@ -261,6 +297,25 @@ export function MediaGrid({
           );
         })}
       </div>
+      {totalCount !== null && media.length < totalCount && (
+        <div className="flex justify-center pt-4 pb-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+            className="gap-2 text-sm"
+          >
+            {loadingMore ? (
+              <>
+                <RefreshCw className="w-4 h-4 animate-spin" /> Loading more...
+              </>
+            ) : (
+              `Load More (${totalCount - media.length} remaining)`
+            )}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

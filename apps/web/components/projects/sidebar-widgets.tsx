@@ -259,12 +259,12 @@ export function FeaturedPostsWidget({ title = "Featured Projects", slugs = "" }:
               </h4>
               <div className="flex items-center gap-1.5 flex-wrap">
                 {post.category && (
-                  <span className="text-[10px] font-medium bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full leading-none">
+                  <span className="text-[11px] font-medium bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full leading-none">
                     {post.category}
                   </span>
                 )}
                 {post.difficulty && (
-                  <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full leading-none ${difficultyColors[post.difficulty] || "bg-slate-100 text-slate-600"}`}>
+                  <span className={`text-[11px] font-medium px-1.5 py-0.5 rounded-full leading-none ${difficultyColors[post.difficulty] || "bg-slate-100 text-slate-600"}`}>
                     {post.difficulty}
                   </span>
                 )}

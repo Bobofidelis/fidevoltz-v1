@@ -37,7 +37,8 @@ export type ProviderConfig = CloudinaryConfig | S3Config;
 
 export interface MediaProviderAdapter {
   upload(file: File | Buffer, options?: UploadOptions): Promise<MediaUploadResult>;
-  delete(publicId: string): Promise<boolean>;
+  delete(publicId: string, type?: MediaType): Promise<boolean>;
+  listAll?(): Promise<MediaUploadResult[]>;
   getUrl(publicId: string, options?: TransformOptions): string;
 }
 

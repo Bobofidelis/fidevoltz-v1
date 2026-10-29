@@ -91,7 +91,7 @@ export async function DELETE(
 
     // Delete from provider
     try {
-      await mediaUploader.delete(media.publicId);
+      await mediaUploader.delete(media.publicId, media.type);
     } catch (providerError) {
       console.error('[API] Error deleting from provider:', providerError);
       // Continue with database deletion even if provider deletion fails

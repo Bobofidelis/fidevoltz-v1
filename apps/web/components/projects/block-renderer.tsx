@@ -15,7 +15,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism';
-import DOMPurify from 'isomorphic-dompurify';
+import { sanitizeHtml } from '@/lib/sanitize';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 
@@ -30,8 +30,9 @@ function renderMathInHtml(html: string): string {
       return `<span class="math-error">${tex}</span>`;
     }
   });
-  // Inline math: $...$  (but not \$ escaped dollars)
-  result = result.replace(/(?<!\$)\$(?!\$)((?:[^$\\]|\\.)+)\$/g, (_, tex) => {
+  // Inline math: $...$ (not \$). The opening $ can't be followed by a space and the closing $
+  // can't be preceded by one or followed by a digit, so prices like "$5 - $10" stay plain text.
+  result = result.replace(/(?<![\\$])\$(?![\s$])((?:[^$\\\n]|\\.)+?)(?<!\s)\$(?!\d)/g, (_, tex) => {
     try {
       const cleanTex = tex.trim().replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
       return katex.renderToString(cleanTex, { displayMode: false, throwOnError: false });
@@ -40,6 +41,11 @@ function renderMathInHtml(html: string): string {
     }
   });
   return result;
+}
+
+/** Sanitize user-entered text first, then render LaTeX (sanitizing after KaTeX strips its MathML) */
+function richText(text: string | null | undefined): string {
+  return renderMathInHtml(sanitizeHtml(text ? String(text) : ''));
 }
 
 interface Block {
@@ -72,7 +78,7 @@ export function BlockRenderer({ blocks, slug }: BlockRendererProps) {
 function renderBlock(block: Block, slug?: string) {
   switch (block.type) {
     case "text": {
-      const processedHtml = renderMathInHtml(DOMPurify.sanitize(block.content ? block.content.toString() : ""));
+      const processedHtml = renderMathInHtml(sanitizeHtml(block.content ? block.content.toString() : ""));
       return (
         <div
           className="prose-rte max-w-none text-slate-700 leading-relaxed"
@@ -131,8 +137,15 @@ function renderBlock(block: Block, slug?: string) {
             <Icon className={cn("w-6 h-6", IconColor)} />
           </div>
           <div className="flex-1 space-y-2">
-            {title && <h4 className="font-bold text-lg">{title}</h4>}
-            <div dangerouslySetInnerHTML={{ __html: renderMathInHtml(DOMPurify.sanitize(text ? text.replace(/\n/g, "<br/>") : "")) }} />
+            {title && (
+              <h4
+                className="font-bold text-lg"
+                dangerouslySetInnerHTML={{
+                  __html: richText(title)
+                }}
+              />
+            )}
+            <div dangerouslySetInnerHTML={{ __html: renderMathInHtml(sanitizeHtml(text ? text.replace(/\n/g, "<br/>") : "")) }} />
           </div>
         </div>
       );
@@ -140,12 +153,15 @@ function renderBlock(block: Block, slug?: string) {
     case "heading":
       const Tag = (block.content.level || "h2") as "h2" | "h3" | "h4";
       return (
-        <Tag className={cn(
-          "font-bold text-slate-900 mt-8 mb-4",
-          block.content.level === "h2" ? "text-3xl" : block.content.level === "h3" ? "text-2xl" : "text-xl"
-        )}>
-          {block.content.text}
-        </Tag>
+        <Tag
+          className={cn(
+            "font-bold text-slate-900 mt-8 mb-4",
+            block.content.level === "h2" ? "text-3xl" : block.content.level === "h3" ? "text-2xl" : "text-xl"
+          )}
+          dangerouslySetInnerHTML={{
+            __html: richText(block.content.text || "")
+          }}
+        />
       );
     
     case "image": {
@@ -195,9 +211,12 @@ function renderBlock(block: Block, slug?: string) {
             ))}
           </div>
           {block.content.alt && (
-            <figcaption className="text-center text-sm text-slate-500 mt-4 italic">
-              {block.content.alt}
-            </figcaption>
+            <figcaption
+              className="text-center text-sm text-slate-500 mt-4 italic"
+              dangerouslySetInnerHTML={{
+                __html: richText(block.content.alt)
+              }}
+            />
           )}
         </figure>
       );
@@ -269,21 +288,37 @@ function renderBlock(block: Block, slug?: string) {
               <Package className="w-12 h-12 text-white" />
             </div>
             <div className="flex-1 space-y-4">
-              <h3 className="text-2xl font-bold text-white tracking-tight">
-                {block.content.title || "📦 THE FIDEVOLTZ PROJECT KIT"}
-              </h3>
-              <p className="text-blue-100/80 leading-relaxed text-lg">
-                {block.content.description || "Skip the hassle of hunting for compatible parts and dealing with dead components. Get everything you need to build this exact project in one box."}
-              </p>
+              <h3
+                className="text-2xl font-bold text-white tracking-tight"
+                dangerouslySetInnerHTML={{
+                  __html: richText(block.content.title || "📦 THE FIDEVOLTZ PROJECT KIT")
+                }}
+              />
+              <p
+                className="text-blue-100/80 leading-relaxed text-lg"
+                dangerouslySetInnerHTML={{
+                  __html: richText(block.content.description || "Skip the hassle of hunting for compatible parts and dealing with dead components. Get everything you need to build this exact project in one box.")
+                }}
+              />
               
               <div className="bg-slate-900/50 rounded-xl p-4 border border-slate-700/50">
                 <p className="text-slate-300">
-                  <strong className="text-white">Includes:</strong> {block.content.includes || "All necessary components pre-tested."}
+                  <strong className="text-white">Includes:</strong>{" "}
+                  <span
+                    dangerouslySetInnerHTML={{
+                      __html: richText(block.content.includes || "All necessary components pre-tested.")
+                    }}
+                  />
                 </p>
               </div>
               
               <p className="text-sm font-medium text-blue-300 flex items-center gap-2">
-                <Check className="w-4 h-4" /> {block.content.guarantee || "Guaranteed to work with the code below."}
+                <Check className="w-4 h-4" />{" "}
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: richText(block.content.guarantee || "Guaranteed to work with the code below.")
+                  }}
+                />
               </p>
             </div>
           </div>
@@ -298,12 +333,83 @@ function renderBlock(block: Block, slug?: string) {
         </div>
       );
 
+    case "table": {
+      const rows: string[][] = Array.isArray(block.content?.rows) ? block.content.rows : [];
+      if (rows.length === 0) return null;
+      const colCount = Math.max(...rows.map((r) => r.length));
+      const align: string[] = block.content.align || [];
+      const hasHeader = block.content.headerRow ?? true;
+      const headerColumn = !!block.content.headerColumn;
+      const striped = block.content.striped ?? true;
+      const bodyRows = hasHeader ? rows.slice(1) : rows;
+      const alignClass = (c: number) => (align[c] === "center" ? "text-center" : align[c] === "right" ? "text-right" : "text-left");
+      const cellHtml = (value?: string) => richText((value || "").replace(/\n/g, "<br/>"));
+
+      return (
+        <figure className="my-8">
+          {block.content.title && (
+            <h3 className="text-xl font-bold text-slate-900 mb-3" dangerouslySetInnerHTML={{ __html: richText(block.content.title) }} />
+          )}
+          <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-sm bg-white">
+            <table className="w-full text-left text-base border-collapse">
+              {hasHeader && (
+                <thead className="bg-slate-100 text-slate-900">
+                  <tr>
+                    {Array.from({ length: colCount }).map((_, c) => (
+                      <th
+                        key={c}
+                        scope="col"
+                        className={cn("px-4 py-3 font-semibold border-b border-slate-200 whitespace-nowrap", alignClass(c))}
+                        dangerouslySetInnerHTML={{ __html: cellHtml(rows[0][c]) }}
+                      />
+                    ))}
+                  </tr>
+                </thead>
+              )}
+              <tbody className="divide-y divide-slate-100">
+                {bodyRows.map((row, r) => (
+                  <tr key={r} className={cn(striped && r % 2 === 1 && "bg-slate-50/70", "hover:bg-blue-50/40 transition-colors")}>
+                    {Array.from({ length: colCount }).map((_, c) =>
+                      headerColumn && c === 0 ? (
+                        <th
+                          key={c}
+                          scope="row"
+                          className={cn("px-4 py-3 font-semibold text-slate-900 align-top", alignClass(c))}
+                          dangerouslySetInnerHTML={{ __html: cellHtml(row[c]) }}
+                        />
+                      ) : (
+                        <td
+                          key={c}
+                          className={cn("px-4 py-3 text-slate-700 align-top", alignClass(c))}
+                          dangerouslySetInnerHTML={{ __html: cellHtml(row[c]) }}
+                        />
+                      )
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {block.content.caption && (
+            <figcaption
+              className="text-sm text-slate-600 mt-2 italic"
+              dangerouslySetInnerHTML={{ __html: richText(block.content.caption) }}
+            />
+          )}
+        </figure>
+      );
+    }
+
     case "bom":
       return (
         <div className="my-12">
           <h2 className="text-3xl font-bold text-slate-900 mb-6 flex items-center gap-3">
             <ShoppingCart className="w-8 h-8 text-blue-600" />
-            {block.content.title || "Hardware Requirements & Bill of Materials"}
+            <span
+              dangerouslySetInnerHTML={{
+                __html: richText(block.content.title || "Hardware Requirements & Bill of Materials")
+              }}
+            />
           </h2>
           <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-sm bg-white">
             <table className="w-full text-left text-sm">
@@ -319,17 +425,19 @@ function renderBlock(block: Block, slug?: string) {
                 {block.content.items && Array.isArray(block.content.items) ? (
                   block.content.items.map((item: any, idx: number) => (
                     <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-6 py-4 font-medium text-slate-900">{item.name}</td>
+                      <td className="px-6 py-4 font-medium text-slate-900">
+                        <span dangerouslySetInnerHTML={{ __html: richText(item.name || '') }} />
+                      </td>
                       <td className="px-6 py-4 text-slate-600">
                         {item.quantity ? (
-                          <span className="bg-slate-100 text-slate-800 px-2 py-1 rounded-md text-xs font-bold">
-                            {item.quantity}
-                          </span>
+                          <span className="bg-slate-100 text-slate-800 px-2 py-1 rounded-md text-xs font-bold" dangerouslySetInnerHTML={{ __html: richText(String(item.quantity)) }} />
                         ) : (
                           <span className="text-slate-400 text-xs italic">-</span>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-slate-600">{item.specs}</td>
+                      <td className="px-6 py-4 text-slate-600">
+                        <span dangerouslySetInnerHTML={{ __html: richText(item.specs || '') }} />
+                      </td>
                       <td className="px-6 py-4 text-right">
                         {item.productLink ? (
                           <AddToCartBOMButton item={item} />

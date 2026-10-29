@@ -48,8 +48,9 @@ export function ProductCard({ product, className, viewMode = "grid" }: ProductCa
     product.images?.[0] ||
     "https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&q=80";
 
-  const rating = product.rating ?? 4.8;
-  const reviewCount = product.reviewCount ?? 14;
+  const rating = product.rating ?? 0;
+  const reviewCount = product.reviewCount ?? 0;
+  const hasReviews = reviewCount > 0;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -84,7 +85,7 @@ export function ProductCard({ product, className, viewMode = "grid" }: ProductCa
   const StockStatus = () => {
     if (isOutOfStock) {
       return (
-        <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100">
+        <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100">
           <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
           Out of stock
         </span>
@@ -92,14 +93,14 @@ export function ProductCard({ product, className, viewMode = "grid" }: ProductCa
     }
     if (isLowStock) {
       return (
-        <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">
+        <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">
           <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
           Low stock: {stock} left
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
         <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
         In stock
       </span>
@@ -125,12 +126,12 @@ export function ProductCard({ product, className, viewMode = "grid" }: ProductCa
               {/* Badges */}
               <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-10">
                 {product.badge && (
-                  <Badge className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-xs">
+                  <Badge className="bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold px-2 py-0.5 rounded-full shadow-xs">
                     {product.badge}
                   </Badge>
                 )}
                 {hasDiscount && (
-                  <Badge className="bg-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                  <Badge className="bg-rose-600 text-white text-[11px] font-bold px-2 py-0.5 rounded-full">
                     -{discountPercent}%
                   </Badge>
                 )}
@@ -160,7 +161,7 @@ export function ProductCard({ product, className, viewMode = "grid" }: ProductCa
                     <span className="text-xs font-semibold uppercase tracking-wider text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
                       {product.category?.name || "Components"}
                     </span>
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-slate-500">
                       {product.brand || "Generic"}
                     </span>
                   </div>
@@ -171,10 +172,11 @@ export function ProductCard({ product, className, viewMode = "grid" }: ProductCa
                   {product.name}
                 </h3>
 
-                <p className="text-xs text-slate-500 line-clamp-2 mb-3">
+                <p className="text-sm text-slate-700 line-clamp-2 mb-3">
                   {product.description || product.shortDescription || "High quality verified electronics component for your prototyping and production needs."}
                 </p>
 
+                {hasReviews ? (
                 <div className="flex items-center gap-1.5 mb-2">
                   <div className="flex items-center">
                     {Array.from({ length: 5 }).map((_, i) => (
@@ -190,15 +192,18 @@ export function ProductCard({ product, className, viewMode = "grid" }: ProductCa
                     ))}
                   </div>
                   <span className="text-xs font-bold text-slate-700">{rating}</span>
-                  <span className="text-xs text-slate-400">({reviewCount})</span>
+                  <span className="text-xs text-slate-500">({reviewCount})</span>
                 </div>
+                ) : (
+                  <p className="text-xs text-slate-500 mb-2">No reviews yet</p>
+                )}
               </div>
 
               {/* Bottom Actions Row */}
               <div className="flex items-center justify-between pt-3 border-t border-slate-100 mt-2">
                 <div className="flex flex-col">
                   {hasDiscount && (
-                    <span className="text-xs text-slate-400 line-through">
+                    <span className="text-xs text-slate-500 line-through">
                       {formatCurrency(Number(product.originalPrice))}
                     </span>
                   )}
@@ -274,12 +279,12 @@ export function ProductCard({ product, className, viewMode = "grid" }: ProductCa
             {/* Badges Overlay */}
             <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-10">
               {product.badge && (
-                <Badge className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-xs">
+                <Badge className="bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold px-2 py-0.5 rounded-full shadow-xs">
                   {product.badge}
                 </Badge>
               )}
               {hasDiscount && (
-                <Badge className="bg-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-xs">
+                <Badge className="bg-rose-600 text-white text-[11px] font-bold px-2 py-0.5 rounded-full shadow-xs">
                   -{discountPercent}%
                 </Badge>
               )}
@@ -339,19 +344,21 @@ export function ProductCard({ product, className, viewMode = "grid" }: ProductCa
             <div>
               {/* Category & Rating */}
               <div className="flex items-center justify-between gap-1 mb-1.5">
-                <span className="text-[10px] sm:text-[11px] font-semibold text-blue-600 uppercase tracking-wider truncate">
+                <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider truncate">
                   {product.category?.name || "Component"}
                 </span>
-                <div className="flex items-center gap-1 shrink-0">
-                  <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                  <span className="text-[11px] font-bold text-slate-700">
-                    {rating}
-                  </span>
-                </div>
+                {hasReviews && (
+                  <div className="flex items-center gap-1 shrink-0" title={`${reviewCount} review${reviewCount === 1 ? '' : 's'}`}>
+                    <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                    <span className="text-xs font-bold text-slate-700">
+                      {rating}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Title */}
-              <h3 className="font-bold text-slate-900 text-xs sm:text-sm leading-snug line-clamp-2 group-hover:text-blue-600 transition-colors mb-2 min-h-[2.4rem]">
+              <h3 className="font-bold text-slate-900 text-base leading-snug line-clamp-2 group-hover:text-blue-600 transition-colors mb-2 min-h-[2.5rem]">
                 {product.name}
               </h3>
 
@@ -365,11 +372,11 @@ export function ProductCard({ product, className, viewMode = "grid" }: ProductCa
             <div className="flex items-end justify-between pt-2 border-t border-slate-100 gap-1">
               <div className="flex flex-col min-w-0">
                 {hasDiscount && (
-                  <span className="text-[11px] text-slate-400 line-through leading-tight">
+                  <span className="text-xs text-slate-500 line-through leading-tight">
                     {formatCurrency(Number(product.originalPrice))}
                   </span>
                 )}
-                <span className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight truncate">
+                <span className="text-xl font-bold text-slate-900 tracking-tight truncate">
                   {formatCurrency(Number(product.price))}
                 </span>
               </div>

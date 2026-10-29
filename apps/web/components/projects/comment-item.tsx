@@ -48,7 +48,7 @@ export function CommentItem({ comment, currentUserId, onReply, onDelete, isReply
           <div className="flex items-center gap-2">
             <span className="font-semibold text-slate-900">{comment.user?.name || 'Anonymous'}</span>
             {isAdmin && (
-              <Badge variant="default" className="bg-blue-600 text-[10px] h-5 px-1.5">
+              <Badge variant="default" className="bg-blue-600 text-[11px] h-5 px-1.5">
                 Admin
               </Badge>
             )}

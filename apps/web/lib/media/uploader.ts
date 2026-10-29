@@ -104,7 +104,7 @@ export class MediaUploader {
   /**
    * Delete a file from the active provider
    */
-  async delete(publicId: string): Promise<boolean> {
+  async delete(publicId: string, type?: MediaUploadResult['type']): Promise<boolean> {
     if (!this.adapter) {
       await this.initialize();
       if (!this.adapter) {
@@ -114,13 +114,29 @@ export class MediaUploader {
 
     try {
       console.log('[MediaUploader] Deleting file:', publicId);
-      const result = await this.adapter.delete(publicId);
+      const result = await this.adapter.delete(publicId, type);
       console.log('[MediaUploader] Delete result:', result);
       return result;
     } catch (error) {
       console.error('[MediaUploader] Delete error:', error);
       return false;
     }
+  }
+
+  /**
+   * List every asset stored at the active provider (used to sync the library)
+   */
+  async listAll(): Promise<MediaUploadResult[]> {
+    if (!this.adapter) {
+      await this.initialize();
+      if (!this.adapter) {
+        throw new Error('No media provider configured');
+      }
+    }
+    if (!this.adapter.listAll) {
+      throw new Error(`Listing is not supported for provider ${this.provider}`);
+    }
+    return this.adapter.listAll();
   }
 
   /**

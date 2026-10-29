@@ -28,7 +28,7 @@ export function NewArrivals({ products }: NewArrivalsProps) {
   if (products.length === 0) return null;
 
   return (
-    <section className="mb-16">
+    <section className="mb-12">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <div className="p-2 bg-blue-100 rounded-lg">
@@ -36,7 +36,7 @@ export function NewArrivals({ products }: NewArrivalsProps) {
           </div>
           <div>
             <h2 className="text-2xl font-bold text-slate-900">New Arrivals</h2>
-            <p className="text-sm text-slate-500">Check out the latest additions to our catalog</p>
+            <p className="text-sm text-slate-700">Check out the latest additions to our catalog</p>
           </div>
         </div>
         

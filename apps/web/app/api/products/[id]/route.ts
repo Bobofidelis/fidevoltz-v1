@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { withReviewStats } from '@/lib/review-stats';
 import type { ApiResponse, Product } from '@fidevoltz/types';
 
 interface RouteParams {
@@ -28,7 +29,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     return NextResponse.json<ApiResponse<Product>>(
-      { success: true, data: product as any },
+      { success: true, data: (await withReviewStats([product]))[0] as any },
       { status: 200 }
     );
   } catch (error: any) {

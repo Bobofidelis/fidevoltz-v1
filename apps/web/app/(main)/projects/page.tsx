@@ -114,7 +114,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Hero Section */}
-      <section className="bg-slate-900 text-white py-20 relative overflow-hidden">
+      <section className="bg-slate-900 text-white py-12 md:py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1600')] bg-cover bg-center opacity-10" />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/90 to-transparent" />
         <div className="container px-4 md:px-6 relative z-10">
@@ -122,21 +122,21 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
             <Sparkles className="w-3 h-3 mr-2" />
             Tutorials & Guides
           </Badge>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight leading-tight">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight leading-tight">
             Master the Art of <br/>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">Electronics Engineering</span>
           </h1>
-          <p className="text-lg text-slate-400 max-w-2xl leading-relaxed mb-8">
+          <p className="text-lg text-slate-300 max-w-2xl leading-relaxed mb-8">
             Step-by-step guides, project ideas, and technical documentation to help you build your next big invention.
           </p>
         </div>
       </section>
 
-      <div className="container px-4 md:px-6 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
+      <div className="container px-4 md:px-6 py-8 md:py-10">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
            
            {/* Main Content (3 Columns) */}
-           <div className="lg:col-span-3 space-y-16">
+           <div className="lg:col-span-3 space-y-10 md:space-y-12">
               
               {/* Content Top Ad */}
               <AdSlot page="projects" zone="CONTENT_TOP" className="w-full" />
@@ -233,7 +233,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                               </h3>
                              </Link>
                              
-                             <p className="text-slate-600 text-sm mb-6 line-clamp-3 leading-relaxed flex-1">
+                             <p className="text-slate-700 text-sm mb-6 line-clamp-3 leading-relaxed flex-1">
                                {project.excerpt || "No description available."}
                              </p>
                              
@@ -255,8 +255,8 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                       </FadeIn>
                     ))
                   ) : (
-                    <div className="col-span-full text-center py-20 bg-slate-50 rounded-lg border border-dashed border-slate-300">
-                      <p className="text-slate-500 text-lg">No projects match your search.</p>
+                    <div className="col-span-full text-center py-12 bg-slate-50 rounded-lg border border-dashed border-slate-300">
+                      <p className="text-slate-700 text-lg">No projects match your search.</p>
                       <Link href="/projects" className="mt-2 text-blue-600 inline-block hover:underline">
                         Clear Filters
                       </Link>
@@ -266,7 +266,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className="flex justify-center gap-2 pt-12">
+                  <div className="flex justify-center gap-2 pt-8">
                      <Link href={`?page=${Math.max(1, page - 1)}&q=${query}&category=${category}&difficulty=${difficulty}`}>
                        <Button variant="outline" disabled={page === 1} className="w-10 h-10 p-0 rounded-full">
                           <ArrowRight className="h-4 w-4 rotate-180" />

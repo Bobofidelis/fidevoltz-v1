@@ -41,7 +41,7 @@ export function Footer() {
 
   return (
     <footer className="border-t border-slate-200 bg-slate-50">
-      <div className="container px-4 py-12 md:py-16">
+      <div className="container px-4 py-10 md:py-12">
         <div className="grid grid-cols-2 gap-8 md:grid-cols-6">
           {/* Brand Section */}
           <div className="col-span-2 md:col-span-2">
@@ -55,7 +55,7 @@ export function Footer() {
               )}
               <span className="text-xl font-bold text-slate-900">{siteName}</span>
             </Link>
-            <p className="text-sm text-slate-600 mb-6 max-w-xs">
+            <p className="text-sm text-slate-700 mb-6 max-w-xs">
               {tagline}
             </p>
             <SocialMediaLinks iconSize={16} />
@@ -69,7 +69,7 @@ export function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-sm text-slate-600 hover:text-slate-900 transition-colors"
+                    className="text-sm text-slate-700 hover:text-slate-900 transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -86,7 +86,7 @@ export function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-sm text-slate-600 hover:text-slate-900 transition-colors"
+                    className="text-sm text-slate-700 hover:text-slate-900 transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -103,7 +103,7 @@ export function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-sm text-slate-600 hover:text-slate-900 transition-colors"
+                    className="text-sm text-slate-700 hover:text-slate-900 transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -120,7 +120,7 @@ export function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-sm text-slate-600 hover:text-slate-900 transition-colors"
+                    className="text-sm text-slate-700 hover:text-slate-900 transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -131,18 +131,18 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-12 pt-8 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-slate-600">
+        <div className="mt-10 pt-6 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-sm text-slate-700">
             © {new Date().getFullYear()} {siteName}. All rights reserved.
           </p>
           <div className="flex gap-6">
-            <Link href="/privacy" className="text-sm text-slate-600 hover:text-slate-900 transition-colors">
+            <Link href="/privacy" className="text-sm text-slate-700 hover:text-slate-900 transition-colors">
               Privacy
             </Link>
-            <Link href="/terms" className="text-sm text-slate-600 hover:text-slate-900 transition-colors">
+            <Link href="/terms" className="text-sm text-slate-700 hover:text-slate-900 transition-colors">
               Terms
             </Link>
-            <Link href="/cookies" className="text-sm text-slate-600 hover:text-slate-900 transition-colors">
+            <Link href="/cookies" className="text-sm text-slate-700 hover:text-slate-900 transition-colors">
               Cookies
             </Link>
           </div>

@@ -14,9 +14,10 @@ import { useEffect, useState } from "react";
 import { 
   User, Lock, Bell, Eye, Globe, Settings as SettingsIcon,
   Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin,
-  Youtube, MessageCircle, Send, Palette, Loader2
+  Youtube, MessageCircle, Send, Palette, Loader2, Store
 } from "lucide-react";
 import { WhatsAppSettings } from "@/components/admin/whatsapp-settings";
+import { StorefrontSettings } from "@/components/admin/storefront-settings";
 import { 
   useUserSettings, 
   useUpdateUserSettings, 
@@ -104,6 +105,13 @@ export default function SettingsPage() {
     requireEmailVerification: true,
   });
 
+
+  // Allow deep links like /dashboard/settings?tab=storefront
+  const [activeTab, setActiveTab] = useState("profile");
+  useEffect(() => {
+    const tab = new URLSearchParams(window.location.search).get("tab");
+    if (tab) setActiveTab(tab);
+  }, []);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -296,7 +304,7 @@ export default function SettingsPage() {
         <p className="text-muted-foreground">Manage your account settings and preferences</p>
       </div>
 
-      <Tabs defaultValue="profile" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="flex w-full overflow-x-auto justify-start h-auto p-1 gap-1">
           <TabsTrigger value="profile" className="shrink-0">
             <User className="h-4 w-4 mr-2" />
@@ -335,6 +343,10 @@ export default function SettingsPage() {
               <TabsTrigger value="whatsapp" className="shrink-0">
                 <MessageCircle className="h-4 w-4 mr-2" />
                 WhatsApp
+              </TabsTrigger>
+              <TabsTrigger value="storefront" className="shrink-0">
+                <Store className="h-4 w-4 mr-2" />
+                Storefront
               </TabsTrigger>
             </>
           )}
@@ -786,6 +798,12 @@ export default function SettingsPage() {
         {isAdmin && (
           <TabsContent value="whatsapp">
             <WhatsAppSettings />
+          </TabsContent>
+        )}
+
+        {isAdmin && (
+          <TabsContent value="storefront">
+            <StorefrontSettings />
           </TabsContent>
         )}
       </Tabs>
