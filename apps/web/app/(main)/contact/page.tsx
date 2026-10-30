@@ -141,7 +141,7 @@ function ContactForm() {
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-3 mb-8">
+      <TabsList className="grid w-full grid-cols-3 mb-5">
         <TabsTrigger value="general" className="flex items-center gap-2">
           <MessageSquare className="h-4 w-4" />
           <span className="hidden sm:inline">General</span>
@@ -390,9 +390,9 @@ export default function ContactPage() {
   const { data: siteSettings } = usePublicSettings('contact');
   
   return (
-    <div className="min-h-screen bg-slate-50 py-12 md:py-20">
+    <div className="min-h-screen bg-slate-50 py-8 md:py-12">
       <div className="container px-4 md:px-6">
-        <div className="text-center mb-12">
+        <div className="text-center mb-6">
           <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
             Get in Touch
           </h1>
@@ -401,7 +401,7 @@ export default function ContactPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
           {/* Contact Info Sidebar */}
           <div className="lg:col-span-1 space-y-6">
             <Card>

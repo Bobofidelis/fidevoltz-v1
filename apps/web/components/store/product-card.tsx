@@ -120,6 +120,8 @@ export function ProductCard({ product, className, viewMode = "grid" }: ProductCa
             <div className="relative w-full sm:w-56 h-48 sm:h-auto overflow-hidden bg-slate-50 shrink-0">
               <div
                 className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                role="img"
+                aria-label={product.name}
                 style={{ backgroundImage: `url('${imageUrl}')` }}
               />
 
@@ -273,7 +275,9 @@ export function ProductCard({ product, className, viewMode = "grid" }: ProductCa
           <div className="relative w-full aspect-square overflow-hidden bg-slate-50/70 shrink-0">
             <div
               className="absolute inset-0 bg-contain bg-center bg-no-repeat transition-transform duration-500 group-hover:scale-105 p-4"
-              style={{ backgroundImage: `url('${imageUrl}')` }}
+              role="img"
+                aria-label={product.name}
+                style={{ backgroundImage: `url('${imageUrl}')` }}
             />
 
             {/* Badges Overlay */}

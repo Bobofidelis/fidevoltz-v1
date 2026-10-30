@@ -53,11 +53,11 @@ export function FeaturedProducts() {
   }
 
   return (
-    <section className="py-12 md:py-16 bg-white overflow-hidden">
+    <section className="py-8 md:py-10 bg-white overflow-hidden">
       <div className="container px-4 md:px-6">
-        <div className="flex items-end justify-between mb-8">
+        <div className="flex items-end justify-between mb-5">
           <div className="max-w-2xl">
-            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">
               Featured Components
             </h2>
             <p className="text-lg text-slate-700">
@@ -99,14 +99,14 @@ export function FeaturedProducts() {
           ) : (
           <div 
             ref={scrollContainerRef}
-            className="flex overflow-x-auto pb-8 gap-6 snap-x snap-mandatory hide-scrollbar"
+            className="flex overflow-x-auto pb-3 gap-4 snap-x snap-mandatory hide-scrollbar"
           >
             {products.map((product, index) => (
-              <div key={product.id} className="min-w-[280px] md:min-w-[300px] snap-center">
+              <div key={product.id} className="min-w-[260px] flex-1 max-w-[440px] snap-center">
                 <FadeIn delay={index * 0.1}>
-                  <Card className="group overflow-hidden border-slate-200 hover:shadow-2xl hover:shadow-slate-300/50 transition-all hover:-translate-y-2 bg-white h-full">
+                  <Card className="group overflow-hidden border-slate-200 hover:shadow-lg transition-all hover:-translate-y-0.5 bg-white h-full">
                     {/* Product Image */}
-                    <div className="relative h-56 overflow-hidden bg-slate-100">
+                    <div className="relative h-44 overflow-hidden bg-slate-100">
                       <div 
                         className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
                         style={{ backgroundImage: `url('${product.image}')` }}
@@ -179,7 +179,7 @@ export function FeaturedProducts() {
           <div className="absolute top-0 bottom-8 right-0 w-12 bg-gradient-to-l from-white to-transparent pointer-events-none md:hidden" />
         </div>
 
-        <div className="text-center mt-8">
+        <div className="text-center mt-5">
           <Link href="/store">
             <Button size="lg" className="bg-slate-900 hover:bg-slate-800 text-white">
               Browse All Products

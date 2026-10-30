@@ -351,7 +351,7 @@ export function PageRenderer({ content }: PageRendererProps) {
         switch (block.type) {
           case 'hero':
             return (
-              <section key={index} className="bg-slate-900 text-white py-20 md:py-32 relative overflow-hidden">
+              <section key={index} className="bg-slate-900 text-white py-12 md:py-20 relative overflow-hidden">
                 {block.backgroundImage && (
                   <div 
                     className="absolute inset-0 bg-cover bg-center opacity-10" 
@@ -364,11 +364,11 @@ export function PageRenderer({ content }: PageRendererProps) {
                       {block.badge}
                     </Badge>
                   )}
-                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 max-w-4xl mx-auto leading-tight">
+                  <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 max-w-4xl mx-auto leading-tight tracking-tight">
                     {block.title}
                   </h1>
                   {block.subtitle && (
-                    <p className="text-xl text-slate-300 max-w-2xl mx-auto">
+                    <p className="text-lg text-slate-300 max-w-2xl mx-auto">
                       {block.subtitle}
                     </p>
                   )}
@@ -378,7 +378,7 @@ export function PageRenderer({ content }: PageRendererProps) {
 
           case 'text':
             return (
-              <section key={index} className="py-20 bg-white">
+              <section key={index} className="py-12 bg-white">
                 <div className="container px-4 md:px-6 max-w-4xl mx-auto">
                   <WysiwygRenderer content={block.content} />
                 </div>
@@ -387,9 +387,9 @@ export function PageRenderer({ content }: PageRendererProps) {
 
           case 'grid':
             return (
-              <section key={index} className="py-20 bg-slate-50">
+              <section key={index} className="py-12 bg-slate-50">
                 <div className="container px-4 md:px-6">
-                  <div className={`grid grid-cols-1 md:grid-cols-${block.columns || 3} gap-8`}>
+                  <div className={`grid grid-cols-1 md:grid-cols-${block.columns || 3} gap-5`}>
                     {block.items?.map((item: any, i: number) => {
                       const Icon = IconMap[item.icon as keyof typeof IconMap] || Lightbulb;
                       return (
@@ -411,8 +411,8 @@ export function PageRenderer({ content }: PageRendererProps) {
 
           case 'faq':
             return (
-              <section key={index} className="py-20">
-                <div className="container px-4 md:px-6 max-w-4xl mx-auto space-y-12">
+              <section key={index} className="py-12">
+                <div className="container px-4 md:px-6 max-w-4xl mx-auto space-y-6">
                   {block.categories?.map((section: any) => (
                     <div key={section.name}>
                       <h2 className="text-3xl font-bold text-slate-900 mb-6">{section.name}</h2>
@@ -432,7 +432,7 @@ export function PageRenderer({ content }: PageRendererProps) {
           case 'form':
             if (block.formType === 'support') {
               return (
-                <section key={index} className="py-20 bg-slate-50">
+                <section key={index} className="py-12 bg-slate-50">
                   <div className="container px-4 md:px-6 max-w-3xl mx-auto">
                     <SupportForm />
                   </div>
@@ -441,7 +441,7 @@ export function PageRenderer({ content }: PageRendererProps) {
             }
             if (block.formType === 'contact') {
               return (
-                <section key={index} className="py-20 bg-slate-50">
+                <section key={index} className="py-12 bg-slate-50">
                   <div className="container px-4 md:px-6 max-w-3xl mx-auto">
                     <ContactForm />
                   </div>
@@ -449,7 +449,7 @@ export function PageRenderer({ content }: PageRendererProps) {
               );
             }
             return (
-              <section key={index} className="py-20 bg-white text-center">
+              <section key={index} className="py-12 bg-white text-center">
                 <div className="container px-4 md:px-6 max-w-2xl mx-auto">
                    <p className="text-slate-500 italic">Form block: {block.formType} (Not implemented yet)</p>
                 </div>
@@ -479,7 +479,7 @@ export function PageRenderer({ content }: PageRendererProps) {
             const mainClass = `${mainCols} min-w-0`;
 
             const SidebarElement = (
-              <aside className={`${asideClass} space-y-8`}>
+              <aside className={`${asideClass} space-y-5`}>
                 {block.sidebar?.map((item: any, i: number) => (
                   <div key={i} className="bg-slate-50 p-6 rounded-xl border border-slate-100 shadow-sm">
                     {item.title && <h4 className="font-bold text-slate-900 mb-4">{item.title}</h4>}
@@ -512,9 +512,9 @@ export function PageRenderer({ content }: PageRendererProps) {
             );
 
             return (
-              <section key={index} className="py-20 bg-white">
+              <section key={index} className="py-12 bg-white">
                 <div className="container px-4 md:px-6">
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 relative items-start">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 relative items-start">
                     {side === 'left' ? (
                       <>
                         {SidebarElement}
@@ -591,7 +591,7 @@ export function PageRenderer({ content }: PageRendererProps) {
 
           case 'links':
             return (
-              <section key={index} className="py-12 bg-slate-50">
+              <section key={index} className="py-8 bg-slate-50">
                 <div className="container px-4 md:px-6 max-w-4xl mx-auto">
                   {block.title && <h3 className="text-2xl font-bold text-slate-900 mb-6">{block.title}</h3>}
                   <div className="grid gap-3 sm:grid-cols-2">

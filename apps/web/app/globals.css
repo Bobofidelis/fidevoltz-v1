@@ -71,12 +71,12 @@
     @apply border-border;
   }
   html {
-    /* Standard 16px base so rem-based sizes match the browser default */
-    font-size: 100%;
+    /* 15px UI base (one step below the 16px default), article text renders at about 17px */
+    font-size: 93.75%;
     -webkit-text-size-adjust: 100%;
   }
   body {
-    line-height: 1.6;
+    line-height: 1.55;
     text-rendering: optimizeLegibility;
   }
   h1, h2, h3, h4, h5, h6 {
@@ -98,13 +98,15 @@
   .prose-rte s, .rte-editor s { text-decoration: line-through; }
   .prose-rte ul, .rte-editor ul.rte-ul, .rte-editor ul { list-style-type: disc !important; padding-left: 1.75rem !important; margin: 0.75rem 0; }
   .prose-rte ol, .rte-editor ol.rte-ol, .rte-editor ol { list-style-type: decimal !important; padding-left: 1.75rem !important; margin: 0.75rem 0; }
-  .prose-rte li, .rte-editor li { margin: 0.3rem 0; line-height: 1.6; display: list-item !important; }
+  .prose-rte li, .rte-editor li { margin: 0.3rem 0; line-height: 1.55; display: list-item !important; }
   .prose-rte li p, .rte-editor li p { margin: 0; }
   .prose-rte blockquote, .rte-editor blockquote { border-left: 4px solid #6366f1; padding: 0.75rem 1rem; margin: 1rem 0; background: #f8f8ff; color: #4b5563; font-style: italic; border-radius: 0 0.5rem 0.5rem 0; }
   .prose-rte a, .rte-editor a.rte-link { color: #2563eb; text-decoration: underline; }
   .prose-rte a:hover, .rte-editor a.rte-link:hover { color: #1d4ed8; }
   .prose-rte hr, .rte-editor hr { border: none; border-top: 2px solid #e2e8f0; margin: 1.5rem 0; }
   .prose-rte code, .rte-editor code { background: #f1f5f9; color: #e11d48; border-radius: 0.25rem; padding: 0.1rem 0.35rem; font-size: 0.875em; font-family: monospace; font-weight: 500; }
+  /* Long values in inline code wrap instead of pushing the page sideways on phones */
+  .prose-rte :not(pre) > code, .prose :not(pre) > code { overflow-wrap: anywhere; }
   .prose-rte pre, .rte-editor pre { background: #1e293b; color: #f8fafc; border-radius: 0.5rem; padding: 1rem; margin: 1rem 0; overflow-x: auto; }
   .prose-rte pre code, .rte-editor pre code { background: transparent; color: inherit; padding: 0; font-size: 0.875em; }
   .rte-editor .ProseMirror-focused { outline: none; }

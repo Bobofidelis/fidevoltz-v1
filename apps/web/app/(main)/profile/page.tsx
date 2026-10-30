@@ -24,7 +24,7 @@ export default function ProfilePage() {
 
   if (!session?.user) {
     return (
-      <div className="container py-16 text-center max-w-md mx-auto">
+      <div className="container py-10 text-center max-w-md mx-auto">
         <User className="h-16 w-16 mx-auto mb-4 text-slate-300" />
         <h2 className="text-2xl font-bold mb-2">Sign in to view your profile</h2>
         <p className="text-slate-500 mb-6">You need to be logged in to access your account settings.</p>
@@ -48,9 +48,9 @@ export default function ProfilePage() {
 
   return (
     <div className="container py-10 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-8">My Profile</h1>
+      <h1 className="text-3xl font-bold mb-5">My Profile</h1>
       
-      <div className="grid gap-8 lg:grid-cols-[300px_1fr]">
+      <div className="grid gap-5 lg:grid-cols-[300px_1fr]">
         <Card className="h-fit">
           <CardHeader className="text-center">
             <div className="mx-auto mb-4">

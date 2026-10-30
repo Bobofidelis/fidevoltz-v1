@@ -45,7 +45,12 @@ function renderMathInHtml(html: string): string {
 
 /** Sanitize user-entered text first, then render LaTeX (sanitizing after KaTeX strips its MathML) */
 function richText(text: string | null | undefined): string {
-  return renderMathInHtml(sanitizeHtml(text ? String(text) : ''));
+  return renderMathInHtml(sanitizeHtml(text ? demoteH1(String(text)) : ''));
+}
+
+// The page title is the only <h1>; a heading 1 written inside the article becomes <h2>
+function demoteH1(html: string) {
+  return html.replace(/<(\/?)h1(?=[\s>])/gi, '<$1h2');
 }
 
 interface Block {
@@ -65,7 +70,7 @@ export function BlockRenderer({ blocks, slug }: BlockRendererProps) {
   }
 
   return (
-    <div className="space-y-8 text-lg leading-relaxed text-slate-700">
+    <div className="space-y-4 text-lg leading-relaxed text-slate-700">
       {blocks.map((block) => (
         <div key={block.id}>
           {renderBlock(block, slug)}
@@ -78,7 +83,7 @@ export function BlockRenderer({ blocks, slug }: BlockRendererProps) {
 function renderBlock(block: Block, slug?: string) {
   switch (block.type) {
     case "text": {
-      const processedHtml = renderMathInHtml(sanitizeHtml(block.content ? block.content.toString() : ""));
+      const processedHtml = renderMathInHtml(sanitizeHtml(block.content ? demoteH1(block.content.toString()) : ""));
       return (
         <div
           className="prose-rte max-w-none text-slate-700 leading-relaxed"
@@ -132,7 +137,7 @@ function renderBlock(block: Block, slug?: string) {
       const IconColor = type === "warning" ? "text-yellow-600" : type === "tip" ? "text-emerald-600" : type === "danger" ? "text-red-600" : "text-blue-600";
 
       return (
-        <div className={cn("my-8 p-6 rounded-xl border flex gap-4 items-start shadow-sm", alertStyles[type as keyof typeof alertStyles] || alertStyles.info)}>
+        <div className={cn("my-5 p-6 rounded-xl border flex gap-4 items-start shadow-sm", alertStyles[type as keyof typeof alertStyles] || alertStyles.info)}>
           <div className="mt-1">
             <Icon className={cn("w-6 h-6", IconColor)} />
           </div>
@@ -155,7 +160,7 @@ function renderBlock(block: Block, slug?: string) {
       return (
         <Tag
           className={cn(
-            "font-bold text-slate-900 mt-8 mb-4",
+            "font-bold text-slate-900 mt-5 mb-4",
             block.content.level === "h2" ? "text-3xl" : block.content.level === "h3" ? "text-2xl" : "text-xl"
           )}
           dangerouslySetInnerHTML={{
@@ -199,7 +204,7 @@ function renderBlock(block: Block, slug?: string) {
           : "space-y-4";
 
       return (
-        <figure className={`my-8 ${sizeClass}`}>
+        <figure className={`my-5 ${sizeClass}`}>
           <div className={containerClass}>
             {urls.map((u: string, idx: number) => (
               <img
@@ -237,14 +242,14 @@ function renderBlock(block: Block, slug?: string) {
       if (!videoId) {
         // Fallback to native video if not a YouTube URL
         return (
-          <div className="aspect-video w-full my-8 rounded-xl overflow-hidden shadow-lg border border-slate-200 bg-slate-900">
+          <div className="aspect-video w-full my-5 rounded-xl overflow-hidden shadow-lg border border-slate-200 bg-slate-900">
             <video src={block.content.url} controls className="w-full h-full object-contain" />
           </div>
         );
       }
 
       return (
-        <div className="aspect-video w-full my-8 rounded-xl overflow-hidden shadow-lg border border-slate-200 bg-slate-100">
+        <div className="aspect-video w-full my-5 rounded-xl overflow-hidden shadow-lg border border-slate-200 bg-slate-100">
           <iframe
             width="100%"
             height="100%"
@@ -261,7 +266,7 @@ function renderBlock(block: Block, slug?: string) {
       const ytId = block.content.url ? block.content.url.split("v=")[1]?.split("&")[0] || block.content.url.split("youtu.be/")[1] : null;
       if (!ytId) return null;
       return (
-        <div className="aspect-video w-full my-8 rounded-xl overflow-hidden shadow-2xl border border-red-500/20 bg-slate-900">
+        <div className="aspect-video w-full my-5 rounded-xl overflow-hidden shadow-2xl border border-red-500/20 bg-slate-900">
           <iframe
             width="100%"
             height="100%"
@@ -279,11 +284,11 @@ function renderBlock(block: Block, slug?: string) {
       
     case "project_kit":
       return (
-        <div className="my-10 bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 shadow-xl border border-blue-500/30 relative overflow-hidden group">
+        <div className="my-5 bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 shadow-xl border border-blue-500/30 relative overflow-hidden group">
           <div className="absolute top-0 right-0 -mt-10 -mr-10 text-blue-500/10 group-hover:text-blue-500/20 transition-colors duration-500">
             <Package className="w-64 h-64" />
           </div>
-          <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center md:items-start">
+          <div className="relative z-10 flex flex-col md:flex-row gap-5 items-center md:items-start">
             <div className="flex-shrink-0 bg-blue-600 rounded-2xl p-4 shadow-lg shadow-blue-900/50">
               <Package className="w-12 h-12 text-white" />
             </div>
@@ -322,7 +327,7 @@ function renderBlock(block: Block, slug?: string) {
               </p>
             </div>
           </div>
-          <div className="relative z-10 mt-8 pt-8 border-t border-slate-700/50 flex justify-center md:justify-end">
+          <div className="relative z-10 mt-5 pt-8 border-t border-slate-700/50 flex justify-center md:justify-end">
             <Link href={block.content.productLink || "#"}>
               <Button size="lg" className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-8 shadow-lg shadow-blue-900/50 h-14 text-lg w-full md:w-auto">
                 <ShoppingCart className="mr-3 w-5 h-5" />
@@ -346,7 +351,7 @@ function renderBlock(block: Block, slug?: string) {
       const cellHtml = (value?: string) => richText((value || "").replace(/\n/g, "<br/>"));
 
       return (
-        <figure className="my-8">
+        <figure className="my-5">
           {block.content.title && (
             <h3 className="text-xl font-bold text-slate-900 mb-3" dangerouslySetInnerHTML={{ __html: richText(block.content.title) }} />
           )}
@@ -402,7 +407,7 @@ function renderBlock(block: Block, slug?: string) {
 
     case "bom":
       return (
-        <div className="my-12">
+        <div className="my-6">
           <h2 className="text-3xl font-bold text-slate-900 mb-6 flex items-center gap-3">
             <ShoppingCart className="w-8 h-8 text-blue-600" />
             <span
@@ -461,7 +466,7 @@ function renderBlock(block: Block, slug?: string) {
     case "ad":
       if (!slug) return null; // We need the page slug to fetch targeted ads
       return (
-        <div className="my-8">
+        <div className="my-5">
           <AdSlot page={`projects/${slug}`} zone={block.content.zone || "CONTENT_MIDDLE"} className="w-full" />
         </div>
       );

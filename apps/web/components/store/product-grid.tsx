@@ -255,7 +255,7 @@ export function StoreProductGrid({
         </div>
       ) : (
         /* Empty State */
-        <div className="text-center py-20 px-4 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
+        <div className="text-center py-12 px-4 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
           <div className="h-16 w-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-100">
             <PackageSearch className="h-8 w-8" />
           </div>
@@ -278,7 +278,7 @@ export function StoreProductGrid({
 
       {/* Working Pagination */}
       {!isLoading && totalPages > 1 && (
-        <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-xs">
+        <div className="mt-5 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-xs">
           <p className="text-sm text-slate-700">
             Page <span className="font-semibold text-slate-900">{currentPage}</span> of{" "}
             <span className="font-semibold text-slate-900">{totalPages}</span>

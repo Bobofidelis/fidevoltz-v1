@@ -37,8 +37,11 @@ export function StorefrontSettings() {
 
   const [stats, setStats] = useState<StorefrontStat[]>(DEFAULT_STOREFRONT.storeStats);
   const [heroBadge, setHeroBadge] = useState(DEFAULT_STOREFRONT.heroBadge);
+  const [googleVerification, setGoogleVerification] = useState('');
 
   useEffect(() => {
+    const seoCode = siteSettings?.grouped?.seo?.['seo.googleVerification'];
+    if (typeof seoCode === 'string') setGoogleVerification(seoCode);
     const grouped = siteSettings?.grouped?.storefront;
     if (!grouped) return;
     if (Array.isArray(grouped[STOREFRONT_KEYS.storeStats])) setStats(grouped[STOREFRONT_KEYS.storeStats]);
@@ -61,6 +64,13 @@ export function StorefrontSettings() {
         value: heroBadge,
         category: 'storefront',
         description: 'Homepage hero badge text (supports {tokens})',
+      },
+      {
+        key: 'seo.googleVerification',
+        // People often paste the whole meta tag; keep only the code
+        value: (googleVerification.match(/content=["']([^"']+)["']/)?.[1] || googleVerification).trim(),
+        category: 'seo',
+        description: 'Google Search Console HTML tag verification code',
       },
     ]);
     queryClient.invalidateQueries({ queryKey: ['storefront'] });
@@ -190,6 +200,44 @@ export function StorefrontSettings() {
             <span className="font-medium text-slate-900">
               {heroBadge.trim() ? preview(heroBadge) ?? 'Hidden (live value is 0)' : 'Hidden'}
             </span>
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Search engines */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Google Search Console</CardTitle>
+          <CardDescription>Tell Google your site exists so your tutorials and products get indexed faster.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <ol className="list-decimal pl-5 space-y-1.5 text-sm text-slate-800">
+            <li>
+              Open{' '}
+              <a href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">
+                Google Search Console
+              </a>{' '}
+              and add your site as a <strong>URL prefix</strong> property.
+            </li>
+            <li>Choose the <strong>HTML tag</strong> verification method and copy the tag Google shows you.</li>
+            <li>Paste it below, click <strong>Save storefront settings</strong>, then click <strong>Verify</strong> in Google.</li>
+            <li>
+              In Search Console open <strong>Sitemaps</strong> and submit <code className="bg-slate-100 px-1 rounded">sitemap.xml</code>.
+              It updates by itself as you publish tutorials, products and pages.
+            </li>
+          </ol>
+          <div className="space-y-1.5">
+            <Label htmlFor="google-verification">Verification tag or code</Label>
+            <Input
+              id="google-verification"
+              value={googleVerification}
+              placeholder='<meta name="google-site-verification" content="..." />'
+              onChange={(e) => setGoogleVerification(e.target.value)}
+            />
+          </div>
+          <p className="text-sm text-slate-600">
+            Search text for each page is managed where you edit it: <strong>Projects → Campaign tab</strong> (title, description, tags),{' '}
+            <strong>Pages</strong> (SEO title and description), and <strong>Products</strong> (name and description).
           </p>
         </CardContent>
       </Card>

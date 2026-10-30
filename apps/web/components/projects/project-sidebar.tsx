@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { absoluteUrl } from "@/lib/site";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ShoppingCart, Download } from "lucide-react";
@@ -106,7 +107,7 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
       <Card>
         <CardContent className="p-4">
           <ShareBlock 
-            url={pageUrl || `https://fidevoltz.com/projects/${project.slug}`} 
+            url={pageUrl || absoluteUrl(`/projects/${project.slug}`)} 
             title={project.title} 
             variant="grid"
           />

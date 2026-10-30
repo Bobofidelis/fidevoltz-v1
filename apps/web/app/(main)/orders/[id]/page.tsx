@@ -61,7 +61,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
 
   return (
     <div className="container mx-auto py-10 px-4">
-      <div className="max-w-3xl mx-auto space-y-8">
+      <div className="max-w-3xl mx-auto space-y-5">
         <div className="flex items-center justify-between">
           <Link href="/orders">
             <Button variant="ghost" size="sm" className="gap-2 text-slate-600">

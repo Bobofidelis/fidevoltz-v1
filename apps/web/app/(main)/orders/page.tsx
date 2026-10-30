@@ -48,7 +48,7 @@ export default function OrdersPage() {
 
   if (!session) {
     return (
-      <div className="container py-16 text-center max-w-md mx-auto">
+      <div className="container py-10 text-center max-w-md mx-auto">
         <ShoppingBag className="h-16 w-16 mx-auto mb-4 text-slate-300" />
         <h2 className="text-2xl font-bold mb-2">Sign in to view orders</h2>
         <p className="text-slate-500 mb-6">You need to be logged in to see your order history.</p>
@@ -61,7 +61,7 @@ export default function OrdersPage() {
 
   if (error) {
     return (
-      <div className="container py-16 text-center">
+      <div className="container py-10 text-center">
         <p className="text-red-500">{error}</p>
         <Button className="mt-4" onClick={() => window.location.reload()}>Retry</Button>
       </div>
@@ -71,11 +71,11 @@ export default function OrdersPage() {
   return (
     <div className="container py-10 max-w-4xl">
       <h1 className="text-3xl font-bold mb-2">My Orders</h1>
-      <p className="text-slate-500 mb-8">Track and manage all your purchases</p>
+      <p className="text-slate-500 mb-5">Track and manage all your purchases</p>
 
       {orders.length === 0 ? (
         <Card>
-          <CardContent className="py-16 text-center">
+          <CardContent className="py-10 text-center">
             <Package className="h-14 w-14 mx-auto mb-4 text-slate-300" />
             <h3 className="text-lg font-semibold mb-2">No orders yet</h3>
             <p className="text-slate-500 mb-6">Start shopping to see your orders here</p>

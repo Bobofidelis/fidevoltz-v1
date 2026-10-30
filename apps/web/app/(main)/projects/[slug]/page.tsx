@@ -12,13 +12,18 @@ import { ShareBlock } from "@/components/projects/ShareBlock";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
 import { AdSlot } from "@/components/ads/AdSlot";
+import { auth } from "@/lib/auth";
+import { breadcrumbJsonLd, buildPageMetadata, descriptionFromBlocks, getSiteIdentity, toMetaDescription } from "@/lib/seo";
+import { SITE_URL, absoluteUrl } from "@/lib/site";
+import { JsonLd } from "@/components/seo/json-ld";
+import { parseBlocks, readingMinutes } from "@/lib/reading-time";
 
 // Fetch project from DB
 async function getProject(slugOrId: string) {
   let project = await prisma.projectPost.findUnique({
     where: { slug: slugOrId },
     include: {
-      author: true,
+      author: { select: { id: true, name: true, avatar: true } },
       components: true,
       attachments: true,
     }
@@ -28,7 +33,7 @@ async function getProject(slugOrId: string) {
     project = await prisma.projectPost.findUnique({
       where: { id: slugOrId },
       include: {
-        author: true,
+        author: { select: { id: true, name: true, avatar: true } },
         components: true,
         attachments: true,
       }
@@ -61,49 +66,47 @@ async function getRelatedProjects(category: string, excludeId: string) {
 }
 
 // Generate Metadata for SEO
+// Unpublished projects are only viewable by staff (preview)
+async function canView(project: { status: string }) {
+  if (project.status === "PUBLISHED") return true;
+  const session = await auth();
+  return session?.user?.role === "ADMIN" || session?.user?.role === "EDITOR";
+}
+
 export async function generateMetadata(
-  props: { params: Promise<{ slug: string }> },
-  parent: ResolvingMetadata
+  props: { params: Promise<{ slug: string }> }
 ): Promise<Metadata> {
   const { slug } = await props.params;
   const project = await getProject(slug);
-  
-  if (!project) return {};
 
-  let metaTitle = project.title;
-  let metaDescription = project.excerpt || "";
-  let keywords: string[] = [];
+  if (!project) return { title: "Tutorial Not Found", robots: { index: false } };
 
-  // Extract SEO from campaign_data block
-  const blocks = (project.content as any[]) || [];
-  const campaignBlock = blocks.find((b) => b.type === "campaign_data");
-  
-  if (campaignBlock?.content) {
-    if (campaignBlock.content.metaTitle) metaTitle = campaignBlock.content.metaTitle;
-    if (campaignBlock.content.metaDescription) metaDescription = campaignBlock.content.metaDescription;
-    if (campaignBlock.content.tags) {
-      keywords = campaignBlock.content.tags.split(",").map((t: string) => t.trim());
-    }
-  }
+  // SEO fields come from the project's "Campaign" tab in the dashboard
+  const blocks = parseBlocks(project.content);
+  const campaign = blocks.find((b) => b.type === "campaign_data")?.content;
+  const description =
+    toMetaDescription(campaign?.metaDescription || project.excerpt) ||
+    descriptionFromBlocks(blocks) ||
+    `${project.title}: step-by-step electronics tutorial.`;
 
-  const images = project.featuredImage ? [project.featuredImage] : [];
-
-  return {
-    title: metaTitle,
-    description: metaDescription,
-    keywords,
-    openGraph: {
-      title: metaTitle,
-      description: metaDescription,
-      images,
-    },
-  };
+  return buildPageMetadata({
+    title: campaign?.metaTitle || project.title,
+    description,
+    path: `/projects/${project.slug}`,
+    image: project.featuredImage,
+    type: "article",
+    noIndex: project.status !== "PUBLISHED",
+    publishedTime: (project.publishedAt || project.createdAt).toISOString(),
+    modifiedTime: project.updatedAt.toISOString(),
+    authors: project.author?.name ? [project.author.name] : undefined,
+    keywords: campaign?.tags ? String(campaign.tags).split(",").map((t: string) => t.trim()).filter(Boolean) : project.tags,
+  });
 }
 
 
 const colSpanMap: Record<string, { main: string; aside: string }> = {
   narrow: { main: 'lg:col-span-9 xl:col-span-10', aside: 'lg:col-span-3 xl:col-span-2' },
-  normal: { main: 'lg:col-span-8 xl:col-span-9', aside: 'lg:col-span-4 xl:col-span-3' },
+  normal: { main: 'lg:col-span-8', aside: 'lg:col-span-4' },
   wide: { main: 'lg:col-span-7 xl:col-span-8', aside: 'lg:col-span-5 xl:col-span-4' },
 };
 
@@ -111,33 +114,36 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   const { slug } = await params;
   const project = await getProject(slug);
 
-  if (!project) {
+  if (!project || !(await canView(project))) {
     notFound();
   }
 
   const relatedProjects = await getRelatedProjects(project.category || "", project.id);
 
-  // Parse content if it's JSON string, otherwise use as is
-  let blocks: any[] = [];
-  try {
-    if (typeof project.content === 'string') {
-      try {
-        const parsed = JSON.parse(project.content);
-        blocks = Array.isArray(parsed) ? parsed : [{ id: '1', type: 'text', content: project.content }];
-      } catch {
-        blocks = [{ id: 'legacy-html', type: 'text', content: project.content }];
-      }
-    } else if (Array.isArray(project.content)) {
-      blocks = project.content as any[];
-    } else if (project.content && typeof project.content === 'object') {
-      blocks = [project.content];
-    }
-  } catch (e) {
-    console.error("Failed to parse project content", e);
-  }
+  const allBlocks = parseBlocks(project.content);
+  // Campaign data is private marketing material: it must never reach the browser
+  const blocks = allBlocks.filter((b) => b.type !== "campaign_data");
+  const campaign = allBlocks.find((b) => b.type === "campaign_data")?.content;
+  const minutes = readingMinutes(blocks);
+  const identity = await getSiteIdentity();
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://fidevoltz.vercel.app';
-  const projectUrl = `${baseUrl}/projects/${project.slug}`;
+  const projectUrl = absoluteUrl(`/projects/${project.slug}`);
+  const articleLd = {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    headline: project.title.slice(0, 110),
+    description: toMetaDescription(campaign?.metaDescription || project.excerpt) || descriptionFromBlocks(blocks),
+    url: projectUrl,
+    mainEntityOfPage: projectUrl,
+    ...(project.featuredImage ? { image: [absoluteUrl(project.featuredImage)] } : {}),
+    datePublished: (project.publishedAt || project.createdAt).toISOString(),
+    dateModified: project.updatedAt.toISOString(),
+    author: { "@type": "Person", name: project.author?.name || identity.name },
+    publisher: { "@id": `${SITE_URL}/#organization` },
+    ...(project.category ? { articleSection: project.category } : {}),
+    ...(project.difficulty ? { proficiencyLevel: project.difficulty } : {}),
+    timeRequired: `PT${minutes}M`,
+  };
 
   // Parse sidebar settings
   const sidebarBlocks = Array.isArray(project.sidebar) ? (project.sidebar as any[]) : [];
@@ -166,23 +172,32 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
           <PublicSidebarRenderer blocks={sidebarBlocks} slug={`projects/${project.slug}`} />
         )}
         {/* Default project sidebar (components, downloads, CTA, share) always renders */}
-        <ProjectSidebar project={project} />
+        <ProjectSidebar project={{ slug: project.slug, title: project.title, components: project.components, attachments: project.attachments }} />
       </div>
     </aside>
   );
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <article className="min-h-screen bg-slate-50">
+      <JsonLd data={articleLd} />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", path: "/" },
+          { name: "Tutorials", path: "/projects" },
+          ...(project.category ? [{ name: project.category, path: `/projects?category=${project.category.toLowerCase()}` }] : []),
+          { name: project.title },
+        ])}
+      />
       {/* Hero Section */}
-      <section className="relative h-[50vh] min-h-[400px] overflow-hidden">
+      <section className="relative overflow-hidden">
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url('${project.featuredImage || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800'}')` }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-slate-900/40" />
         
-        <div className="relative max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 h-full flex flex-col justify-end pb-12">
-          <nav className="flex items-center gap-2 text-sm text-white/70 mb-6 font-medium flex-wrap">
+        <div className="relative max-w-[1240px] mx-auto px-4 md:px-6 pt-6 pb-8 md:pt-8 md:pb-10">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-white/70 mb-4 font-medium flex-wrap">
             <Link href="/" className="hover:text-white transition-colors">Home</Link>
             <span>&gt;</span>
             <Link href="/projects" className="hover:text-white transition-colors">Tutorials</Link>
@@ -213,7 +228,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             )}
           </div>
           
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 max-w-4xl leading-tight tracking-tight">
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 max-w-4xl leading-tight tracking-tight">
             {project.title}
           </h1>
           
@@ -232,28 +247,28 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             <div className="hidden md:block h-1 w-1 rounded-full bg-slate-500" />
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4" />
-              <span>5 min read</span>
+              <span>{minutes} min read</span>
             </div>
           </div>
         </div>
       </section>
 
       {/* Content */}
-      <section className="py-12">
-        <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12">
-          <AdSlot page={`projects/${project.slug}`} zone="HEADER" className="mb-8" />
+      <section className="py-8">
+        <div className="max-w-[1240px] mx-auto px-4 md:px-6">
+          <AdSlot page={`projects/${project.slug}`} zone="HEADER" className="mb-5" />
           
           {/* Grid: sidebar order depends on side setting */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6">
             {/* Left sidebar */}
             {sidebarSide === "left" && sidebarAside}
 
             {/* Main Content */}
-            <div className={`${colSpans.main} space-y-8`}>
+            <div className={`${colSpans.main} min-w-0 space-y-5`}>
                
                {/* Excerpt/Intro */}
                {project.excerpt && (
-                  <div className="text-xl leading-relaxed text-slate-600 font-medium border-l-4 border-blue-500 pl-4 py-1 bg-white p-4 rounded-r-lg shadow-sm">
+                  <div className="text-lg leading-relaxed text-slate-700 border-l-4 border-blue-500 bg-white p-4 rounded-r-lg shadow-sm">
                      {project.excerpt}
                   </div>
                )}
@@ -261,7 +276,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                {/* Content Top Ad */}
                <AdSlot page={`projects/${project.slug}`} zone="CONTENT_TOP" className="w-full" />
 
-              <div id="article-content" className="bg-white rounded-xl p-8 shadow-sm border border-slate-100">
+              <div id="article-content" className="bg-white rounded-xl p-5 md:p-7 shadow-sm border border-slate-100">
                  <BlockRenderer blocks={blocks} slug={project.slug} />
               </div>
 
@@ -350,6 +365,6 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
           </div>
         </div>
       </section>
-    </div>
+    </article>
   );
 }

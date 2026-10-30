@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { buildPageMetadata } from '@/lib/seo';
 import { prisma } from '@/lib/prisma';
 import { Metadata } from 'next';
 import { PageRenderer } from '@/components/page-renderer';
@@ -12,11 +13,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   try {
     const page = await prisma.page.findUnique({ where: { slug } });
-    if (!page) return { title: 'Page Not Found' };
-    return {
+    if (!page) return { title: 'Page Not Found', robots: { index: false } };
+    return buildPageMetadata({
       title: page.seoTitle || page.title,
       description: page.seoDesc || `${page.title} - FideVoltz`,
-    };
+      path: `/${page.slug}`,
+      noIndex: !page.isPublished,
+    });
   } catch {
     return { title: 'Error' };
   }
@@ -79,11 +82,11 @@ export default async function DynamicPage({ params }: PageProps) {
     );
 
     return (
-      <main className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-slate-50">
         {heroBlock && <PageRenderer content={[heroBlock]} />}
-        <div className="py-10">
-          <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+        <div className="py-6">
+          <div className="max-w-[1240px] mx-auto px-4 md:px-6">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-5 items-start">
               {sidebarSide === 'left' ? (
                 <>
                   {sidebarElement}
@@ -98,17 +101,17 @@ export default async function DynamicPage({ params }: PageProps) {
             </div>
           </div>
         </div>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-slate-50">
-      <div className="container max-w-5xl mx-auto px-4 py-10">
+    <div className="min-h-screen bg-slate-50">
+      <div className="container max-w-5xl mx-auto px-4 py-6">
         <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
           <PageRenderer content={blocks} />
         </div>
       </div>
-    </main>
+    </div>
   );
 }

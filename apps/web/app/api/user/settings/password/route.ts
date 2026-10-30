@@ -37,6 +37,7 @@ export async function POST(request: NextRequest) {
     // Get user
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
+      omit: { passwordHash: false },
     });
 
     if (!user) {

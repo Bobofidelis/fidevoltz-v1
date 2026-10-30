@@ -1,4 +1,3 @@
-import { cache } from "react";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -13,34 +12,30 @@ import { Providers } from "@/components/providers";
 const inter = Inter({ subsets: ["latin"], display: "swap", variable: "--font-inter" });
 
 import { prisma } from "@/lib/prisma";
+import { getSiteIdentity, organizationJsonLd } from "@/lib/seo";
+import { SITE_URL } from "@/lib/site";
+import { JsonLd } from "@/components/seo/json-ld";
 import { hexToHsl } from "@/lib/utils";
 
-const getBrandingSettings = cache(async () => {
-  try {
-    const settings = await prisma.siteSettings.findMany({ where: { category: 'branding' } });
-    return settings.reduce((acc: any, s) => ({ ...acc, [s.key]: s.value }), {});
-  } catch {
-    return {};
-  }
-});
-
 export async function generateMetadata(): Promise<Metadata> {
-  const branding = await getBrandingSettings();
-  
-  const siteName = branding['branding.siteName'] || "FideVoltz";
-  const tagline = branding['branding.tagline'] || "Electronics Tutorials & Store";
-  const favicon = branding['branding.favicon'] || "/favicon.ico";
-  
+  const identity = await getSiteIdentity();
+
   return {
-    metadataBase: new URL('https://fidevoltz.vercel.app'),
+    metadataBase: new URL(SITE_URL),
     title: {
-      default: `${siteName} - ${tagline}`,
-      template: `%s | ${siteName}`,
+      // Google shows about 60 characters, so a long tagline is left out of the title
+      default: identity.tagline.length <= 45 ? `${identity.name} - ${identity.tagline}` : identity.name,
+      template: `%s | ${identity.name}`,
     },
-    description: tagline,
-    icons: {
-      icon: favicon,
+    description: identity.tagline,
+    applicationName: identity.name,
+    icons: { icon: identity.favicon },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
     },
+    ...(identity.googleVerification ? { verification: { google: identity.googleVerification } } : {}),
   };
 }
 
@@ -49,7 +44,11 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const branding = await getBrandingSettings();
+  const [identity, brandingRows] = await Promise.all([
+    getSiteIdentity(),
+    prisma.siteSettings.findMany({ where: { key: 'branding.primaryColor' } }).catch(() => []),
+  ]);
+  const branding: Record<string, any> = Object.fromEntries(brandingRows.map((s) => [s.key, s.value]));
 
   const primaryColor = branding['branding.primaryColor'] || "#3B82F6";
   const primaryHsl = hexToHsl(primaryColor);
@@ -64,6 +63,7 @@ export default async function RootLayout({
         `}} />
       </head>
       <body className="font-sans antialiased" suppressHydrationWarning>
+        <JsonLd data={organizationJsonLd(identity)} />
         <TopLoader />
         <Providers>
           <AnalyticsTracker />

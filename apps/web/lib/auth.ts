@@ -6,7 +6,7 @@ import { prisma } from "./prisma";
 import type { Role } from "@fidevoltz/types";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: PrismaAdapter(prisma) as any,
+  adapter: PrismaAdapter(prisma as any) as any,
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
@@ -35,6 +35,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           
           const user = await prisma.user.findUnique({
             where: { email: credentials.email as string },
+            omit: { passwordHash: false },
           });
 
           if (!user) {

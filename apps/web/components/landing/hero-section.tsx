@@ -14,7 +14,7 @@ export function HeroSection() {
   });
 
   return (
-    <section className="relative min-h-[85vh] py-16 md:py-20 flex items-center overflow-hidden">
+    <section className="relative py-12 md:py-16 lg:py-20 flex items-center overflow-hidden">
       {/* Background with overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 z-10" />
       <div 
@@ -47,7 +47,7 @@ export function HeroSection() {
           )}
 
           <SlideUp delay={0.1}>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-6 leading-tight">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
               Build Amazing
               <span className="block bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
                 Electronics Projects
@@ -56,7 +56,7 @@ export function HeroSection() {
           </SlideUp>
 
           <SlideUp delay={0.2}>
-            <p className="text-xl text-slate-200 mb-8 max-w-2xl">
+            <p className="text-xl text-slate-200 mb-5 max-w-2xl">
               From beginner tutorials to advanced IoT systems. Learn, shop, and create 
               with our comprehensive platform designed for electronics enthusiasts.
             </p>

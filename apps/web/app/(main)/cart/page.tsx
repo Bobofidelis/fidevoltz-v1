@@ -42,7 +42,7 @@ export default function CartPage() {
             <ShoppingBag className="h-12 w-12 text-slate-400" />
           </div>
           <h1 className="text-4xl font-bold text-slate-900 mb-4">Your Cart is Empty</h1>
-          <p className="text-slate-600 mb-8 max-w-md mx-auto">
+          <p className="text-slate-600 mb-5 max-w-md mx-auto">
             Looks like you haven't added any items to your cart yet. Start shopping to fill it up!
           </p>
           <Link href="/store">
@@ -132,8 +132,8 @@ export default function CartPage() {
         </div>
       </div>
 
-      <div className="container px-4 md:px-6 py-12">
-        <div className="grid gap-8 lg:grid-cols-3">
+      <div className="container px-4 md:px-6 py-8">
+        <div className="grid gap-5 lg:grid-cols-3">
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
             

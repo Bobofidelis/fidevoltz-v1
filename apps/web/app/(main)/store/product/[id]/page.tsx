@@ -1,5 +1,7 @@
 "use client";
 
+import { absoluteUrl } from "@/lib/site";
+
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
@@ -173,7 +175,7 @@ export default function ProductDetailPage() {
   };
 
   // Social Share
-  const currentUrl = typeof window !== "undefined" ? window.location.href : `https://fidevoltz.com/store/product/${product.id}`;
+  const currentUrl = typeof window !== "undefined" ? window.location.href : absoluteUrl(`/store/product/${product.id}`);
   
   const handleCopyLink = () => {
     navigator.clipboard.writeText(currentUrl);
@@ -199,7 +201,7 @@ export default function ProductDetailPage() {
     .slice(0, 4);
 
   return (
-    <div className="min-h-screen bg-slate-50/70 pb-28 md:pb-20">
+    <div className="min-h-screen bg-slate-50/70 pb-16 md:pb-12">
       
       {/* ================= BREADCRUMBS ================= */}
       <div className="bg-white border-b border-slate-200 sticky top-0 z-20 shadow-xs">
@@ -226,7 +228,7 @@ export default function ProductDetailPage() {
       {/* ================= MAIN PRODUCT CONTAINER ================= */}
       <div className="container mx-auto px-4 sm:px-6 py-8">
         
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 mb-6">
           
           {/* LEFT: Image Gallery with Interactive Hover Zoom */}
           <div className="lg:col-span-7">
@@ -294,6 +296,8 @@ export default function ProductDetailPage() {
                     >
                       <div 
                         className="w-full h-full bg-contain bg-center bg-no-repeat"
+                        role="img"
+                        aria-label={`${product.name} photo`}
                         style={{ backgroundImage: `url('${img}')` }}
                       />
                     </button>
@@ -400,7 +404,7 @@ export default function ProductDetailPage() {
                     )}
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3">
                     <div className="flex items-center border border-slate-200 rounded-xl bg-slate-50 h-12 shrink-0">
                       <Button
                         type="button"
@@ -431,11 +435,11 @@ export default function ProductDetailPage() {
 
                     <Button
                       size="lg"
-                      className="flex-1 h-12 text-base font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20"
+                      className="flex-1 min-w-0 h-12 px-3 sm:px-8 text-sm sm:text-base font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20"
                       onClick={handleAddToCart}
                       disabled={isOutOfStock}
                     >
-                      <ShoppingCart className="h-5 w-5 mr-2" />
+                      <ShoppingCart className="h-5 w-5 mr-1.5 sm:mr-2" />
                       {isOutOfStock ? "Out of Stock" : "Add to Cart"}
                     </Button>
 
@@ -530,9 +534,9 @@ export default function ProductDetailPage() {
         </div>
 
         {/* ================= TABS: SPECS, DESCRIPTION, REVIEWS ================= */}
-        <div className="mt-12 bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-xs">
+        <div className="mt-6 bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-xs">
           <Tabs defaultValue="description" className="w-full">
-            <TabsList className="w-full justify-start border-b border-slate-200 rounded-none h-auto p-0 bg-transparent space-x-6">
+            <TabsList className="w-full justify-start overflow-x-auto hide-scrollbar border-b border-slate-200 rounded-none h-auto p-0 bg-transparent space-x-5">
               <TabsTrigger
                 value="description"
                 className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 pb-3 px-1 font-semibold text-sm sm:text-base text-slate-600"
@@ -583,7 +587,7 @@ export default function ProductDetailPage() {
                     </Table>
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-12 text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                  <div className="flex flex-col items-center justify-center py-8 text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
                     <Settings className="w-10 h-10 mb-2 opacity-30 text-slate-500" />
                     <p className="text-sm font-medium">No technical specifications listed for this product.</p>
                   </div>
@@ -600,7 +604,7 @@ export default function ProductDetailPage() {
 
         {/* ================= RELATED PRODUCTS ================= */}
         {relatedProducts.length > 0 && (
-          <section className="mt-16">
+          <section className="mt-8">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h3 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
@@ -628,7 +632,7 @@ export default function ProductDetailPage() {
 
         {/* ================= RECENTLY VIEWED ================= */}
         {recentlyViewed.length > 0 && (
-          <section className="mt-16 pt-8 border-t border-slate-200">
+          <section className="mt-8 pt-8 border-t border-slate-200">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h3 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">

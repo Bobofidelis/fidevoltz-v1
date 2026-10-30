@@ -5,7 +5,7 @@ import { Zap } from "lucide-react";
 import { SocialMediaLinks } from "./social-media-links";
 import { usePublicSettings } from "@/lib/hooks/use-public-settings";
 
-// Note: Dynamic CMS pages ([slug]) handle routes like /careers, /shipping, /returns, /faq, /privacy, /terms, and /cookies
+// Note: Dynamic CMS pages ([slug]) handle routes like /careers, /shipping, /returns, /faq, /privacy-policy, /terms-of-service, and /cookie-policy
 const footerLinks = {
   product: [
     { label: "Tutorials", href: "/projects" },
@@ -26,9 +26,9 @@ const footerLinks = {
     { label: "FAQ", href: "/faq" },
   ],
   legal: [
-    { label: "Privacy Policy", href: "/privacy" },
-    { label: "Terms of Service", href: "/terms" },
-    { label: "Cookie Policy", href: "/cookies" },
+    { label: "Privacy Policy", href: "/privacy-policy" },
+    { label: "Terms of Service", href: "/terms-of-service" },
+    { label: "Cookie Policy", href: "/cookie-policy" },
   ],
 };
 
@@ -41,8 +41,8 @@ export function Footer() {
 
   return (
     <footer className="border-t border-slate-200 bg-slate-50">
-      <div className="container px-4 py-10 md:py-12">
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-6">
+      <div className="container px-4 py-8">
+        <div className="grid grid-cols-2 gap-5 md:grid-cols-6">
           {/* Brand Section */}
           <div className="col-span-2 md:col-span-2">
             <Link href="/" className="flex items-center gap-2 mb-4">
@@ -64,7 +64,7 @@ export function Footer() {
           {/* Product Links */}
           <div>
             <h3 className="font-semibold text-slate-900 mb-4">Product</h3>
-            <ul className="space-y-3">
+            <ul className="space-y-2">
               {footerLinks.product.map((link) => (
                 <li key={link.label}>
                   <Link
@@ -81,7 +81,7 @@ export function Footer() {
           {/* Company Links */}
           <div>
             <h3 className="font-semibold text-slate-900 mb-4">Company</h3>
-            <ul className="space-y-3">
+            <ul className="space-y-2">
               {footerLinks.company.map((link) => (
                 <li key={link.label}>
                   <Link
@@ -98,7 +98,7 @@ export function Footer() {
           {/* Support Links */}
           <div>
             <h3 className="font-semibold text-slate-900 mb-4">Support</h3>
-            <ul className="space-y-3">
+            <ul className="space-y-2">
               {footerLinks.support.map((link) => (
                 <li key={link.label}>
                   <Link
@@ -115,7 +115,7 @@ export function Footer() {
           {/* Legal Links */}
           <div>
             <h3 className="font-semibold text-slate-900 mb-4">Legal</h3>
-            <ul className="space-y-3">
+            <ul className="space-y-2">
               {footerLinks.legal.map((link) => (
                 <li key={link.label}>
                   <Link
@@ -131,18 +131,18 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-10 pt-6 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="mt-5 pt-6 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-slate-700">
             © {new Date().getFullYear()} {siteName}. All rights reserved.
           </p>
           <div className="flex gap-6">
-            <Link href="/privacy" className="text-sm text-slate-700 hover:text-slate-900 transition-colors">
+            <Link href="/privacy-policy" className="text-sm text-slate-700 hover:text-slate-900 transition-colors">
               Privacy
             </Link>
-            <Link href="/terms" className="text-sm text-slate-700 hover:text-slate-900 transition-colors">
+            <Link href="/terms-of-service" className="text-sm text-slate-700 hover:text-slate-900 transition-colors">
               Terms
             </Link>
-            <Link href="/cookies" className="text-sm text-slate-700 hover:text-slate-900 transition-colors">
+            <Link href="/cookie-policy" className="text-sm text-slate-700 hover:text-slate-900 transition-colors">
               Cookies
             </Link>
           </div>

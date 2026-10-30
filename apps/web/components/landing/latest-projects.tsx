@@ -5,6 +5,7 @@ import { FadeIn } from "@/components/ui/motion";
 import Link from "next/link";
 import { ArrowRight, Clock, TrendingUp } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { parseBlocks, readingMinutes } from "@/lib/reading-time";
 import type { ProjectPost } from "@fidevoltz/types";
 
 export async function LatestProjects() {
@@ -24,7 +25,7 @@ export async function LatestProjects() {
     image: p.featuredImage || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800',
     category: p.category || 'Tutorial',
     difficulty: p.difficulty || 'Beginner',
-    readTime: '5 min read',
+    readTime: `${readingMinutes(parseBlocks(p.content))} min read`,
     date: new Date(p.publishedAt || p.createdAt).toLocaleDateString('en-US', { 
       month: 'short', 
       day: 'numeric', 
@@ -36,13 +37,13 @@ export async function LatestProjects() {
   // Empty state
   if (projects.length === 0) {
     return (
-      <section className="py-12 md:py-16 bg-slate-50">
+      <section className="py-8 md:py-10 bg-slate-50">
         <div className="container px-4 md:px-6">
           <div className="text-center max-w-2xl mx-auto">
-            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-              Latest Projects
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">
+              Latest Tutorials
             </h2>
-            <p className="text-lg text-slate-700 mb-8">
+            <p className="text-lg text-slate-700 mb-5">
               No projects available yet. Check back soon for exciting tutorials and guides!
             </p>
             <Link href="/projects">
@@ -57,27 +58,27 @@ export async function LatestProjects() {
   }
 
   return (
-    <section className="py-12 md:py-16 bg-slate-50">
+    <section className="py-8 md:py-10 bg-slate-50">
       <div className="container px-4 md:px-6">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+        <div className="flex flex-row flex-wrap justify-between items-end mb-4 gap-3">
           <div>
-            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-2">Trending Projects</h2>
-            <p className="text-slate-700">Popular tutorials this week</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-1">Latest Tutorials</h2>
+            <p className="text-slate-700">Newest step-by-step builds</p>
           </div>
           <Link href="/projects">
             <Button variant="outline" className="group border-slate-300 hover:bg-slate-900 hover:text-white hover:border-slate-900">
-              View All Projects
+              View All Tutorials
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {projects.map((project, index) => (
             <FadeIn key={project.id} delay={index * 0.1}>
-              <Card className="group overflow-hidden border-slate-200 hover:shadow-2xl hover:shadow-slate-300/50 transition-all hover:-translate-y-2 bg-white flex flex-col h-full">
+              <Card className="group overflow-hidden border-slate-200 hover:shadow-lg transition-all hover:-translate-y-0.5 bg-white flex flex-col h-full">
                 {/* Project Image */}
-                <div className="relative h-48 overflow-hidden flex-shrink-0">
+                <div className="relative h-44 overflow-hidden flex-shrink-0">
                   <div 
                     className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
                     style={{ backgroundImage: `url('${project.image}')` }}
@@ -101,12 +102,12 @@ export async function LatestProjects() {
                   )}
                 </div>
 
-                <CardContent className="p-6 flex flex-col flex-1">
-                  <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">
+                <CardContent className="p-4 flex flex-col flex-1">
+                  <h3 className="text-lg leading-snug font-bold text-slate-900 mb-1.5 group-hover:text-blue-600 transition-colors">
                     {project.title}
                   </h3>
                   
-                  <p className="text-slate-700 mb-4 line-clamp-2 flex-1">
+                  <p className="text-sm text-slate-700 mb-3 line-clamp-2 flex-1">
                     {project.excerpt}
                   </p>
 
@@ -116,10 +117,12 @@ export async function LatestProjects() {
                         <Clock className="h-4 w-4" />
                         <span>{project.readTime}</span>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <TrendingUp className="h-4 w-4" />
-                        <span>Popular</span>
-                      </div>
+                      {project.trending && (
+                        <div className="flex items-center gap-1">
+                          <TrendingUp className="h-4 w-4" />
+                          <span>Featured</span>
+                        </div>
+                      )}
                     </div>
                     
                     <Link href={`/projects/${project.slug}`}>

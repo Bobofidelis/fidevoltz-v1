@@ -177,15 +177,15 @@ export default function TrackOrderPage() {
   };
 
   return (
-    <div className="container max-w-3xl py-16 px-4">
-      <div className="text-center mb-12">
+    <div className="container max-w-3xl py-10 px-4">
+      <div className="text-center mb-6">
         <h1 className="text-4xl font-bold tracking-tight mb-4">Track Your Order</h1>
         <p className="text-lg text-muted-foreground">
           Enter your order ID to see real-time updates and delivery progress.
         </p>
       </div>
 
-      <Card className="mb-12 shadow-sm border-slate-200">
+      <Card className="mb-6 shadow-sm border-slate-200">
         <CardContent className="pt-6">
           <form onSubmit={handleTrack} className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
@@ -219,7 +219,7 @@ export default function TrackOrderPage() {
       </Card>
 
       {trackingResult && (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <Card className="shadow-sm border-slate-200">
             <CardHeader className="border-b border-slate-100 pb-5">
               <div className="flex items-center justify-between flex-wrap gap-4">
@@ -275,7 +275,7 @@ export default function TrackOrderPage() {
             </CardHeader>
 
             <CardContent className="pt-8">
-              <div className="relative space-y-8 before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-blue-500 before:via-slate-200 before:to-transparent">
+              <div className="relative space-y-5 before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-blue-500 before:via-slate-200 before:to-transparent">
                 {trackingResult.steps.map((step: TrackingStep, index: number) => (
                   <div key={index} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
                     <div
@@ -316,7 +316,7 @@ export default function TrackOrderPage() {
 
               {/* Items in order */}
               {trackingResult.items && trackingResult.items.length > 0 && (
-                <div className="mt-10 pt-6 border-t border-slate-200">
+                <div className="mt-5 pt-6 border-t border-slate-200">
                   <h3 className="text-sm font-semibold text-slate-900 mb-4 flex items-center gap-2">
                     <Package className="h-4 w-4 text-blue-600" />
                     Items in this Order ({trackingResult.items.length})

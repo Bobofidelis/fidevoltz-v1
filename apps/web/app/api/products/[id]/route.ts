@@ -21,7 +21,12 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       },
     });
 
-    if (!product) {
+    // Drafts/archived products are only visible to staff
+    const session = product && !['ACTIVE', 'OUT_OF_STOCK'].includes(product.status) ? await auth() : null;
+    const hidden = product && !['ACTIVE', 'OUT_OF_STOCK'].includes(product.status)
+      && session?.user?.role !== 'ADMIN' && session?.user?.role !== 'EDITOR';
+
+    if (!product || hidden) {
       return NextResponse.json<ApiResponse>(
         { success: false, error: 'Product not found' },
         { status: 404 }

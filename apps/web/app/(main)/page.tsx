@@ -5,18 +5,32 @@ import { LatestProjects } from "@/components/landing/latest-projects";
 import { FeaturedProducts } from "@/components/landing/featured-products";
 import { ServicesSection } from "@/components/landing/services-section";
 import { AdSlot } from "@/components/ads/AdSlot";
+import { buildPageMetadata, getSiteIdentity } from "@/lib/seo";
+import { getPublicProducts } from "@/lib/catalog";
+import { getStorefrontData } from "@/lib/storefront-server";
+import { Prefetched } from "@/components/seo/prefetched";
 
-export const metadata: Metadata = {
-  title: 'Home',
-  description: 'Build amazing electronics projects with step-by-step tutorials, premium components, and a thriving community of makers.',
-  openGraph: {
-    title: 'FideVoltz - Electronics Tutorials & Store',
-    description: 'Build amazing electronics projects with step-by-step tutorials, premium components, and a thriving community of makers.',
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { name } = await getSiteIdentity();
+  return buildPageMetadata({
+    title: `${name}: Electronics Tutorials & Components in Nigeria`,
+    absoluteTitle: true,
+    description:
+      'Learn electronics with step-by-step Arduino, ESP32 and IoT tutorials, and buy tested components, sensors and microcontrollers in Nigeria.',
+    path: '/',
+  });
+}
 
-export default function Home() {
+export default async function Home() {
+  const [featured, storefront] = await Promise.all([getPublicProducts(8), getStorefrontData()]);
+
   return (
+    <Prefetched
+      queries={[
+        { key: ['products', 'featured'], data: featured },
+        { key: ['storefront'], data: storefront },
+      ]}
+    >
     <div className="flex flex-col min-h-screen">
       {/* Header Ad - Full width banner */}
       <AdSlot page="home" zone="HEADER" className="container mx-auto px-4 mb-4" />
@@ -41,5 +55,6 @@ export default function Home() {
       {/* Footer Ad */}
       <AdSlot page="home" zone="FOOTER" className="container mx-auto px-4 mt-6 mb-4" />
     </div>
+    </Prefetched>
   );
 }
