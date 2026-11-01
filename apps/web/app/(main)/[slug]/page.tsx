@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { Metadata } from 'next';
 import { PageRenderer } from '@/components/page-renderer';
 import { PublicSidebarRenderer } from "@/components/projects/PublicSidebarRenderer";
+import { getSidebarLayout } from "@/lib/sidebar-layout";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -25,6 +26,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
+// A page already has its <h1> when it has a hero block, a level-1 heading in its rich text
+// (stored as { type: "heading", attrs: { level: 1 } }), or raw <h1> HTML
+function pageHasTitle(node: unknown): boolean {
+  if (typeof node === 'string') return /<h1[\s>]/i.test(node);
+  if (Array.isArray(node)) return node.some(pageHasTitle);
+  if (node && typeof node === 'object') {
+    const n = node as { type?: string; attrs?: { level?: number } };
+    if (n.type === 'hero' || (n.type === 'heading' && n.attrs?.level === 1)) return true;
+    return Object.values(node).some(pageHasTitle);
+  }
+  return false;
+}
+
 export default async function DynamicPage({ params }: PageProps) {
   const { slug } = await params;
 
@@ -41,53 +55,43 @@ export default async function DynamicPage({ params }: PageProps) {
   const blocks = Array.isArray(page.content) ? (page.content as any[]) : [];
   const sidebarBlocks = Array.isArray(page.sidebar) ? (page.sidebar as any[]) : [];
 
-  // Determine sticky/floating behaviour from the sidebar_settings config block
-  const settingsBlock = sidebarBlocks.find((b: any) => b.type === 'sidebar_settings');
-  const sidebarSide: "left" | "right" = settingsBlock?.content?.side || "right";
-  const scrollMode: "sticky" | "scroll" = settingsBlock?.content?.scrollMode === "scroll" ? "scroll" : "sticky";
-  const sidebarWidth: "narrow" | "normal" | "wide" = settingsBlock?.content?.width || "normal";
-  
-  // Use explicit tailwind class names for compiler safety
-  let asideCols = "lg:col-span-4 xl:col-span-3";
-  let mainCols = "lg:col-span-8 xl:col-span-9";
-  
-  if (sidebarWidth === 'narrow') {
-    asideCols = "lg:col-span-3 xl:col-span-2";
-    mainCols = "lg:col-span-9 xl:col-span-10";
-  } else if (sidebarWidth === 'wide') {
-    asideCols = "lg:col-span-5 xl:col-span-4";
-    mainCols = "lg:col-span-7 xl:col-span-8";
-  }
+  // Position, width and scroll behaviour come from the sidebar_settings block (Dashboard → Pages → Edit sidebar)
+  const layout = getSidebarLayout(sidebarBlocks);
 
-  const asideClass = scrollMode === "sticky"
-    ? `${asideCols} space-y-4 min-w-0 lg:sticky lg:top-20 lg:self-start`
-    : `${asideCols} space-y-4 min-w-0`;
-    
-  const mainClass = `${mainCols} bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden min-w-0`;
+  // A page needs exactly one <h1>: its hero, a heading written in the content, or else the page title
+  const hasTitle = pageHasTitle(blocks);
+  const titleHeader = hasTitle ? null : (
+    <header className="bg-slate-900 text-white">
+      <div className="container px-4 md:px-6 lg:px-8 py-6 md:py-8">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{page.title}</h1>
+      </div>
+    </header>
+  );
 
   if (sidebarBlocks.length > 0) {
     const heroBlock = blocks.find((b: any) => b.type === 'hero');
     const bodyBlocks = blocks.filter((b: any) => b.type !== 'hero');
 
     const sidebarElement = (
-      <aside className={asideClass}>
+      <aside className={layout.asideClass}>
         {/* slug passed as-is so AdWidget targets 'about', 'contact' etc. matching PlacementManager values */}
         <PublicSidebarRenderer blocks={sidebarBlocks} slug={page.slug} />
       </aside>
     );
     const mainElement = (
-      <div className={mainClass}>
-        <PageRenderer content={bodyBlocks} />
+      <div className="min-w-0 bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+        <PageRenderer content={bodyBlocks} fluid />
       </div>
     );
 
     return (
       <div className="min-h-screen bg-slate-50">
+        {titleHeader}
         {heroBlock && <PageRenderer content={[heroBlock]} />}
         <div className="py-6">
-          <div className="max-w-[1240px] mx-auto px-4 md:px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-5 items-start">
-              {sidebarSide === 'left' ? (
+          <div className="container px-4 md:px-6 lg:px-8">
+            <div className={layout.gridClass} style={layout.style}>
+              {layout.side === 'left' ? (
                 <>
                   {sidebarElement}
                   {mainElement}
@@ -107,6 +111,7 @@ export default async function DynamicPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      {titleHeader}
       <div className="container max-w-5xl mx-auto px-4 py-6">
         <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
           <PageRenderer content={blocks} />

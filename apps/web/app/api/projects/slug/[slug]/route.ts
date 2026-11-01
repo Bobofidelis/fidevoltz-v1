@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { isStaffRequest, toPublicProject } from '@/lib/project-public';
 import type { ApiResponse, ProjectPost } from '@fidevoltz/types';
 
 interface RouteParams {
@@ -44,7 +45,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       },
     });
 
-    if (!project) {
+    // Visitors only see published projects, without private campaign notes or commenter emails
+    const staff = project ? await isStaffRequest() : false;
+    if (!project || (!staff && project.status !== 'PUBLISHED')) {
       return NextResponse.json<ApiResponse>(
         { success: false, error: 'Project not found' },
         { status: 404 }
@@ -52,7 +55,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     return NextResponse.json<ApiResponse<ProjectPost>>(
-      { success: true, data: project as ProjectPost },
+      { success: true, data: (staff ? project : toPublicProject(project)) as ProjectPost },
       { status: 200 }
     );
   } catch (error: any) {

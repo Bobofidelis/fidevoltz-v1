@@ -36,5 +36,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error('[SITEMAP] Failed to load dynamic entries', error);
   }
 
-  return entries;
+  const seen = new Set<string>();
+  return entries.filter((entry) => !seen.has(entry.url) && !!seen.add(entry.url));
 }

@@ -17,6 +17,7 @@ import { breadcrumbJsonLd, buildPageMetadata, descriptionFromBlocks, getSiteIden
 import { SITE_URL, absoluteUrl } from "@/lib/site";
 import { JsonLd } from "@/components/seo/json-ld";
 import { parseBlocks, readingMinutes } from "@/lib/reading-time";
+import { getSidebarLayout } from "@/lib/sidebar-layout";
 
 // Fetch project from DB
 async function getProject(slugOrId: string) {
@@ -104,11 +105,6 @@ export async function generateMetadata(
 }
 
 
-const colSpanMap: Record<string, { main: string; aside: string }> = {
-  narrow: { main: 'lg:col-span-9 xl:col-span-10', aside: 'lg:col-span-3 xl:col-span-2' },
-  normal: { main: 'lg:col-span-8', aside: 'lg:col-span-4' },
-  wide: { main: 'lg:col-span-7 xl:col-span-8', aside: 'lg:col-span-5 xl:col-span-4' },
-};
 
 export default async function ProjectDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -147,32 +143,28 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
   // Parse sidebar settings
   const sidebarBlocks = Array.isArray(project.sidebar) ? (project.sidebar as any[]) : [];
-  const settingsBlock = sidebarBlocks.find((b: any) => b.type === 'sidebar_settings');
-  const sidebarSide: "left" | "right" = settingsBlock?.content?.side || "right";
-  const scrollMode: "sticky" | "scroll" = settingsBlock?.content?.scrollMode === "scroll" ? "scroll" : "sticky";
-  const sidebarWidth: "narrow" | "normal" | "wide" = settingsBlock?.content?.width || "normal";
-  
-  const colSpans = colSpanMap[sidebarWidth] || colSpanMap.normal;
-
-  // Sticky: sidebar sticks at the top as user scrolls (natural, no own scrollbar)
-  // Scroll: sidebar just flows normally with the page
-  const asideClass = scrollMode === "sticky"
-    ? `${colSpans.aside} min-w-0 lg:sticky lg:top-20 lg:self-start`
-    : `${colSpans.aside} min-w-0`;
+  const layout = getSidebarLayout(sidebarBlocks);
 
   // Whether there are any custom sidebar blocks to show above the defaults
   const hasCustomSidebar = sidebarBlocks.filter((b: any) => b.type !== 'sidebar_settings').length > 0;
 
   // Sidebar JSX element
   const sidebarAside = (
-    <aside className={asideClass}>
+    <aside className={layout.asideClass}>
       <div className="space-y-4">
         {/* Custom sidebar blocks from the editor come first */}
         {hasCustomSidebar && (
-          <PublicSidebarRenderer blocks={sidebarBlocks} slug={`projects/${project.slug}`} />
+          <PublicSidebarRenderer
+            blocks={sidebarBlocks}
+            slug={`projects/${project.slug}`}
+            context={{ category: project.category, excludeSlug: project.slug }}
+          />
         )}
         {/* Default project sidebar (components, downloads, CTA, share) always renders */}
-        <ProjectSidebar project={{ slug: project.slug, title: project.title, components: project.components, attachments: project.attachments }} />
+        <ProjectSidebar
+          project={{ slug: project.slug, title: project.title, components: project.components, attachments: project.attachments }}
+          showAd={!sidebarBlocks.some((b: any) => b.type === "ad")}
+        />
       </div>
     </aside>
   );
@@ -196,7 +188,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-slate-900/40" />
         
-        <div className="relative max-w-[1240px] mx-auto px-4 md:px-6 pt-6 pb-8 md:pt-8 md:pb-10">
+        <div className="container relative px-4 md:px-6 lg:px-8 pt-6 pb-8 md:pt-8 md:pb-10">
           <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-white/70 mb-4 font-medium flex-wrap">
             <Link href="/" className="hover:text-white transition-colors">Home</Link>
             <span>&gt;</span>
@@ -255,16 +247,16 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
       {/* Content */}
       <section className="py-8">
-        <div className="max-w-[1240px] mx-auto px-4 md:px-6">
+        <div className="container px-4 md:px-6 lg:px-8">
           <AdSlot page={`projects/${project.slug}`} zone="HEADER" className="mb-5" />
           
           {/* Grid: sidebar order depends on side setting */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6">
+          <div className={layout.gridClass} style={layout.style}>
             {/* Left sidebar */}
-            {sidebarSide === "left" && sidebarAside}
+            {layout.side === "left" && sidebarAside}
 
             {/* Main Content */}
-            <div className={`${colSpans.main} min-w-0 space-y-5`}>
+            <div className="min-w-0 space-y-5">
                
                {/* Excerpt/Intro */}
                {project.excerpt && (
@@ -322,7 +314,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                       View all <ArrowRight className="h-3 w-3" />
                     </Link>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                     {relatedProjects.map((rel) => (
                       <Link key={rel.id} href={`/projects/${rel.slug}`} className="group block">
                         <Card className="overflow-hidden h-full border border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 bg-white">
@@ -361,7 +353,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             </div>
 
             {/* Right sidebar */}
-            {sidebarSide === "right" && sidebarAside}
+            {layout.side === "right" && sidebarAside}
           </div>
         </div>
       </section>

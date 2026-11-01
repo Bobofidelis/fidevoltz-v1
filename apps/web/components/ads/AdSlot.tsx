@@ -3,23 +3,29 @@
 import { useState, useEffect, useRef } from "react";
 import { usePageAds, trackAdClick, trackAdImpression } from "@/lib/hooks/use-ads";
 
+type AdZone = "HEADER" | "SIDEBAR_LEFT" | "SIDEBAR_RIGHT" | "CONTENT_TOP" | "CONTENT_MIDDLE" | "CONTENT_BOTTOM" | "FOOTER" | "POPUP";
+
 interface AdSlotProps {
   page: string;
-  zone: "HEADER" | "SIDEBAR_LEFT" | "SIDEBAR_RIGHT" | "CONTENT_TOP" | "CONTENT_MIDDLE" | "CONTENT_BOTTOM" | "FOOTER" | "POPUP";
+  /** One zone, or several: an ad placed in any of them shows here (used so a "sidebar" ad shows in either sidebar) */
+  zone: AdZone | AdZone[];
   className?: string;
+  /** Draw the card frame around the ad. Only drawn when there is an ad, so empty slots leave no empty box. */
+  framed?: boolean;
 }
 
 // Track impressions once per ad per page load
 const trackedImpressions = new Set<string>();
 
-export function AdSlot({ page, zone, className = "" }: AdSlotProps) {
+export function AdSlot({ page, zone, className = "", framed = false }: AdSlotProps) {
   const { data: ads, isLoading } = usePageAds(page);
   const [adIndex, setAdIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Filter ads for this specific zone
+  const zones: string[] = Array.isArray(zone) ? zone : [zone];
   const zoneAds = ads?.filter((ad: any) =>
-    ad.placements?.some((p: any) => p.zone === zone && p.isActive)
+    ad.placements?.some((p: any) => zones.includes(p.zone) && p.isActive)
   ) || [];
 
   // Rotate ads every 30 seconds if there are multiple
@@ -83,14 +89,18 @@ export function AdSlot({ page, zone, className = "" }: AdSlotProps) {
   const scopedCss = ad.customCss ? `#${adContainerId} { ${ad.customCss} }` : "";
 
   return (
-    <div ref={containerRef} id={adContainerId} className={`promo-container promo-zone-${zone.toLowerCase()} relative ${className}`}>
+    <div
+      ref={containerRef}
+      id={adContainerId}
+      className={`promo-container promo-zone-${zones[0].toLowerCase()} relative ${framed ? "rounded-xl overflow-hidden border border-slate-200 bg-white shadow-sm" : ""} ${className}`}
+    >
       {ad.customHtml ? (
         // Custom HTML ad (e.g., Google AdSense code)
         <div dangerouslySetInnerHTML={{ __html: ad.customHtml }} />
       ) : (
         // Standard image + text ad
         <div
-          className="promo-content max-w-2xl mx-auto cursor-pointer rounded-xl overflow-hidden border border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all duration-200 bg-white"
+          className={`promo-content cursor-pointer transition-all duration-200 bg-white ${framed ? "hover:bg-slate-50" : "max-w-2xl mx-auto rounded-xl overflow-hidden border border-slate-200 hover:border-blue-300 hover:shadow-lg"}`}
           onClick={handleClick}
           role="button"
           tabIndex={0}

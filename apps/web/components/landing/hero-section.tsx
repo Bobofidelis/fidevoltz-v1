@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Play, Package } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { FadeIn, SlideUp } from "@/components/ui/motion";
 import { useApiQuery } from "@/lib/hooks/use-api-query";
@@ -56,7 +56,7 @@ export function HeroSection() {
           </SlideUp>
 
           <SlideUp delay={0.2}>
-            <p className="text-xl text-slate-200 mb-5 max-w-2xl">
+            <p className="text-lg text-slate-200 mb-6 max-w-2xl">
               From beginner tutorials to advanced IoT systems. Learn, shop, and create 
               with our comprehensive platform designed for electronics enthusiasts.
             </p>
@@ -71,9 +71,9 @@ export function HeroSection() {
                 </Button>
               </Link>
               <Link href="/store">
-                <Button size="lg" variant="ghost" className="border border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white group">
-                  <Package className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
+                <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-100 group">
                   Browse Products
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
             </div>

@@ -99,6 +99,10 @@ function renderBlock(block: Block, slug?: string) {
             remarkPlugins={[remarkGfm, remarkMath]}
             rehypePlugins={[rehypeKatex]}
             components={{
+              // The page title is the only <h1>: a "# heading" written in Markdown becomes an <h2>
+              h1({ node, ...props }: any) {
+                return <h2 {...props} />;
+              },
               code({ node, inline, className, children, ...props }: any) {
                 const match = /language-(\w+)/.exec(className || '');
                 return !inline && match ? (
@@ -156,7 +160,8 @@ function renderBlock(block: Block, slug?: string) {
       );
 
     case "heading":
-      const Tag = (block.content.level || "h2") as "h2" | "h3" | "h4";
+      // Older content may say "h1"; the page title is the only <h1>, so it renders as <h2>
+      const Tag = (block.content.level === "h1" ? "h2" : block.content.level || "h2") as "h2" | "h3" | "h4";
       return (
         <Tag
           className={cn(

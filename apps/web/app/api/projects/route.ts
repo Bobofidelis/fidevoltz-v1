@@ -1,21 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { PUBLIC_PROJECT_LIST_SELECT, isStaffRequest } from '@/lib/project-public';
 import type { ApiResponse, ProjectPost, CreateProjectDto, PaginatedResponse } from '@fidevoltz/types';
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '10') || 10, 1), 200);
     const category = searchParams.get('category') || '';
     const published = searchParams.get('published');
     const featuredParam = searchParams.get('featured');
 
     const skip = (page - 1) * limit;
 
+    // Only staff may list drafts; everyone else always gets published projects
+    const wantsDrafts = published === 'false' && (await isStaffRequest());
+
     const where: any = {
-      status: published === 'false' ? 'DRAFT' : 'PUBLISHED',
+      status: wantsDrafts ? 'DRAFT' : 'PUBLISHED',
       ...(category && { category: { equals: category, mode: 'insensitive' } }),
       ...(featuredParam === 'true' && { featured: true, status: 'PUBLISHED' }),
     };
@@ -23,6 +27,7 @@ export async function GET(request: NextRequest) {
     const [projects, total] = await Promise.all([
       prisma.projectPost.findMany({
         where,
+        select: PUBLIC_PROJECT_LIST_SELECT,
         skip,
         take: limit,
         orderBy: { publishedAt: 'desc' },
@@ -34,7 +39,7 @@ export async function GET(request: NextRequest) {
       {
         success: true,
         data: {
-          data: projects as ProjectPost[],
+          data: projects as unknown as ProjectPost[],
           pagination: {
             page,
             limit,

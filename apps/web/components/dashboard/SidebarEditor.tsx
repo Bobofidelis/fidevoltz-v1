@@ -10,11 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   PencilLine, Plus, Trash2, GripVertical, FileText, Code2,
   Image as ImageIcon, AlertCircle, ChevronRight, Loader2,
-  List, Heading2
+  List, Heading2, Gauge, Layers, Megaphone, Star, Clock, Tag
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type KnownBlockType = "text" | "markdown" | "code" | "heading" | "image" | "alert" | "sidebar_settings" | "toc" | "latest_posts" | "featured_posts" | "categories" | "ad";
+type KnownBlockType = "text" | "markdown" | "code" | "heading" | "image" | "alert" | "sidebar_settings" | "toc" | "latest_posts" | "featured_posts" | "related_posts" | "categories" | "levels" | "cta" | "ad";
 type BlockType = KnownBlockType | (string & {});
 
 export interface Block {
@@ -48,9 +48,12 @@ const BLOCK_TYPES: { type: BlockType; label: string; icon: any; desc: string; co
   { type: "image", label: "Image", icon: ImageIcon, desc: "Single image or gallery", color: "text-pink-600 bg-pink-50" },
   { type: "sidebar_settings", label: "⚙️ Sidebar Settings", icon: GripVertical, desc: "Position, width and scroll behaviour", color: "text-slate-600 bg-slate-100" },
   { type: "toc", label: "Table of Contents", icon: List, desc: "Auto-generated clickable TOC", color: "text-indigo-600 bg-indigo-50" },
-  { type: "latest_posts", label: "Latest Posts", icon: FileText, desc: "Recent articles list", color: "text-blue-600 bg-blue-50" },
-  { type: "featured_posts", label: "Featured Posts", icon: FileText, desc: "Hand-picked articles", color: "text-orange-600 bg-orange-50" },
-  { type: "categories", label: "Categories", icon: FileText, desc: "List of categories", color: "text-teal-600 bg-teal-50" },
+  { type: "latest_posts", label: "Latest Posts", icon: Clock, desc: "Newest tutorials", color: "text-blue-600 bg-blue-50" },
+  { type: "featured_posts", label: "Featured Posts", icon: Star, desc: "Tutorials marked Featured, or hand-picked", color: "text-orange-600 bg-orange-50" },
+  { type: "related_posts", label: "Related Posts", icon: Layers, desc: "Same category as the tutorial being read", color: "text-violet-600 bg-violet-50" },
+  { type: "categories", label: "Categories", icon: Tag, desc: "Topics with tutorial counts", color: "text-teal-600 bg-teal-50" },
+  { type: "levels", label: "Browse by Level", icon: Gauge, desc: "Beginner / Intermediate / Advanced", color: "text-emerald-600 bg-emerald-50" },
+  { type: "cta", label: "Call to Action", icon: Megaphone, desc: "Highlighted box with a button", color: "text-rose-600 bg-rose-50" },
   { type: "ad", label: "Ad Slot", icon: Plus, desc: "Monetization ad placement", color: "text-red-600 bg-red-50" },
 ];
 
@@ -66,7 +69,10 @@ function defaultContent(type: BlockType): any {
     case "toc": return { title: "Table of Contents" };
     case "latest_posts": return { title: "Latest Posts", count: 3 };
     case "featured_posts": return { title: "Featured Posts", slugs: "" };
+    case "related_posts": return { title: "Related Tutorials", count: 4 };
     case "categories": return { title: "Categories" };
+    case "levels": return { title: "Browse by Level" };
+    case "cta": return { title: "Want us to build it for you?", text: "No time or tools? Our engineers can build it to your exact specs.", buttonText: "Request a Build", href: "/contact?type=service" };
     case "ad": return { zone: "SIDEBAR_RIGHT" };
     default: return "";
   }
@@ -243,9 +249,9 @@ function BlockEditor({ block, onChange }: { block: Block; onChange: (b: Block) =
             <Select value={block.content.width || "normal"} onValueChange={v => set({ ...block.content, width: v })}>
               <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="narrow">Narrow (col-span-3)</SelectItem>
-                <SelectItem value="normal">Normal (col-span-4)</SelectItem>
-                <SelectItem value="wide">Wide (col-span-5)</SelectItem>
+                <SelectItem value="narrow">Narrow (about 20% of the screen)</SelectItem>
+                <SelectItem value="normal">Normal (about 26% of the screen)</SelectItem>
+                <SelectItem value="wide">Wide (about 32% of the screen)</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -293,6 +299,53 @@ function BlockEditor({ block, onChange }: { block: Block; onChange: (b: Block) =
         </div>
       );
 
+    case "related_posts":
+      return (
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <Label className="text-xs">Title</Label>
+            <Input value={block.content.title || ""} onChange={e => set({ ...block.content, title: e.target.value })} className="h-9" placeholder="Related Tutorials" />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Number of Posts</Label>
+            <Input type="number" min="1" max="8" value={block.content.count || 4} onChange={e => set({ ...block.content, count: parseInt(e.target.value) || 4 })} className="h-9" />
+          </div>
+          <p className="text-xs text-slate-500">Shows other tutorials from the same category. It appears on tutorial pages only, and stays hidden on the Tutorials list and other pages.</p>
+        </div>
+      );
+
+    case "levels":
+      return (
+        <div className="space-y-1">
+          <Label className="text-xs">Title</Label>
+          <Input value={block.content.title || ""} onChange={e => set({ ...block.content, title: e.target.value })} className="h-9" placeholder="Browse by Level" />
+        </div>
+      );
+
+    case "cta":
+      return (
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <Label className="text-xs">Title</Label>
+            <Input value={block.content.title || ""} onChange={e => set({ ...block.content, title: e.target.value })} className="h-9" />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Text</Label>
+            <Textarea value={block.content.text || ""} onChange={e => set({ ...block.content, text: e.target.value })} className="text-sm min-h-[70px] resize-none" />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1">
+              <Label className="text-xs">Button text</Label>
+              <Input value={block.content.buttonText || ""} onChange={e => set({ ...block.content, buttonText: e.target.value })} className="h-9" />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Button link</Label>
+              <Input value={block.content.href || ""} onChange={e => set({ ...block.content, href: e.target.value })} className="h-9" placeholder="/contact or https://..." />
+            </div>
+          </div>
+        </div>
+      );
+
     case "categories":
       return (
         <div className="space-y-3">
@@ -311,13 +364,17 @@ function BlockEditor({ block, onChange }: { block: Block; onChange: (b: Block) =
             <Select value={block.content.zone || "SIDEBAR_RIGHT"} onValueChange={v => set({ ...block.content, zone: v })}>
               <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="SIDEBAR_RIGHT">Sidebar Right</SelectItem>
+                <SelectItem value="SIDEBAR_RIGHT">Sidebar (shows ads placed in either sidebar zone)</SelectItem>
                 <SelectItem value="CONTENT_TOP">Content Top</SelectItem>
                 <SelectItem value="CONTENT_BOTTOM">Content Bottom</SelectItem>
                 <SelectItem value="CONTENT_MIDDLE">Content Middle</SelectItem>
               </SelectContent>
             </Select>
           </div>
+          <p className="text-xs text-slate-500">
+            Which ad appears here is decided in <strong>SEO &amp; Ads → Ads</strong>: edit an ad and add a placement for this page
+            (or <em>All Pages</em>) in the <em>Sidebar</em> zone. Nothing shows until an ad is placed.
+          </p>
         </div>
       );
 
@@ -493,7 +550,7 @@ export function SidebarEditor({
                       <GripVertical className="h-3.5 w-3.5" /> Sidebar Widgets
                     </p>
                     <div className="space-y-1.5">
-                      {BLOCK_TYPES.filter(b => ["sidebar_settings", "toc", "latest_posts", "featured_posts", "categories", "ad"].includes(b.type as string)).map(({ type, label, icon: Icon, desc, color }) => (
+                      {BLOCK_TYPES.filter(b => ["sidebar_settings", "toc", "latest_posts", "featured_posts", "related_posts", "categories", "levels", "cta", "ad"].includes(b.type as string)).map(({ type, label, icon: Icon, desc, color }) => (
                         <button
                           key={type}
                           onClick={() => addBlock(type)}

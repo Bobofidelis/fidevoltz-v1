@@ -20,6 +20,8 @@ interface Block {
 
 interface PageRendererProps {
   content: Block[];
+  /** Fill the width of the card the content sits in (pages with a sidebar) instead of a centred narrow column */
+  fluid?: boolean;
 }
 
 export const IconMap: { [key: string]: any } = {
@@ -342,8 +344,12 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
   );
 }
 
-export function PageRenderer({ content }: PageRendererProps) {
+export function PageRenderer({ content, fluid = false }: PageRendererProps) {
   if (!content || !Array.isArray(content)) return null;
+
+  // Section wrapper: a centred container normally, or the full width of the card when fluid
+  const wrap = (max = "", extra = "") =>
+    (fluid ? `w-full px-5 md:px-7 ${extra}` : `container px-4 md:px-6 ${max} ${max ? "mx-auto" : ""} ${extra}`).trim();
 
   return (
     <div className="space-y-0">
@@ -378,8 +384,8 @@ export function PageRenderer({ content }: PageRendererProps) {
 
           case 'text':
             return (
-              <section key={index} className="py-12 bg-white">
-                <div className="container px-4 md:px-6 max-w-4xl mx-auto">
+              <section key={index} className="py-8 bg-white">
+                <div className={wrap("max-w-4xl")}>
                   <WysiwygRenderer content={block.content} />
                 </div>
               </section>
@@ -387,8 +393,8 @@ export function PageRenderer({ content }: PageRendererProps) {
 
           case 'grid':
             return (
-              <section key={index} className="py-12 bg-slate-50">
-                <div className="container px-4 md:px-6">
+              <section key={index} className="py-8 bg-slate-50">
+                <div className={wrap("")}>
                   <div className={`grid grid-cols-1 md:grid-cols-${block.columns || 3} gap-5`}>
                     {block.items?.map((item: any, i: number) => {
                       const Icon = IconMap[item.icon as keyof typeof IconMap] || Lightbulb;
@@ -411,8 +417,8 @@ export function PageRenderer({ content }: PageRendererProps) {
 
           case 'faq':
             return (
-              <section key={index} className="py-12">
-                <div className="container px-4 md:px-6 max-w-4xl mx-auto space-y-6">
+              <section key={index} className="py-8">
+                <div className={wrap("max-w-4xl", "space-y-6")}>
                   {block.categories?.map((section: any) => (
                     <div key={section.name}>
                       <h2 className="text-3xl font-bold text-slate-900 mb-6">{section.name}</h2>
@@ -432,8 +438,8 @@ export function PageRenderer({ content }: PageRendererProps) {
           case 'form':
             if (block.formType === 'support') {
               return (
-                <section key={index} className="py-12 bg-slate-50">
-                  <div className="container px-4 md:px-6 max-w-3xl mx-auto">
+                <section key={index} className="py-8 bg-slate-50">
+                  <div className={wrap("max-w-3xl")}>
                     <SupportForm />
                   </div>
                 </section>
@@ -441,16 +447,16 @@ export function PageRenderer({ content }: PageRendererProps) {
             }
             if (block.formType === 'contact') {
               return (
-                <section key={index} className="py-12 bg-slate-50">
-                  <div className="container px-4 md:px-6 max-w-3xl mx-auto">
+                <section key={index} className="py-8 bg-slate-50">
+                  <div className={wrap("max-w-3xl")}>
                     <ContactForm />
                   </div>
                 </section>
               );
             }
             return (
-              <section key={index} className="py-12 bg-white text-center">
-                <div className="container px-4 md:px-6 max-w-2xl mx-auto">
+              <section key={index} className="py-8 bg-white text-center">
+                <div className={wrap("max-w-2xl")}>
                    <p className="text-slate-500 italic">Form block: {block.formType} (Not implemented yet)</p>
                 </div>
               </section>
@@ -512,8 +518,8 @@ export function PageRenderer({ content }: PageRendererProps) {
             );
 
             return (
-              <section key={index} className="py-12 bg-white">
-                <div className="container px-4 md:px-6">
+              <section key={index} className="py-8 bg-white">
+                <div className={wrap("")}>
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 relative items-start">
                     {side === 'left' ? (
                       <>
@@ -538,7 +544,7 @@ export function PageRenderer({ content }: PageRendererProps) {
             
             return (
               <section key={index} className="py-10 bg-white">
-                <div className="container px-4 md:px-6 max-w-4xl mx-auto">
+                <div className={wrap("max-w-4xl")}>
                   {images.length === 1 ? (
                     <figure className="space-y-3">
                       <img src={images[0].url} alt={images[0].alt || ''} className="w-full rounded-xl shadow-md object-cover" loading="lazy" />
@@ -563,7 +569,7 @@ export function PageRenderer({ content }: PageRendererProps) {
             if (!block.url) return null;
             return (
               <section key={index} className="py-10 bg-white">
-                <div className="container px-4 md:px-6 max-w-4xl mx-auto">
+                <div className={wrap("max-w-4xl")}>
                   <div className="rounded-xl overflow-hidden shadow-md border border-slate-200">
                     <video src={block.url} poster={block.poster} controls className="w-full max-h-[70vh]" />
                   </div>
@@ -579,7 +585,7 @@ export function PageRenderer({ content }: PageRendererProps) {
               .replace('vimeo.com/', 'player.vimeo.com/video/');
             return (
               <section key={index} className="py-10 bg-white">
-                <div className="container px-4 md:px-6 max-w-4xl mx-auto">
+                <div className={wrap("max-w-4xl")}>
                   <div className="aspect-video rounded-xl overflow-hidden shadow-md border border-slate-200">
                     <iframe src={embedUrl} className="w-full h-full" allowFullScreen title={block.title || 'Embedded Video'} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" />
                   </div>
@@ -592,7 +598,7 @@ export function PageRenderer({ content }: PageRendererProps) {
           case 'links':
             return (
               <section key={index} className="py-8 bg-slate-50">
-                <div className="container px-4 md:px-6 max-w-4xl mx-auto">
+                <div className={wrap("max-w-4xl")}>
                   {block.title && <h3 className="text-2xl font-bold text-slate-900 mb-6">{block.title}</h3>}
                   <div className="grid gap-3 sm:grid-cols-2">
                     {block.links?.map((link: any, i: number) => (

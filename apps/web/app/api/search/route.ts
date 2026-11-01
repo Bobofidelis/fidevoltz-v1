@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import type { ApiResponse } from '@fidevoltz/types';
 import { auth } from "@/lib/auth";
+import { PUBLIC_PROJECT_LIST_SELECT } from "@/lib/project-public";
 
 export async function GET(request: NextRequest) {
   try {
@@ -151,6 +152,7 @@ export async function GET(request: NextRequest) {
             { tags: { has: query } },
           ],
         },
+        select: PUBLIC_PROJECT_LIST_SELECT,
         take: 10,
       });
 

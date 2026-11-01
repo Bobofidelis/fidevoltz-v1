@@ -111,6 +111,11 @@ export function PlacementManager({ placements, setPlacements }: PlacementManager
             <li>Custom: use the page slug exactly as it appears in the URL (e.g. <code>services</code> for /services)</li>
           </ul>
           <p className="text-xs mt-1">The zone determines <em>where</em> on the page it renders. Your ad must be <strong>Active</strong> to display.</p>
+          <p className="text-xs mt-1">
+            <strong>Want it in the sidebar?</strong> Choose a page and the zone <em>Sidebar Right</em> (or <em>Sidebar Left</em>, both
+            show in the sidebar whichever side it is on). <em>projects</em> + sidebar covers the Tutorials page and every tutorial;{' '}
+            <em>about</em> covers the About page; <em>all</em> covers every sidebar. The home page has no sidebar.
+          </p>
         </div>
       </div>
 

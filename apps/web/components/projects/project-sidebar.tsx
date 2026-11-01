@@ -11,9 +11,11 @@ import { useEffect, useState } from "react";
 
 interface ProjectSidebarProps {
   project: any;
+  /** Show the built-in ad slot. Turned off when the project's own sidebar already has an Ad Slot widget, so one ad never appears twice. */
+  showAd?: boolean;
 }
 
-export function ProjectSidebar({ project }: ProjectSidebarProps) {
+export function ProjectSidebar({ project, showAd = true }: ProjectSidebarProps) {
   const components = project.components || [];
   const attachments = project.attachments || [];
   const [pageUrl, setPageUrl] = useState("");
@@ -48,16 +50,15 @@ export function ProjectSidebar({ project }: ProjectSidebarProps) {
         </Card>
       )}
 
-      {/* Randomised Sidebar Ad (automated) */}
-      <Card className="overflow-hidden border-slate-200">
-        <CardContent className="p-0">
-          <AdSlot 
-            page={`projects/${project.slug}`} 
-            zone="SIDEBAR_RIGHT" 
-            className="w-full"
-          />
-        </CardContent>
-      </Card>
+      {/* Sidebar ad: appears only when an ad is placed in a sidebar zone for this page (no empty box otherwise) */}
+      {showAd && (
+        <AdSlot
+          page={`projects/${project.slug}`}
+          zone={["SIDEBAR_RIGHT", "SIDEBAR_LEFT"]}
+          framed
+          className="w-full"
+        />
+      )}
 
       {/* Attachments & Files */}
       {attachments.length > 0 && (

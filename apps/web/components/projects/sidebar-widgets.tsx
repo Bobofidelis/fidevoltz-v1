@@ -3,9 +3,134 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ChevronRight, List, Clock, TrendingUp, Star, Tag, Megaphone } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ChevronRight, List, Clock, TrendingUp, Star, Tag, Gauge, Layers } from "lucide-react";
 import { AdSlot } from "@/components/ads/AdSlot";
+
+// ─────────────────────────────────────────────
+// Shared data: one request for the whole page, not one per widget
+// ─────────────────────────────────────────────
+interface SidebarProject {
+  id: string;
+  title: string;
+  slug: string;
+  featuredImage?: string | null;
+  category?: string | null;
+  difficulty?: string | null;
+  featured?: boolean;
+  publishedAt?: string | null;
+  createdAt: string;
+}
+
+let projectsRequest: Promise<SidebarProject[]> | null = null;
+let projectsRequestedAt = 0;
+
+function fetchAllProjects(): Promise<SidebarProject[]> {
+  if (!projectsRequest || Date.now() - projectsRequestedAt > 60_000) {
+    projectsRequestedAt = Date.now();
+    projectsRequest = fetch("/api/projects?limit=200&published=true")
+      .then((r) => r.json())
+      .then((data) => {
+        const all = data?.data?.data || data?.data || data?.projects || [];
+        return Array.isArray(all) ? (all as SidebarProject[]) : [];
+      })
+      .catch(() => {
+        projectsRequest = null;
+        return [];
+      });
+  }
+  return projectsRequest;
+}
+
+function useProjects() {
+  const [projects, setProjects] = useState<SidebarProject[] | null>(null);
+  useEffect(() => {
+    let alive = true;
+    fetchAllProjects().then((p) => alive && setProjects(p));
+    return () => {
+      alive = false;
+    };
+  }, []);
+  return projects;
+}
+
+const formatDate = (p: SidebarProject) =>
+  new Date(p.publishedAt || p.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+
+const difficultyColors: Record<string, string> = {
+  Beginner: "bg-emerald-100 text-emerald-700",
+  Intermediate: "bg-amber-100 text-amber-700",
+  Advanced: "bg-red-100 text-red-700",
+};
+
+function WidgetSkeleton({ rows = 3 }: { rows?: number }) {
+  return (
+    <Card className="border-slate-200 shadow-sm">
+      <CardContent className="p-4 space-y-3">
+        {[...Array(rows)].map((_, i) => (
+          <div key={i} className="flex gap-3 animate-pulse">
+            <div className="w-16 h-14 bg-slate-200 rounded-lg shrink-0" />
+            <div className="flex-1 space-y-2 py-1">
+              <div className="h-3 bg-slate-200 rounded w-full" />
+              <div className="h-3 bg-slate-200 rounded w-2/3" />
+            </div>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
+function WidgetHeader({ icon: Icon, title, accent = false }: { icon: any; title: string; accent?: boolean }) {
+  return (
+    <CardHeader className={`py-3 px-4 border-b ${accent ? "bg-gradient-to-r from-blue-600 to-indigo-600 border-b-0" : "bg-slate-50 border-slate-200"}`}>
+      <CardTitle className={`text-base font-semibold flex items-center gap-2 ${accent ? "text-white" : "text-slate-800"}`}>
+        <Icon className={`h-4 w-4 ${accent ? "text-yellow-300 fill-yellow-300" : "text-blue-600"}`} />
+        {title}
+      </CardTitle>
+    </CardHeader>
+  );
+}
+
+function PostRow({ post, showMeta = "date" }: { post: SidebarProject; showMeta?: "date" | "badges" }) {
+  return (
+    <Link href={`/projects/${post.slug}`} className="group flex gap-3 p-3 hover:bg-slate-50 transition-colors">
+      {post.featuredImage ? (
+        <div
+          role="img"
+          aria-label={post.title}
+          className="w-16 h-14 rounded-lg bg-cover bg-center shrink-0 border border-slate-200 group-hover:border-blue-300 transition-colors"
+          style={{ backgroundImage: `url(${post.featuredImage})` }}
+        />
+      ) : (
+        <div className="w-16 h-14 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 shrink-0 flex items-center justify-center">
+          <TrendingUp className="h-5 w-5 text-white/80" />
+        </div>
+      )}
+      <div className="flex-1 min-w-0">
+        <h4 className="text-sm font-semibold text-slate-900 group-hover:text-blue-600 line-clamp-2 leading-snug transition-colors">
+          {post.title}
+        </h4>
+        {showMeta === "date" ? (
+          <p className="text-xs text-slate-600 mt-1">{formatDate(post)}</p>
+        ) : (
+          <div className="flex items-center gap-1.5 flex-wrap mt-1.5">
+            {post.category && (
+              <span className="text-xs font-medium bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full leading-none">
+                {post.category}
+              </span>
+            )}
+            {post.difficulty && (
+              <span className={`text-xs font-medium px-1.5 py-0.5 rounded-full leading-none ${difficultyColors[post.difficulty] || "bg-slate-100 text-slate-600"}`}>
+                {post.difficulty}
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+    </Link>
+  );
+}
 
 // ─────────────────────────────────────────────
 // Table of Contents
@@ -54,13 +179,8 @@ export function TableOfContents({ title = "Table of Contents" }: { title?: strin
 
   return (
     <Card className="border-slate-200 shadow-sm overflow-hidden">
-      <CardHeader className="py-3 px-4 bg-slate-50 border-b border-slate-200">
-        <CardTitle className="text-sm font-semibold flex items-center gap-2 text-slate-700">
-          <List className="h-4 w-4 text-blue-500" />
-          {title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
+      <WidgetHeader icon={List} title={title} />
+      <CardContent className="p-0 max-h-[60vh] overflow-y-auto">
         <nav>
           {headings.map((h) => (
             <a
@@ -73,7 +193,7 @@ export function TableOfContents({ title = "Table of Contents" }: { title?: strin
               className={`flex items-start gap-2 px-4 py-2 text-sm border-l-2 transition-all hover:bg-blue-50 ${
                 activeId === h.id
                   ? "border-blue-500 text-blue-700 font-medium bg-blue-50/60"
-                  : "border-transparent text-slate-600 hover:text-slate-900"
+                  : "border-transparent text-slate-700 hover:text-slate-900"
               }`}
               style={{ paddingLeft: `${(h.level - 2) * 12 + 16}px` }}
             >
@@ -90,74 +210,21 @@ export function TableOfContents({ title = "Table of Contents" }: { title?: strin
 // Latest Posts
 // ─────────────────────────────────────────────
 export function LatestPostsWidget({ title = "Latest Posts", count = 4 }: { title?: string; count?: number }) {
-  const [posts, setPosts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch(`/api/projects?limit=${count}&published=true`)
-      .then((r) => r.json())
-      .then((data) => {
-        // API returns { success: true, data: { data: [...], pagination: {} } }
-        const posts = data?.data?.data || data?.data || data?.projects || [];
-        setPosts(Array.isArray(posts) ? posts : []);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, [count]);
-
-  if (loading) {
-    return (
-      <Card className="border-slate-200 shadow-sm">
-        <CardContent className="p-4 space-y-3">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="flex gap-3 animate-pulse">
-              <div className="w-14 h-14 bg-slate-200 rounded-lg shrink-0" />
-              <div className="flex-1 space-y-2">
-                <div className="h-3 bg-slate-200 rounded w-full" />
-                <div className="h-3 bg-slate-200 rounded w-2/3" />
-              </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-    );
-  }
+  const projects = useProjects();
+  if (!projects) return <WidgetSkeleton />;
+  const posts = projects.slice(0, count); // already newest first
   if (!posts.length) return null;
 
   return (
     <Card className="border-slate-200 shadow-sm overflow-hidden">
-      <CardHeader className="py-3 px-4 bg-slate-50 border-b border-slate-200">
-        <CardTitle className="text-sm font-semibold flex items-center gap-2 text-slate-700">
-          <Clock className="h-4 w-4 text-blue-500" />
-          {title}
-        </CardTitle>
-      </CardHeader>
+      <WidgetHeader icon={Clock} title={title} />
       <CardContent className="p-0 divide-y divide-slate-100">
-        {posts.map((post: any) => (
-          <Link key={post.id} href={`/projects/${post.slug}`} className="group flex gap-3 p-4 hover:bg-slate-50 transition-colors">
-            {post.featuredImage ? (
-              <div
-                className="w-14 h-14 rounded-lg bg-cover bg-center shrink-0 border border-slate-200 group-hover:border-blue-300 transition-colors"
-                style={{ backgroundImage: `url(${post.featuredImage})` }}
-              />
-            ) : (
-              <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-slate-100 to-slate-200 shrink-0 flex items-center justify-center">
-                <TrendingUp className="h-5 w-5 text-slate-400" />
-              </div>
-            )}
-            <div className="flex-1 min-w-0">
-              <h4 className="text-sm font-medium text-slate-800 group-hover:text-blue-600 line-clamp-2 leading-snug transition-colors">
-                {post.title}
-              </h4>
-              <p className="text-xs text-slate-400 mt-1">
-                {new Date(post.publishedAt || post.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
-              </p>
-            </div>
-          </Link>
+        {posts.map((post) => (
+          <PostRow key={post.id} post={post} />
         ))}
         <div className="p-3 text-center">
-          <Link href="/projects" className="text-xs font-medium text-blue-600 hover:text-blue-700 flex items-center justify-center gap-1">
-            View all tutorials <ChevronRight className="h-3 w-3" />
+          <Link href="/projects" className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center justify-center gap-1">
+            View all tutorials <ChevronRight className="h-3.5 w-3.5" />
           </Link>
         </div>
       </CardContent>
@@ -169,115 +236,69 @@ export function LatestPostsWidget({ title = "Latest Posts", count = 4 }: { title
 // Featured Posts
 // ─────────────────────────────────────────────
 export function FeaturedPostsWidget({ title = "Featured Projects", slugs = "" }: { title?: string; slugs?: string }) {
-  const [posts, setPosts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const projects = useProjects();
+  if (!projects) return <WidgetSkeleton />;
 
-  useEffect(() => {
-    // Fetch featured projects — uses ?featured=true to get DB featured flag
-    fetch(`/api/projects?featured=true&published=true&limit=5`)
-      .then((r) => r.json())
-      .then((data) => {
-        let all: any[] = data?.data?.data || data?.data || data?.projects || [];
-        if (!Array.isArray(all)) { setLoading(false); return; }
-        
-        // If specific slugs are provided, filter to those
-        if (slugs.trim()) {
-          const slugList = slugs.split(",").map((s) => s.trim().toLowerCase());
-          const filtered = all.filter((p) => slugList.includes(p.slug?.toLowerCase()));
-          // Fall back to just latest featured if no slug matches
-          setPosts(filtered.length > 0 ? filtered : all.slice(0, 4));
-        } else {
-          setPosts(all.slice(0, 4));
-        }
-        setLoading(false);
-      })
-      .catch(() => {
-        // Fallback: fetch latest published if featured query fails
-        fetch(`/api/projects?published=true&limit=4`)
-          .then(r => r.json())
-          .then(data => {
-            const all: any[] = data?.data?.data || data?.data || data?.projects || [];
-            setPosts(Array.isArray(all) ? all.slice(0, 4) : []);
-          })
-          .catch(() => {})
-          .finally(() => setLoading(false));
-      });
-  }, [slugs]);
-
-  if (loading) {
-    return (
-      <Card className="border-slate-200 shadow-sm overflow-hidden">
-        <CardContent className="p-4 space-y-3">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="flex gap-3 animate-pulse">
-              <div className="w-16 h-14 bg-slate-200 rounded-lg shrink-0" />
-              <div className="flex-1 space-y-2 py-1">
-                <div className="h-3 bg-slate-200 rounded w-full" />
-                <div className="h-3 bg-slate-200 rounded w-3/4" />
-                <div className="h-4 bg-slate-100 rounded w-1/3" />
-              </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-    );
-  }
+  const featured = projects.filter((p) => p.featured);
+  const picked = slugs.trim()
+    ? (() => {
+        const wanted = slugs.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
+        const chosen = wanted.map((s) => projects.find((p) => p.slug?.toLowerCase() === s)).filter(Boolean) as SidebarProject[];
+        // Nothing matched (typo or unpublished): fall back to whatever is flagged featured
+        return chosen.length ? chosen : featured;
+      })()
+    : featured;
+  const posts = picked.slice(0, 5);
   if (!posts.length) return null;
-
-  const difficultyColors: Record<string, string> = {
-    Beginner: "bg-emerald-100 text-emerald-700",
-    Intermediate: "bg-amber-100 text-amber-700",
-    Advanced: "bg-red-100 text-red-700",
-  };
 
   return (
     <Card className="border-slate-200 shadow-sm overflow-hidden">
-      <CardHeader className="py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 border-b-0">
-        <CardTitle className="text-sm font-semibold flex items-center gap-2 text-white">
-          <Star className="h-4 w-4 text-yellow-300 fill-yellow-300" />
-          {title}
-        </CardTitle>
-      </CardHeader>
+      <WidgetHeader icon={Star} title={title} accent />
       <CardContent className="p-0 divide-y divide-slate-100">
-        {posts.map((post: any) => (
-          <Link key={post.id} href={`/projects/${post.slug}`} className="group flex gap-3 p-3 hover:bg-slate-50 transition-colors">
-            {/* Thumbnail */}
-            <div
-              className="w-16 h-14 rounded-lg bg-cover bg-center shrink-0 border border-slate-200 group-hover:border-blue-300 transition-colors overflow-hidden relative"
-              style={{ backgroundImage: post.featuredImage ? `url(${post.featuredImage})` : undefined }}
-            >
-              {!post.featuredImage && (
-                <div className="w-full h-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                  <TrendingUp className="h-5 w-5 text-white/70" />
-                </div>
-              )}
-            </div>
-            {/* Info */}
-            <div className="flex-1 min-w-0">
-              <h4 className="text-xs font-semibold text-slate-800 group-hover:text-blue-600 line-clamp-2 leading-snug transition-colors mb-1">
-                {post.title}
-              </h4>
-              <div className="flex items-center gap-1.5 flex-wrap">
-                {post.category && (
-                  <span className="text-[11px] font-medium bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full leading-none">
-                    {post.category}
-                  </span>
-                )}
-                {post.difficulty && (
-                  <span className={`text-[11px] font-medium px-1.5 py-0.5 rounded-full leading-none ${difficultyColors[post.difficulty] || "bg-slate-100 text-slate-600"}`}>
-                    {post.difficulty}
-                  </span>
-                )}
-              </div>
-            </div>
-            <ChevronRight className="h-3.5 w-3.5 text-slate-300 group-hover:text-blue-400 transition-colors shrink-0 self-center" />
-          </Link>
+        {posts.map((post) => (
+          <PostRow key={post.id} post={post} showMeta="badges" />
         ))}
         <div className="p-3 bg-slate-50 text-center">
-          <Link href="/projects?featured=true" className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center justify-center gap-1 transition-colors">
-            View all featured <ChevronRight className="h-3 w-3" />
+          <Link href="/projects" className="text-sm font-semibold text-blue-600 hover:text-blue-700 flex items-center justify-center gap-1 transition-colors">
+            Browse all tutorials <ChevronRight className="h-3.5 w-3.5" />
           </Link>
         </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─────────────────────────────────────────────
+// Related Posts (same category as the page being read)
+// ─────────────────────────────────────────────
+export function RelatedPostsWidget({
+  title = "Related Tutorials",
+  category,
+  excludeSlug,
+  count = 4,
+}: {
+  title?: string;
+  category?: string | null;
+  excludeSlug?: string;
+  count?: number;
+}) {
+  const projects = useProjects();
+  // Only meaningful on a tutorial page; on other pages there is nothing to be related to
+  if (!category) return null;
+  if (!projects) return <WidgetSkeleton />;
+
+  const posts = projects
+    .filter((p) => p.category?.toLowerCase() === category.toLowerCase() && p.slug !== excludeSlug)
+    .slice(0, count);
+  if (!posts.length) return null;
+
+  return (
+    <Card className="border-slate-200 shadow-sm overflow-hidden">
+      <WidgetHeader icon={Layers} title={title} />
+      <CardContent className="p-0 divide-y divide-slate-100">
+        {posts.map((post) => (
+          <PostRow key={post.id} post={post} showMeta="badges" />
+        ))}
       </CardContent>
     </Card>
   );
@@ -287,58 +308,114 @@ export function FeaturedPostsWidget({ title = "Featured Projects", slugs = "" }:
 // Categories
 // ─────────────────────────────────────────────
 export function CategoriesWidget({ title = "Categories" }: { title?: string }) {
-  const [categories, setCategories] = useState<{ name: string; count: number }[]>([]);
-  const [loading, setLoading] = useState(true);
+  const projects = useProjects();
+  if (!projects) return <Card className="border-slate-200 shadow-sm h-32 animate-pulse bg-slate-100" />;
 
-  useEffect(() => {
-    fetch(`/api/projects?limit=200&published=true`)
-      .then((r) => r.json())
-      .then((data) => {
-        const all: any[] = data?.data?.data || data?.data || data?.projects || [];
-        if (!Array.isArray(all)) { setLoading(false); return; }
-        const counts: Record<string, number> = {};
-        all.forEach((p) => {
-          if (p.category) counts[p.category] = (counts[p.category] || 0) + 1;
-        });
-        const arr = Object.entries(counts)
-          .map(([name, count]) => ({ name, count }))
-          .sort((a, b) => b.count - a.count)
-          .slice(0, 10);
-        setCategories(arr);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
-
-  if (loading) return <Card className="border-slate-200 shadow-sm h-32 animate-pulse bg-slate-100" />;
+  const counts: Record<string, number> = {};
+  projects.forEach((p) => {
+    if (p.category) counts[p.category] = (counts[p.category] || 0) + 1;
+  });
+  const categories = Object.entries(counts)
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10);
   if (!categories.length) return null;
 
   return (
     <Card className="border-slate-200 shadow-sm overflow-hidden">
-      <CardHeader className="py-3 px-4 bg-slate-50 border-b border-slate-200">
-        <CardTitle className="text-sm font-semibold flex items-center gap-2 text-slate-700">
-          <Tag className="h-4 w-4 text-blue-500" />
-          {title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-3">
-        <div className="space-y-1">
-          {categories.map((cat) => (
-            <Link
-              key={cat.name}
-              href={`/projects?category=${encodeURIComponent(cat.name)}`}
-              className="flex justify-between items-center px-3 py-2 rounded-lg hover:bg-slate-50 group transition-colors"
-            >
-              <span className="text-sm text-slate-600 group-hover:text-blue-600 flex items-center gap-2 transition-colors">
-                <ChevronRight className="h-3.5 w-3.5 text-slate-300 group-hover:text-blue-400 transition-colors" />
-                {cat.name}
-              </span>
-              <span className="text-xs font-medium bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full group-hover:bg-blue-100 group-hover:text-blue-700 transition-colors">
-                {cat.count}
-              </span>
-            </Link>
-          ))}
-        </div>
+      <WidgetHeader icon={Tag} title={title} />
+      <CardContent className="p-2">
+        {categories.map((cat) => (
+          <Link
+            key={cat.name}
+            href={`/projects?category=${encodeURIComponent(cat.name)}`}
+            className="flex justify-between items-center px-3 py-2 rounded-lg hover:bg-slate-50 group transition-colors"
+          >
+            <span className="text-sm text-slate-800 group-hover:text-blue-600 flex items-center gap-2 transition-colors">
+              <ChevronRight className="h-3.5 w-3.5 text-slate-400 group-hover:text-blue-500 transition-colors" />
+              {cat.name}
+            </span>
+            <span className="text-xs font-medium bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full group-hover:bg-blue-100 group-hover:text-blue-700 transition-colors">
+              {cat.count}
+            </span>
+          </Link>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─────────────────────────────────────────────
+// Difficulty levels
+// ─────────────────────────────────────────────
+const LEVELS = [
+  { name: "Beginner", dot: "bg-emerald-500", hint: "Start here" },
+  { name: "Intermediate", dot: "bg-amber-500", hint: "Some experience" },
+  { name: "Advanced", dot: "bg-red-500", hint: "Deep dives" },
+];
+
+export function LevelsWidget({ title = "Browse by Level" }: { title?: string }) {
+  const projects = useProjects();
+  if (!projects) return <Card className="border-slate-200 shadow-sm h-28 animate-pulse bg-slate-100" />;
+
+  const counts: Record<string, number> = {};
+  projects.forEach((p) => {
+    if (p.difficulty) counts[p.difficulty] = (counts[p.difficulty] || 0) + 1;
+  });
+  const levels = LEVELS.filter((l) => counts[l.name] > 0);
+  if (!levels.length) return null;
+
+  return (
+    <Card className="border-slate-200 shadow-sm overflow-hidden">
+      <WidgetHeader icon={Gauge} title={title} />
+      <CardContent className="p-2">
+        {levels.map((level) => (
+          <Link
+            key={level.name}
+            href={`/projects?difficulty=${level.name}`}
+            className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-50 group transition-colors"
+          >
+            <span className="flex items-center gap-2.5">
+              <span className={`h-2.5 w-2.5 rounded-full ${level.dot}`} />
+              <span className="text-sm font-medium text-slate-900 group-hover:text-blue-600 transition-colors">{level.name}</span>
+              <span className="text-xs text-slate-600 hidden sm:inline">{level.hint}</span>
+            </span>
+            <span className="text-xs font-medium bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full group-hover:bg-blue-100 group-hover:text-blue-700 transition-colors">
+              {counts[level.name]}
+            </span>
+          </Link>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─────────────────────────────────────────────
+// Call to action
+// ─────────────────────────────────────────────
+export function CtaWidget({
+  title = "Want us to build it for you?",
+  text = "",
+  buttonText = "Get in touch",
+  href = "/contact",
+}: {
+  title?: string;
+  text?: string;
+  buttonText?: string;
+  href?: string;
+}) {
+  // Only site-internal paths and full web addresses; anything else falls back to the contact page
+  const safeHref = /^\/(?!\/)/.test(href) || /^https?:\/\//i.test(href) ? href : "/contact";
+  return (
+    <Card className="bg-gradient-to-br from-slate-900 to-slate-800 text-white border-none shadow-sm">
+      <CardContent className="p-5">
+        <h3 className="text-lg font-bold mb-2">{title}</h3>
+        {text && <p className="text-sm text-slate-300 mb-4 leading-relaxed">{text}</p>}
+        <Link href={safeHref}>
+          <Button variant="secondary" className="w-full font-semibold">
+            {buttonText}
+          </Button>
+        </Link>
       </CardContent>
     </Card>
   );
@@ -351,9 +428,7 @@ type AdZone = "POPUP" | "HEADER" | "SIDEBAR_LEFT" | "SIDEBAR_RIGHT" | "CONTENT_T
 
 export function AdWidget({ zone = "SIDEBAR_RIGHT", slug }: { zone?: AdZone; slug?: string }) {
   if (!slug) return null;
-  return (
-    <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm">
-      <AdSlot page={slug} zone={zone} className="w-full" />
-    </div>
-  );
+  // An ad placed in either sidebar zone shows in any sidebar, whichever side that page uses
+  const zones: AdZone[] = zone.startsWith("SIDEBAR") ? ["SIDEBAR_RIGHT", "SIDEBAR_LEFT"] : [zone];
+  return <AdSlot page={slug} zone={zones} framed className="w-full" />;
 }

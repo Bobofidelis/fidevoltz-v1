@@ -14,10 +14,11 @@ import { useEffect, useState } from "react";
 import { 
   User, Lock, Bell, Eye, Globe, Settings as SettingsIcon,
   Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin,
-  Youtube, MessageCircle, Send, Palette, Loader2, Store
+  Youtube, MessageCircle, Send, Palette, Loader2, Store, PanelRight
 } from "lucide-react";
 import { WhatsAppSettings } from "@/components/admin/whatsapp-settings";
 import { StorefrontSettings } from "@/components/admin/storefront-settings";
+import { ListingSidebarSettings } from "@/components/admin/listing-sidebar-settings";
 import { 
   useUserSettings, 
   useUpdateUserSettings, 
@@ -347,6 +348,10 @@ export default function SettingsPage() {
               <TabsTrigger value="storefront" className="shrink-0">
                 <Store className="h-4 w-4 mr-2" />
                 Storefront
+              </TabsTrigger>
+              <TabsTrigger value="sidebars" className="shrink-0">
+                <PanelRight className="h-4 w-4 mr-2" />
+                Sidebars
               </TabsTrigger>
             </>
           )}
@@ -798,6 +803,12 @@ export default function SettingsPage() {
         {isAdmin && (
           <TabsContent value="whatsapp">
             <WhatsAppSettings />
+          </TabsContent>
+        )}
+
+        {isAdmin && (
+          <TabsContent value="sidebars">
+            <ListingSidebarSettings />
           </TabsContent>
         )}
 
