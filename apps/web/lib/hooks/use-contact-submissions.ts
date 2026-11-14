@@ -22,20 +22,6 @@ export function useContactSubmissions(filters?: {
   });
 }
 
-// Get single contact submission
-export function useContactSubmission(id: string) {
-  return useQuery({
-    queryKey: ['contact-submission', id],
-    queryFn: async () => {
-      const response = await fetch(`/api/admin/contact-submissions/${id}`);
-      if (!response.ok) throw new Error('Failed to fetch submission');
-      const result = await response.json();
-      return result.data;
-    },
-    enabled: !!id,
-  });
-}
-
 // Update contact submission
 export function useUpdateContactSubmission(id: string) {
   const queryClient = useQueryClient();

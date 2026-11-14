@@ -66,11 +66,6 @@ export function getValidNextStatuses(currentStatus: OrderStatus): OrderStatus[] 
   ) as OrderStatus[];
 }
 
-// Get status configuration
-export function getStatusConfig(status: OrderStatus) {
-  return ORDER_STATUS_CONFIG[status];
-}
-
 // Format order number for display
 export function formatOrderNumber(orderId: string): string {
   return `#${orderId.slice(0, 8).toUpperCase()}`;
@@ -142,17 +137,6 @@ export function calculateOrderStats(orders: any[]): OrderStats {
   return stats;
 }
 
-// Check if user can update order
-export function canUpdateOrder(userRole: string, orderUserId: string, currentUserId: string): boolean {
-  if (userRole === 'ADMIN') return true;
-  return orderUserId === currentUserId;
-}
-
-// Check if user can change order status
-export function canChangeOrderStatus(userRole: string): boolean {
-  return userRole === 'ADMIN';
-}
-
 // Format currency
 export function formatCurrency(amount: number | string): string {
   const num = typeof amount === 'string' ? parseFloat(amount) : amount;
@@ -162,18 +146,3 @@ export function formatCurrency(amount: number | string): string {
   }).format(num);
 }
 
-// Get status progress percentage
-export function getStatusProgress(status: OrderStatus): number {
-  const progressMap: Record<OrderStatus, number> = {
-    PENDING: 10,
-    PROCESSING: 25,
-    SHIPPED: 40,
-    IN_TRANSIT: 60,
-    OUT_FOR_DELIVERY: 80,
-    DELIVERED: 90,
-    COMPLETED: 100,
-    CANCELLED: 0,
-    REFUNDED: 0,
-  };
-  return progressMap[status] || 0;
-}

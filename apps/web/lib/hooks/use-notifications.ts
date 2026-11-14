@@ -33,22 +33,6 @@ export function useNotifications(filters?: {
   });
 }
 
-// Fetch single notification
-export function useNotification(id: string) {
-  const { data: session } = useSession();
-
-  return useQuery({
-    queryKey: ['notification', id],
-    queryFn: async () => {
-      const response = await fetch(`/api/notifications/${id}`);
-      if (!response.ok) throw new Error('Failed to fetch notification');
-      const result = await response.json();
-      return result.data;
-    },
-    enabled: !!session && !!id,
-  });
-}
-
 // Mark notification as read
 export function useMarkAsRead() {
   const queryClient = useQueryClient();
@@ -128,39 +112,3 @@ export function useDeleteNotification() {
   });
 }
 
-// Broadcast notification (Admin only)
-export function useBroadcastNotification() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (data: {
-      type: NotificationType;
-      title: string;
-      message: string;
-      actionUrl?: string;
-      actionLabel?: string;
-      priority?: string;
-      targetRole?: 'ALL' | 'USER' | 'ADMIN' | 'EDITOR';
-    }) => {
-      const response = await fetch('/api/notifications/broadcast', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to broadcast notification');
-      }
-
-      return response.json();
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
-      toast.success(data.message || 'Broadcast sent successfully');
-    },
-    onError: (error: Error) => {
-      toast.error(error.message);
-    },
-  });
-}

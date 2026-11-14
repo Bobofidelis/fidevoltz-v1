@@ -105,18 +105,3 @@ export function generateRandomAvatar(): string {
   });
 }
 
-// Validate image URL
-export function isValidImageUrl(url: string): boolean {
-  try {
-    const parsed = new URL(url);
-    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
-  } catch {
-    return false;
-  }
-}
-
-// Validate image file (base64)
-export function isValidBase64Image(base64: string): boolean {
-  const regex = /^data:image\/(png|jpg|jpeg|gif|webp);base64,/;
-  return regex.test(base64);
-}

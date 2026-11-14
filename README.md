@@ -1,58 +1,33 @@
-# FideVoltz - Electronics Tutorial & Store Platform
+# FideVoltz
 
-## 🚀 Quick Start
+Electronics tutorials and component store for makers in Nigeria. Live at https://fidevoltz.vercel.app
 
-### Automated Setup
-```powershell
-# Windows
-.\setup.ps1
+## Stack
 
-# Linux/Mac
-chmod +x setup.sh && ./setup.sh
-```
+- Next.js (App Router) in `apps/web`, deployed on Vercel
+- PostgreSQL (Neon) with Prisma — schema in `prisma/schema.prisma`
+- NextAuth for sign-in, Cloudinary for media, Resend for email
+- Shared TypeScript types in `packages/types`
 
-### Manual Setup
+## Run locally
+
 ```bash
-cd apps/frontend
-npm install next-auth@beta @tanstack/react-query @tanstack/react-query-devtools bcryptjs @types/bcryptjs
-npx prisma generate
-npm run dev
+npm install          # also runs `prisma generate`
+cd apps/web
+npm run dev          # http://localhost:3000
 ```
 
-## 📁 Structure
+Environment variables go in `apps/web/.env.local` (see `.env.production.example`).
+**Note:** if your local `DATABASE_URL` points at the live database, everything you do locally changes real data.
 
-### Active
-- `apps/frontend` - Next.js application (migrated to API routes)
-- `packages/types` - Shared TypeScript types
-- `docs/` - Migration documentation
+## Where things live
 
-### Legacy (To be removed)
-- `apps/backend` - NestJS application (replaced by Next.js API routes)
+| Path | What |
+| --- | --- |
+| `apps/web/app/(main)` | Public site: home, tutorials, store, CMS pages |
+| `apps/web/app/(dashboard)` | Admin/editor dashboard |
+| `apps/web/app/api` | API routes |
+| `apps/web/components` | UI components |
+| `apps/web/lib` | Data helpers, SEO, auth, media providers |
 
-## 🎯 Migration Status
-
-✅ **Complete** - 29 API routes, 42 endpoints
-✅ **Complete** - Shared types package  
-✅ **Complete** - React Query hooks
-✅ **Complete** - NextAuth configuration
-✅ **Complete** - Comprehensive documentation
-
-## 📚 Documentation
-
-- [Migration Guide](docs/migration-guide.md) - Step-by-step instructions
-- [API Structure](docs/api-structure.md) - All 42 endpoints
-- [Hooks Usage](docs/hooks-usage.md) - React Query examples
-- [Deployment](docs/deployment.md) - Production guide
-
-## 🛠️ Tech Stack
-
-- Next.js 14+ (App Router)
-- NextAuth.js v5
-- React Query (TanStack)
-- PostgreSQL + Prisma
-- TypeScript
-- Shadcn/ui
-
-## 📖 Learn More
-
-See `docs/` for complete migration documentation.
+Site content (pages, sidebars, storefront stats, SEO verification) is managed from the dashboard, not in code.

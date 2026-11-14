@@ -144,14 +144,3 @@ export function AdSlot({ page, zone, className = "", framed = false }: AdSlotPro
     </div>
   );
 }
-
-// Google Ads placeholder component
-export function GoogleAdUnit({ adSlot, className = "" }: { adSlot: string; className?: string }) {
-  return (
-    <div className={`google-ad-unit ${className}`}>
-      <div data-ad-slot={adSlot}>
-        {/* Google Ad */}
-      </div>
-    </div>
-  );
-}

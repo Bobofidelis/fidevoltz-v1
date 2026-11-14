@@ -123,36 +123,6 @@ export function useDeleteAd() {
   });
 }
 
-// Add placement to ad
-export function useAddPlacement(adId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (data: { page: string; zone: string; position?: number }) => {
-      const response = await fetch(`/api/admin/ads/${adId}/placements`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to add placement');
-      }
-
-      return result;
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['ad', adId] });
-      toast.success(data.message || 'Placement added successfully!');
-    },
-    onError: (error: Error) => {
-      toast.error(error.message);
-    },
-  });
-}
-
 // Get ad analytics
 export function useAdAnalytics(period?: string) {
   return useQuery({

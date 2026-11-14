@@ -48,3 +48,11 @@ prisma/migrations/
 
 # Backup files
 *.bak
+
+# Environment files pulled by the Vercel CLI (never commit)
+.env.production
+.env*.local
+
+# TypeScript build caches and logs
+*.tsbuildinfo
+tsc_errors.txt
