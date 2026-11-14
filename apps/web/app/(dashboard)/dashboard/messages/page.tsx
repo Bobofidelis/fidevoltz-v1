@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,7 @@ import {
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Phone, MessageCircle, Mail, Send, Loader2, Search, Users } from 'lucide-react';
-import { useWhatsAppSettings } from '@/lib/hooks/use-conversations';
+import { useConversations, useWhatsAppSettings } from '@/lib/hooks/use-conversations';
 import { useUsers, useSendDirectMessage, useUserMessages } from '@/lib/hooks/use-admin-users';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -331,8 +332,11 @@ export default function MessagesPage() {
   const { data: session } = useSession();
   const isAdmin = session?.user.role === 'ADMIN';
 
+  const queryClient = useQueryClient();
   const { data: whatsappSettings } = useWhatsAppSettings();
-  const { data: usersData } = useUsers({});
+  // Load every user (not just the first page) so anyone can be found to start a conversation
+  const { data: usersData } = useUsers({ limit: 500 });
+  const { data: conversations = [] } = useConversations(isAdmin);
   
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -344,16 +348,28 @@ export default function MessagesPage() {
   const sendMessage = useSendDirectMessage();
 
   const users = usersData?.users || [];
-  const selectedUser = users.find((u: any) => u.id === selectedUserId);
+  const selectedUser =
+    users.find((u: any) => u.id === selectedUserId) ||
+    conversations.find((c) => c.participant.id === selectedUserId)?.participant;
 
-  // Filter users by search
-  const filteredUsers = users.filter((user: any) => {
+  const matches = (u: { name?: string | null; email: string }) => {
     const search = searchQuery.toLowerCase();
-    return (
-      user.name?.toLowerCase().includes(search) ||
-      user.email.toLowerCase().includes(search)
-    );
-  });
+    return !search || u.name?.toLowerCase().includes(search) || u.email.toLowerCase().includes(search);
+  };
+  // Inbox: people you have exchanged messages with (newest first, unread highlighted)
+  const inbox = conversations.filter((c) => matches(c.participant));
+  // Everyone else, to start a new conversation
+  const inInbox = new Set(conversations.map((c) => c.participant.id));
+  const filteredUsers = users.filter((user: any) => !inInbox.has(user.id) && user.id !== session?.user?.id && matches(user));
+  const totalUnread = conversations.reduce((sum, c) => sum + c.unreadCount, 0);
+
+  // Opening a conversation marks it read on the server; refresh the inbox and dashboard counters
+  const messagesLoaded = messages !== undefined;
+  useEffect(() => {
+    if (!selectedUserId || !messagesLoaded) return;
+    queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    queryClient.invalidateQueries({ queryKey: ['overview-stats'] });
+  }, [selectedUserId, messagesLoaded, queryClient]);
 
   const handleSendMessage = () => {
     if (!selectedUserId || !message.trim()) {
@@ -392,7 +408,11 @@ export default function MessagesPage() {
           <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
             User Messages
           </h1>
-          <p className="text-gray-600 mt-1">View and manage conversations with users</p>
+          <p className="text-gray-600 mt-1">
+            {totalUnread > 0
+              ? `${totalUnread} unread message${totalUnread === 1 ? '' : 's'}. Unread conversations are at the top.`
+              : 'View and manage conversations with users'}
+          </p>
         </div>
         <Link href="/dashboard/settings">
           <Button variant="outline" size="sm">
@@ -418,40 +438,99 @@ export default function MessagesPage() {
           </div>
 
           <div className="flex-1 overflow-y-auto">
-            {filteredUsers.length === 0 ? (
+            {inbox.length === 0 && filteredUsers.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full p-6 text-center">
                 <Users className="h-12 w-12 text-gray-400 mb-2" />
                 <p className="text-sm text-gray-500">No users found</p>
               </div>
             ) : (
-              <div className="divide-y">
-                {filteredUsers.map((user: any) => (
-                  <button
-                    key={user.id}
-                    onClick={() => setSelectedUserId(user.id)}
-                    className={cn(
-                      "w-full p-4 text-left transition-colors hover:bg-gray-50",
-                      selectedUserId === user.id && "bg-purple-50 border-l-4 border-purple-600"
-                    )}
-                  >
-                    <div className="flex gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={user.avatar || undefined} />
-                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white">
-                          {user.name?.substring(0, 2).toUpperCase() || user.email.substring(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold truncate">{user.name || user.email}</h4>
-                        <p className="text-sm text-gray-600 truncate">{user.email}</p>
-                        <Badge variant="outline" className="text-xs mt-1">
-                          {user.role}
-                        </Badge>
-                      </div>
+              <>
+                {inbox.length > 0 && (
+                  <div>
+                    <p className="px-4 pt-3 pb-1 text-xs font-semibold uppercase tracking-wider text-gray-500">Conversations</p>
+                    <div className="divide-y">
+                      {inbox.map((c) => {
+                        const unread = c.unreadCount > 0;
+                        const p = c.participant;
+                        return (
+                          <button
+                            key={p.id}
+                            onClick={() => setSelectedUserId(p.id)}
+                            className={cn(
+                              "w-full p-4 text-left transition-colors hover:bg-gray-50",
+                              unread && "bg-blue-50/60",
+                              selectedUserId === p.id && "bg-purple-50 border-l-4 border-purple-600"
+                            )}
+                          >
+                            <div className="flex gap-3">
+                              <Avatar className="h-10 w-10">
+                                <AvatarImage src={p.avatar || undefined} />
+                                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white">
+                                  {p.name?.substring(0, 2).toUpperCase() || p.email.substring(0, 2).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between gap-2">
+                                  <h4 className={cn("truncate", unread ? "font-bold text-gray-900" : "font-semibold")}>{p.name || p.email}</h4>
+                                  {c.lastMessage && (
+                                    <span className="text-xs text-gray-500 shrink-0">
+                                      {formatDistanceToNow(new Date(c.lastMessage.createdAt), { addSuffix: true })}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center justify-between gap-2 mt-0.5">
+                                  <p className={cn("text-sm truncate", unread ? "text-gray-900 font-medium" : "text-gray-600")}>
+                                    {c.lastMessage ? `${c.lastMessage.isSentByMe ? 'You: ' : ''}${c.lastMessage.message}` : p.email}
+                                  </p>
+                                  {unread && (
+                                    <span className="shrink-0 min-w-[1.25rem] h-5 px-1.5 rounded-full bg-purple-600 text-white text-xs font-bold flex items-center justify-center">
+                                      {c.unreadCount}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
                     </div>
-                  </button>
-                ))}
-              </div>
+                  </div>
+                )}
+
+                {filteredUsers.length > 0 && (
+                  <div>
+                    <p className="px-4 pt-4 pb-1 text-xs font-semibold uppercase tracking-wider text-gray-500">Start a new conversation</p>
+                    <div className="divide-y">
+                      {filteredUsers.map((user: any) => (
+                        <button
+                          key={user.id}
+                          onClick={() => setSelectedUserId(user.id)}
+                          className={cn(
+                            "w-full p-4 text-left transition-colors hover:bg-gray-50",
+                            selectedUserId === user.id && "bg-purple-50 border-l-4 border-purple-600"
+                          )}
+                        >
+                          <div className="flex gap-3">
+                            <Avatar className="h-10 w-10">
+                              <AvatarImage src={user.avatar || undefined} />
+                              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white">
+                                {user.name?.substring(0, 2).toUpperCase() || user.email.substring(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-semibold truncate">{user.name || user.email}</h4>
+                              <p className="text-sm text-gray-600 truncate">{user.email}</p>
+                              <Badge variant="outline" className="text-xs mt-1">
+                                {user.role}
+                              </Badge>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

@@ -38,6 +38,12 @@ export async function GET(request: NextRequest) {
       ];
     }
 
+    // Opening the inbox means the user has now seen the replies sent to them
+    await prisma.directMessage.updateMany({
+      where: { recipientId: session.user.id, isRead: false, ...(partnerId ? { senderId: partnerId } : {}) },
+      data: { isRead: true, readAt: new Date() },
+    });
+
     // Get ALL messages - both received and sent by the user for full conversation
     const messages = await prisma.directMessage.findMany({
       where,

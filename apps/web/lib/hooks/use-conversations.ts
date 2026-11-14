@@ -2,6 +2,28 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
 
+export interface Conversation {
+  participant: { id: string; name: string | null; email: string; role: string; avatar: string | null };
+  lastMessage: { message: string; createdAt: string; isSentByMe: boolean } | null;
+  unreadCount: number;
+  totalMessages: number;
+}
+
+// Inbox: everyone the signed-in user has exchanged messages with, newest first, with unread counts
+export function useConversations(enabled = true) {
+  return useQuery({
+    queryKey: ['conversations'],
+    queryFn: async (): Promise<Conversation[]> => {
+      const response = await fetch('/api/conversations');
+      if (!response.ok) throw new Error('Failed to fetch conversations');
+      const result = await response.json();
+      return result.data || [];
+    },
+    enabled,
+    refetchInterval: 15000,
+  });
+}
+
 // Mark message as read
 export function useMarkAsRead() {
   const queryClient = useQueryClient();

@@ -122,6 +122,12 @@ export async function GET(
       orderBy: { createdAt: 'desc' },
     });
 
+    // Opening the conversation means the admin has now seen this user's messages
+    await prisma.directMessage.updateMany({
+      where: { senderId: id, recipientId: session.user.id, isRead: false },
+      data: { isRead: true, readAt: new Date() },
+    });
+
     return NextResponse.json<ApiResponse>({
       success: true,
       data: messages,

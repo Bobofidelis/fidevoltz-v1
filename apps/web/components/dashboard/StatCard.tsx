@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LucideIcon } from "lucide-react";
 import { ArrowUpIcon, ArrowDownIcon } from "lucide-react";
@@ -13,11 +14,13 @@ interface StatCardProps {
     isPositive: boolean;
   };
   description?: string;
+  /** Makes the whole card a link to the page where the number can be acted on */
+  href?: string;
 }
 
-export function StatCard({ title, value, icon: Icon, trend, description }: StatCardProps) {
-  return (
-    <Card>
+export function StatCard({ title, value, icon: Icon, trend, description, href }: StatCardProps) {
+  const card = (
+    <Card className={href ? "h-full transition-all group-hover:border-blue-300 group-hover:shadow-md" : undefined}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         <Icon className="h-4 w-4 text-muted-foreground" />
@@ -42,5 +45,13 @@ export function StatCard({ title, value, icon: Icon, trend, description }: StatC
         )}
       </CardContent>
     </Card>
+  );
+
+  return href ? (
+    <Link href={href} className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+      {card}
+    </Link>
+  ) : (
+    card
   );
 }

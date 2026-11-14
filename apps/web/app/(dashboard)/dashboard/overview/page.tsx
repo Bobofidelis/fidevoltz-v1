@@ -4,8 +4,7 @@ import { useSession } from "next-auth/react";
 import { Card, CardContent } from "@/components/ui/card";
 import { 
   DollarSign, ShoppingCart, Users, Bell, AlertTriangle, 
-  Package, TrendingUp, Activity, Loader2 
-} from "lucide-react";
+  Package, TrendingUp, Activity, Loader2, Mail } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { useOverviewStats, useActivityFeed, useNotifications } from "@/lib/hooks/use-overview";
@@ -128,12 +127,14 @@ export default function OverviewPage() {
           value={stats?.pendingOrders || 0}
           icon={ShoppingCart}
           description="Awaiting processing"
+          href="/dashboard/orders"
         />
         <StatCard
           title="Unread Messages"
           value={stats?.unreadMessages || 0}
-          icon={Bell}
+          icon={Mail}
           description="New messages"
+          href="/dashboard/messages"
         />
       </div>
 
@@ -144,18 +145,21 @@ export default function OverviewPage() {
           value={stats?.newNotifications || 0}
           icon={Bell}
           description="Unread notifications"
+          href="/dashboard/notifications"
         />
         <StatCard
           title="Low Stock Items"
           value={stats?.lowStockCount || 0}
           icon={AlertTriangle}
           description="Products need restocking"
+          href="/dashboard/inventory"
         />
         <StatCard
           title="Today's Orders"
           value={stats?.todayOrders || 0}
           icon={Package}
           description="Orders placed today"
+          href="/dashboard/orders"
         />
         <StatCard
           title="Conversion Rate"
