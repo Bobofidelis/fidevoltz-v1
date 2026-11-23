@@ -10,6 +10,9 @@ import { getPublicProducts } from "@/lib/catalog";
 import { getStorefrontData } from "@/lib/storefront-server";
 import { Prefetched } from "@/components/seo/prefetched";
 
+// Cached at the edge; refreshed every 10 minutes, or straight away when content is saved
+export const revalidate = 600;
+
 export async function generateMetadata(): Promise<Metadata> {
   const { name } = await getSiteIdentity();
   return buildPageMetadata({

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import type { ApiResponse } from '@fidevoltz/types';
+import { refreshWholeSite } from '@/lib/content-updates';
 
 // PATCH - Update review status (approve/reject)
 export async function PATCH(
@@ -51,6 +52,9 @@ export async function PATCH(
       },
     });
 
+    // Star ratings are part of the cached product pages
+    refreshWholeSite();
+
     return NextResponse.json<ApiResponse>({
       success: true,
       data: review,
@@ -86,6 +90,9 @@ export async function DELETE(
     await prisma.review.delete({
       where: { id: reviewId },
     });
+
+    // Star ratings are part of the cached product pages
+    refreshWholeSite();
 
     return NextResponse.json<ApiResponse>({
       success: true,

@@ -5,6 +5,7 @@ import { SearchX, ArrowRight } from "lucide-react";
 import { formatCurrency, cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import type { Product } from "@fidevoltz/types";
+import { optimizedImage } from "@/lib/image-url";
 
 export const MAX_SUGGESTIONS = 6;
 
@@ -47,6 +48,7 @@ export function SearchSuggestions({ products, searchQuery, onSelect, onViewAll, 
 
   return (
     <div
+      id="store-search-suggestions"
       role="listbox"
       className="absolute top-full left-0 right-0 mt-2 bg-white text-slate-900 rounded-2xl shadow-2xl ring-1 ring-slate-900/10 overflow-hidden z-50 animate-in fade-in-50 slide-in-from-top-2 duration-200"
     >
@@ -83,7 +85,7 @@ export function SearchSuggestions({ products, searchQuery, onSelect, onViewAll, 
                 >
                   <div
                     className="w-12 h-12 flex-shrink-0 bg-slate-100 rounded-lg overflow-hidden bg-cover bg-center border border-slate-200/80"
-                    style={{ backgroundImage: `url('${imgUrl}')` }}
+                    style={{ backgroundImage: `url('${optimizedImage(imgUrl, 120)}')` }}
                   />
 
                   <div className="flex-1 min-w-0">

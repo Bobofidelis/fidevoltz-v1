@@ -7,6 +7,7 @@ import { ArrowRight, Clock, TrendingUp } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { parseBlocks, readingMinutes } from "@/lib/reading-time";
 import type { ProjectPost } from "@fidevoltz/types";
+import { optimizedImage } from "@/lib/image-url";
 
 export async function LatestProjects() {
   // Fetch projects directly from Prisma
@@ -81,7 +82,7 @@ export async function LatestProjects() {
                 <div className="relative h-44 overflow-hidden flex-shrink-0">
                   <div 
                     className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                    style={{ backgroundImage: `url('${project.image}')` }}
+                    style={{ backgroundImage: `url('${optimizedImage(project.image, 640)}')` }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent" />
                   

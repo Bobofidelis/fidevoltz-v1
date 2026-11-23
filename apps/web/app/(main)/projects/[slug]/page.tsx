@@ -12,12 +12,14 @@ import { ShareBlock } from "@/components/projects/ShareBlock";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
 import { AdSlot } from "@/components/ads/AdSlot";
-import { auth } from "@/lib/auth";
+import { draftMode } from "next/headers";
 import { breadcrumbJsonLd, buildPageMetadata, descriptionFromBlocks, getSiteIdentity, toMetaDescription } from "@/lib/seo";
 import { SITE_URL, absoluteUrl } from "@/lib/site";
 import { JsonLd } from "@/components/seo/json-ld";
 import { parseBlocks, readingMinutes } from "@/lib/reading-time";
 import { getSidebarLayout } from "@/lib/sidebar-layout";
+import { optimizedImage, imageSrcSet } from "@/lib/image-url";
+import { topicPath } from "@/lib/slug";
 
 // Fetch project from DB
 async function getProject(slugOrId: string) {
@@ -67,11 +69,20 @@ async function getRelatedProjects(category: string, excludeId: string) {
 }
 
 // Generate Metadata for SEO
-// Unpublished projects are only viewable by staff (preview)
+// Unpublished projects are only viewable by staff, through /api/preview (Next.js draft mode).
+// Published pages never read the visitor's login, so they can be cached at the edge.
 async function canView(project: { status: string }) {
   if (project.status === "PUBLISHED") return true;
-  const session = await auth();
-  return session?.user?.role === "ADMIN" || session?.user?.role === "EDITOR";
+  return (await draftMode()).isEnabled;
+}
+
+// Cached at the edge; refreshed within the hour, or straight away when the tutorial is saved
+export const revalidate = 3600;
+
+// No pages are built ahead of time: each one is rendered on its first visit, then served from cache
+// (refreshed hourly, or instantly when it is edited in the dashboard)
+export function generateStaticParams() {
+  return [];
 }
 
 export async function generateMetadata(
@@ -176,15 +187,21 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         data={breadcrumbJsonLd([
           { name: "Home", path: "/" },
           { name: "Tutorials", path: "/projects" },
-          ...(project.category ? [{ name: project.category, path: `/projects?category=${project.category.toLowerCase()}` }] : []),
+          ...(project.category ? [{ name: project.category, path: topicPath(project.category) }] : []),
           { name: project.title },
         ])}
       />
       {/* Hero Section */}
       <section className="relative overflow-hidden">
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url('${project.featuredImage || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800'}')` }}
+        <img
+          src={optimizedImage(project.featuredImage || 'https://images.unsplash.com/photo-1518770660439-4636190af475', 1280)}
+          srcSet={imageSrcSet(project.featuredImage || 'https://images.unsplash.com/photo-1518770660439-4636190af475', [640, 960, 1280, 1920])}
+          sizes="100vw"
+          alt=""
+          aria-hidden="true"
+          fetchPriority="high"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-slate-900/40" />
         
@@ -196,7 +213,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             {project.category && (
               <>
                 <span>&gt;</span>
-                <Link href={`/projects?category=${project.category.toLowerCase()}`} className="hover:text-white transition-colors">{project.category}</Link>
+                <Link href={topicPath(project.category)} className="hover:text-white transition-colors">{project.category}</Link>
               </>
             )}
             <span>&gt;</span>
@@ -310,7 +327,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                     <h2 className="text-2xl font-bold text-slate-900">Related Projects</h2>
-                    <Link href={`/projects?category=${project.category?.toLowerCase()}`} className="text-sm text-blue-600 font-medium hover:underline flex items-center gap-1">
+                    <Link href={project.category ? topicPath(project.category) : "/projects"} className="text-sm text-blue-600 font-medium hover:underline flex items-center gap-1">
                       View all <ArrowRight className="h-3 w-3" />
                     </Link>
                   </div>
@@ -321,7 +338,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                           <div className="relative h-36 overflow-hidden">
                             <div
                               className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                              style={{ backgroundImage: `url('${rel.featuredImage || "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400"}')` }}
+                              style={{ backgroundImage: `url('${optimizedImage(rel.featuredImage || "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400", 480)}')` }}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
                             <Badge className="absolute bottom-2 left-2 bg-blue-600/90 text-white border-none text-xs">

@@ -15,7 +15,8 @@ import {
   type StorefrontCounts,
   type StorefrontStat,
 } from '@/lib/storefront';
-import { BarChart3, Info, Loader2, Plus, RotateCcw, Save, Trash2 } from 'lucide-react';
+import { BarChart3, Info, Loader2, Plus, RotateCcw, Save, Send, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 const MAX_STATS = 4;
 
@@ -38,10 +39,29 @@ export function StorefrontSettings() {
   const [stats, setStats] = useState<StorefrontStat[]>(DEFAULT_STOREFRONT.storeStats);
   const [heroBadge, setHeroBadge] = useState(DEFAULT_STOREFRONT.heroBadge);
   const [googleVerification, setGoogleVerification] = useState('');
+  const [bingVerification, setBingVerification] = useState('');
+  const [notifying, setNotifying] = useState(false);
+
+  // Submit every page to Bing & co. through IndexNow (pages are also submitted automatically whenever they are saved)
+  const notifySearchEngines = async () => {
+    setNotifying(true);
+    try {
+      const res = await fetch('/api/admin/seo/indexnow', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) toast.success(data.message);
+      else toast.error(data.error || 'Could not notify search engines');
+    } catch {
+      toast.error('Could not notify search engines');
+    } finally {
+      setNotifying(false);
+    }
+  };
 
   useEffect(() => {
     const seoCode = siteSettings?.grouped?.seo?.['seo.googleVerification'];
     if (typeof seoCode === 'string') setGoogleVerification(seoCode);
+    const bingCode = siteSettings?.grouped?.seo?.['seo.bingVerification'];
+    if (typeof bingCode === 'string') setBingVerification(bingCode);
     const grouped = siteSettings?.grouped?.storefront;
     if (!grouped) return;
     if (Array.isArray(grouped[STOREFRONT_KEYS.storeStats])) setStats(grouped[STOREFRONT_KEYS.storeStats]);
@@ -71,6 +91,12 @@ export function StorefrontSettings() {
         value: (googleVerification.match(/content=["']([^"']+)["']/)?.[1] || googleVerification).trim(),
         category: 'seo',
         description: 'Google Search Console HTML tag verification code',
+      },
+      {
+        key: 'seo.bingVerification',
+        value: (bingVerification.match(/content=["']([^"']+)["']/)?.[1] || bingVerification).trim(),
+        category: 'seo',
+        description: 'Bing Webmaster Tools meta tag verification code (msvalidate.01)',
       },
     ]);
     queryClient.invalidateQueries({ queryKey: ['storefront'] });
@@ -205,39 +231,83 @@ export function StorefrontSettings() {
       </Card>
 
       {/* Search engines */}
-      <Card>
+      <Card className="border-amber-200">
         <CardHeader>
-          <CardTitle>Google Search Console</CardTitle>
-          <CardDescription>Tell Google your site exists so your tutorials and products get indexed faster.</CardDescription>
+          <CardTitle>Get found on Google, Bing and AI assistants</CardTitle>
+          <CardDescription>
+            A site that search engines have not been told about can&apos;t rank at all. Do these once; after that, new tutorials,
+            products and pages are submitted automatically when you save them.
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <ol className="list-decimal pl-5 space-y-1.5 text-sm text-slate-800">
-            <li>
-              Open{' '}
-              <a href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">
-                Google Search Console
-              </a>{' '}
-              and add your site as a <strong>URL prefix</strong> property.
-            </li>
-            <li>Choose the <strong>HTML tag</strong> verification method and copy the tag Google shows you.</li>
-            <li>Paste it below, click <strong>Save storefront settings</strong>, then click <strong>Verify</strong> in Google.</li>
-            <li>
-              In Search Console open <strong>Sitemaps</strong> and submit <code className="bg-slate-100 px-1 rounded">sitemap.xml</code>.
-              It updates by itself as you publish tutorials, products and pages.
-            </li>
-          </ol>
-          <div className="space-y-1.5">
-            <Label htmlFor="google-verification">Verification tag or code</Label>
-            <Input
-              id="google-verification"
-              value={googleVerification}
-              placeholder='<meta name="google-site-verification" content="..." />'
-              onChange={(e) => setGoogleVerification(e.target.value)}
-            />
+        <CardContent className="space-y-6">
+          <div className="space-y-3">
+            <h4 className="font-semibold text-slate-900">1. Google Search Console</h4>
+            <ol className="list-decimal pl-5 space-y-1.5 text-sm text-slate-800">
+              <li>
+                Open{' '}
+                <a href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">
+                  Google Search Console
+                </a>{' '}
+                and add your site as a <strong>URL prefix</strong> property.
+              </li>
+              <li>Choose the <strong>HTML tag</strong> verification method and copy the tag Google shows you.</li>
+              <li>Paste it below, click <strong>Save storefront settings</strong> at the bottom, then click <strong>Verify</strong> in Google.</li>
+              <li>
+                In Search Console open <strong>Sitemaps</strong> and submit <code className="bg-slate-100 px-1 rounded">sitemap.xml</code>.
+                Then use <strong>URL inspection → Request indexing</strong> on your home page and best tutorials.
+              </li>
+            </ol>
+            <div className="space-y-1.5">
+              <Label htmlFor="google-verification">Google verification tag or code</Label>
+              <Input
+                id="google-verification"
+                value={googleVerification}
+                placeholder='<meta name="google-site-verification" content="..." />'
+                onChange={(e) => setGoogleVerification(e.target.value)}
+              />
+            </div>
           </div>
+
+          <div className="space-y-3">
+            <h4 className="font-semibold text-slate-900">2. Bing Webmaster Tools (also feeds ChatGPT search and Copilot)</h4>
+            <ol className="list-decimal pl-5 space-y-1.5 text-sm text-slate-800">
+              <li>
+                Open{' '}
+                <a href="https://www.bing.com/webmasters" target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">
+                  Bing Webmaster Tools
+                </a>
+                . The quickest route is <strong>Import from Google Search Console</strong> once step 1 is verified.
+              </li>
+              <li>Or add the site manually, choose the <strong>HTML Meta Tag</strong> option and paste the tag below, then save and verify.</li>
+              <li>Submit <code className="bg-slate-100 px-1 rounded">sitemap.xml</code> there too.</li>
+            </ol>
+            <div className="space-y-1.5">
+              <Label htmlFor="bing-verification">Bing verification tag or code</Label>
+              <Input
+                id="bing-verification"
+                value={bingVerification}
+                placeholder='<meta name="msvalidate.01" content="..." />'
+                onChange={(e) => setBingVerification(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <h4 className="font-semibold text-slate-900">3. Notify search engines now</h4>
+            <p className="text-sm text-slate-700">
+              Sends every tutorial, product and page to Bing, Yandex and other IndexNow search engines in one go. Use it once now, and
+              again after big changes. (Each save already does this for the page you saved.)
+            </p>
+            <Button type="button" variant="outline" onClick={notifySearchEngines} disabled={notifying}>
+              {notifying ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
+              Notify search engines
+            </Button>
+          </div>
+
           <p className="text-sm text-slate-600">
             Search text for each page is managed where you edit it: <strong>Projects → Campaign tab</strong> (title, description, tags),{' '}
-            <strong>Pages</strong> (SEO title and description), and <strong>Products</strong> (name and description).
+            <strong>Pages</strong> (SEO title and description), <strong>Products</strong> (name and description) and{' '}
+            <strong>Categories</strong> (description shown on each category page).
           </p>
         </CardContent>
       </Card>

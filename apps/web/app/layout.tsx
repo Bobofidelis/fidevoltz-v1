@@ -35,7 +35,11 @@ export async function generateMetadata(): Promise<Metadata> {
       follow: true,
       googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
     },
-    ...(identity.googleVerification ? { verification: { google: identity.googleVerification } } : {}),
+    // Ownership codes from Dashboard → Settings → Storefront → Search engines
+    verification: {
+      ...(identity.googleVerification ? { google: identity.googleVerification } : {}),
+      ...(identity.bingVerification ? { other: { 'msvalidate.01': identity.bingVerification } } : {}),
+    },
   };
 }
 

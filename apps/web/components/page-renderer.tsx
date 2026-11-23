@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { optimizedImage, imageSrcSet } from "@/lib/image-url";
 
 interface Block {
   type: string;
@@ -359,10 +360,16 @@ export function PageRenderer({ content, fluid = false }: PageRendererProps) {
             return (
               <section key={index} className="bg-slate-900 text-white py-12 md:py-20 relative overflow-hidden">
                 {block.backgroundImage && (
-                  <div 
-                    className="absolute inset-0 bg-cover bg-center opacity-10" 
-                    style={{ backgroundImage: `url(${block.backgroundImage})` }}
-                  />
+                  <img
+          src={optimizedImage(block.backgroundImage, 1280)}
+          srcSet={imageSrcSet(block.backgroundImage, [640, 960, 1280, 1920])}
+          sizes="100vw"
+          alt=""
+          aria-hidden="true"
+          fetchPriority="high"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover opacity-10"
+        />
                 )}
                 <div className="container px-4 md:px-6 relative z-10 text-center">
                   {block.badge && (
@@ -547,14 +554,14 @@ export function PageRenderer({ content, fluid = false }: PageRendererProps) {
                 <div className={wrap("max-w-4xl")}>
                   {images.length === 1 ? (
                     <figure className="space-y-3">
-                      <img src={images[0].url} alt={images[0].alt || ''} className="w-full rounded-xl shadow-md object-cover" loading="lazy" />
+<img src={optimizedImage(images[0].url, 1200)} alt={images[0].alt || ''} loading="lazy" decoding="async" className="w-full rounded-xl shadow-md object-cover" />
                       {images[0].caption && <figcaption className="text-center text-sm text-slate-500 italic">{images[0].caption}</figcaption>}
                     </figure>
                   ) : (
                     <div className={`grid gap-4 ${images.length === 2 ? 'sm:grid-cols-2' : 'sm:grid-cols-2 md:grid-cols-3'}`}>
                       {images.map((img: any, i: number) => (
                         <figure key={i} className="space-y-2">
-                          <img src={img.url} alt={img.alt || ''} className="w-full h-48 md:h-64 rounded-xl shadow-sm object-cover" loading="lazy" />
+<img src={optimizedImage(img.url, 640)} alt={img.alt || ''} loading="lazy" decoding="async" className="w-full h-48 md:h-64 rounded-xl shadow-sm object-cover" />
                           {img.caption && <figcaption className="text-center text-xs text-slate-500 italic">{img.caption}</figcaption>}
                         </figure>
                       ))}

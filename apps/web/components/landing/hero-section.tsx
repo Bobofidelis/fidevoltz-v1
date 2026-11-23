@@ -5,6 +5,9 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { FadeIn, SlideUp } from "@/components/ui/motion";
 import { useApiQuery } from "@/lib/hooks/use-api-query";
+import { optimizedImage, imageSrcSet } from "@/lib/image-url";
+
+const HERO_IMAGE = "https://images.unsplash.com/photo-1518770660439-4636190af475";
 
 export function HeroSection() {
   const { data: storefront } = useApiQuery<{ heroBadge: string | null }>({
@@ -17,12 +20,16 @@ export function HeroSection() {
     <section className="relative py-12 md:py-16 lg:py-20 flex items-center overflow-hidden">
       {/* Background with overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 z-10" />
-      <div 
-        className="absolute inset-0 bg-cover bg-center opacity-30"
-        style={{
-          backgroundImage: "url('https://images.unsplash.com/photo-1518770660439-4636190af475?w=1920&q=80')",
-        }}
-      />
+      <img
+          src={optimizedImage(HERO_IMAGE, 1280)}
+          srcSet={imageSrcSet(HERO_IMAGE, [640, 960, 1280, 1920])}
+          sizes="100vw"
+          alt=""
+          aria-hidden="true"
+          fetchPriority="high"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover opacity-30"
+        />
       
       {/* Animated grid pattern */}
       <div className="absolute inset-0 z-10 opacity-10">

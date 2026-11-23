@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 import { ProductStatus } from '@prisma/client';
+import { publishContentChange, refreshWholeSite } from '@/lib/content-updates';
 
 const updateProductSchema = z.object({
   name: z.string().min(1).optional(),
@@ -87,6 +88,11 @@ export async function PATCH(
       data: updateData,
     });
 
+    // Refresh the cached pages, and tell search engines about products visible in the store
+    publishContentChange([`/store/product/${product.id}`, '/store', '/'], {
+      notify: product.status === 'ACTIVE' || product.status === 'OUT_OF_STOCK',
+    });
+
     return NextResponse.json({ success: true, data: product });
   } catch (error: any) {
     console.error('Update product error:', error);
@@ -136,6 +142,9 @@ export async function DELETE(
     await prisma.product.delete({
       where: { id },
     });
+
+    // Pages show this everywhere (lists, menus, counts): refresh the cached site
+    refreshWholeSite();
 
     return NextResponse.json({ success: true, message: 'Product deleted successfully' });
   } catch (error: any) {

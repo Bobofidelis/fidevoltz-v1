@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
+import { refreshWholeSite } from '@/lib/content-updates';
 
 function slugify(text: string): string {
   return text
@@ -82,6 +83,9 @@ export async function POST(req: Request) {
         },
       },
     });
+
+    // Pages show this everywhere (lists, menus, counts): refresh the cached site
+    refreshWholeSite();
 
     return NextResponse.json(category, { status: 201 });
   } catch (error: any) {

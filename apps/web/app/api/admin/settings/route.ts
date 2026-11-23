@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import type { ApiResponse } from '@fidevoltz/types';
+import { refreshWholeSite } from '@/lib/content-updates';
 
 // GET - Get all site settings
 export async function GET(request: NextRequest) {
@@ -93,6 +94,9 @@ export async function PATCH(request: NextRequest) {
         })
       )
     );
+
+    // Branding, contact details, storefront stats, sidebars, maintenance mode... appear site-wide
+    refreshWholeSite();
 
     return NextResponse.json<ApiResponse>({
       success: true,

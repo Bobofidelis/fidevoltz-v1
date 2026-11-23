@@ -12,6 +12,7 @@ import { useApiQuery } from "@/lib/hooks/use-api-query";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/utils";
 import type { Product, PaginatedResponse } from "@fidevoltz/types";
+import { optimizedImage } from "@/lib/image-url";
 
 export function FeaturedProducts() {
   const { addItem } = useCartStore();
@@ -71,6 +72,7 @@ export function FeaturedProducts() {
               variant="outline" 
               size="icon"
               onClick={() => scroll('left')}
+              aria-label="Scroll products left"
               className="rounded-full hover:bg-slate-100 border-slate-200"
             >
               <ChevronLeft className="h-5 w-5" />
@@ -79,6 +81,7 @@ export function FeaturedProducts() {
               variant="outline" 
               size="icon"
               onClick={() => scroll('right')}
+              aria-label="Scroll products right"
               className="rounded-full hover:bg-slate-100 border-slate-200"
             >
               <ChevronRight className="h-5 w-5" />
@@ -109,7 +112,7 @@ export function FeaturedProducts() {
                     <div className="relative h-44 overflow-hidden bg-slate-100">
                       <div 
                         className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                        style={{ backgroundImage: `url('${product.image}')` }}
+                        style={{ backgroundImage: `url('${optimizedImage(product.image, 600)}')` }}
                       />
                       
                       {/* Badge */}

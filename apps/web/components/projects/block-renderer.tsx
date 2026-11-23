@@ -13,11 +13,12 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism';
+import { CodeHighlighter } from './code-highlighter';
+import { YouTubeEmbed } from './youtube-embed';
 import { sanitizeHtml } from '@/lib/sanitize';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
+import { optimizedImage } from "@/lib/image-url";
 
 function renderMathInHtml(html: string): string {
   if (!html) return '';
@@ -106,15 +107,12 @@ function renderBlock(block: Block, slug?: string) {
               code({ node, inline, className, children, ...props }: any) {
                 const match = /language-(\w+)/.exec(className || '');
                 return !inline && match ? (
-                  <SyntaxHighlighter
-                    style={vscDarkPlus as any}
+                  <CodeHighlighter
                     language={match[1]}
-                    PreTag="div"
+                    code={String(children).replace(/\n$/, '')}
                     className="rounded-md my-4 shadow-sm"
-                    {...props}
-                  >
-                    {String(children).replace(/\n$/, '')}
-                  </SyntaxHighlighter>
+                    rounded
+                  />
                 ) : (
                   <code className="bg-slate-100 text-pink-600 px-1 py-0.5 rounded text-sm font-mono" {...props}>
                     {children}
@@ -214,7 +212,9 @@ function renderBlock(block: Block, slug?: string) {
             {urls.map((u: string, idx: number) => (
               <img
                 key={idx}
-                src={u}
+                src={optimizedImage(u, 1200)}
+                loading="lazy"
+                decoding="async"
                 alt={block.content.alt || `Project Image ${idx + 1}`}
                 className={`w-full object-cover rounded-xl shadow-md border border-slate-100 ${imgClass} ${layout === "masonry" ? "mb-3 break-inside-avoid" : ""}`}
               />
@@ -255,15 +255,7 @@ function renderBlock(block: Block, slug?: string) {
 
       return (
         <div className="aspect-video w-full my-5 rounded-xl overflow-hidden shadow-lg border border-slate-200 bg-slate-100">
-          <iframe
-            width="100%"
-            height="100%"
-            src={`https://www.youtube.com/embed/${videoId}`}
-            title="YouTube video player"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="border-none"
-          />
+          <YouTubeEmbed videoId={videoId} title={block.content.title || "Project video"} />
         </div>
       );
       
@@ -272,15 +264,7 @@ function renderBlock(block: Block, slug?: string) {
       if (!ytId) return null;
       return (
         <div className="aspect-video w-full my-5 rounded-xl overflow-hidden shadow-2xl border border-red-500/20 bg-slate-900">
-          <iframe
-            width="100%"
-            height="100%"
-            src={`https://www.youtube.com/embed/${ytId}`}
-            title="YouTube video tutorial"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="border-none"
-          />
+          <YouTubeEmbed videoId={ytId} title={block.content.title || "Video tutorial"} />
         </div>
       );
     
@@ -442,7 +426,7 @@ function renderBlock(block: Block, slug?: string) {
                         {item.quantity ? (
                           <span className="bg-slate-100 text-slate-800 px-2 py-1 rounded-md text-xs font-bold" dangerouslySetInnerHTML={{ __html: richText(String(item.quantity)) }} />
                         ) : (
-                          <span className="text-slate-400 text-xs italic">-</span>
+                          <span className="text-slate-500 text-xs italic">-</span>
                         )}
                       </td>
                       <td className="px-6 py-4 text-slate-600">
@@ -452,7 +436,7 @@ function renderBlock(block: Block, slug?: string) {
                         {item.productLink ? (
                           <AddToCartBOMButton item={item} />
                         ) : (
-                          <span className="text-slate-400 text-xs uppercase tracking-wider">Supplied</span>
+                          <span className="text-slate-600 text-xs uppercase tracking-wider">Supplied</span>
                         )}
                       </td>
                     </tr>
@@ -516,18 +500,13 @@ function CodeBlock({ language, code }: { language: string, code: string }) {
           size="icon" 
           className="h-6 w-6 text-slate-400 hover:text-white"
           onClick={copyToClipboard}
+          aria-label={copied ? "Code copied" : "Copy code"}
         >
           {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
         </Button>
       </div>
       <div className="overflow-x-auto text-sm">
-        <SyntaxHighlighter
-          style={vscDarkPlus as any}
-          language={language || 'text'}
-          customStyle={{ margin: 0, borderRadius: 0, background: '#1e1e1e' }}
-        >
-          {code}
-        </SyntaxHighlighter>
+        <CodeHighlighter language={language} code={code} />
       </div>
     </div>
   );

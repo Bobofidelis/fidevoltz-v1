@@ -10,7 +10,14 @@ export const getSiteIdentity = cache(async () => {
   let values: Record<string, unknown> = {};
   try {
     const settings = await prisma.siteSettings.findMany({
-      where: { OR: [{ category: 'branding' }, { category: 'social' }, { key: 'seo.googleVerification' }] },
+      where: {
+        OR: [
+          { category: 'branding' },
+          { category: 'social' },
+          { category: 'contact' },
+          { key: { in: ['seo.googleVerification', 'seo.bingVerification'] } },
+        ],
+      },
     });
     values = Object.fromEntries(settings.map((s) => [s.key, s.value]));
   } catch {
@@ -31,6 +38,13 @@ export const getSiteIdentity = cache(async () => {
     favicon: str('branding.favicon') || '/favicon.ico',
     sameAs,
     googleVerification: str('seo.googleVerification') || undefined,
+    bingVerification: str('seo.bingVerification') || undefined,
+    // From Dashboard → Settings → Contact Info; tells search engines who and where the business is
+    contact: {
+      email: str('contact.email') || undefined,
+      phone: str('contact.phone') || undefined,
+      city: str('contact.address') || undefined,
+    },
   };
 });
 
@@ -49,6 +63,27 @@ export function toMetaDescription(text: string | null | undefined, max = 160) {
 }
 
 /** First readable text of a project's blocks, used when no excerpt/meta description was written */
+/** All readable text inside CMS page content (rich-text JSON documents, HTML strings, hero subtitles) */
+export function textFromContent(node: unknown, out: string[] = []): string[] {
+  if (typeof node === 'string') {
+    if (node.trim()) out.push(node);
+  } else if (Array.isArray(node)) {
+    node.forEach((n) => textFromContent(n, out));
+  } else if (node && typeof node === 'object') {
+    const n = node as Record<string, unknown>;
+    // only content-bearing fields, not ids, urls, icons or styling
+    for (const key of ['text', 'title', 'subtitle', 'content', 'items', 'categories', 'questions', 'q', 'a']) {
+      if (key in n) textFromContent(n[key], out);
+    }
+  }
+  return out;
+}
+
+/** A meta description built from a CMS page's own text, for pages without a written SEO description */
+export function descriptionFromPageContent(content: unknown) {
+  return toMetaDescription(textFromContent(content).join(' '));
+}
+
 export function descriptionFromBlocks(blocks: unknown) {
   if (!Array.isArray(blocks)) return '';
   for (const block of blocks as { type?: string; content?: unknown }[]) {
@@ -91,7 +126,7 @@ export async function buildPageMetadata(seo: PageSeo): Promise<Metadata> {
     description: seo.description,
     ...(seo.keywords?.length ? { keywords: seo.keywords } : {}),
     alternates: { canonical: seo.path },
-    ...(seo.noIndex ? { robots: { index: false, follow: false } } : {}),
+    ...(seo.noIndex ? { robots: { index: false, follow: true } } : {}),
     openGraph: {
       title: socialTitle,
       description: seo.description,
@@ -130,13 +165,33 @@ export function organizationJsonLd(identity: Awaited<ReturnType<typeof getSiteId
   return [
     {
       '@context': 'https://schema.org',
-      '@type': 'Organization',
+      '@type': 'OnlineStore',
       '@id': `${SITE_URL}/#organization`,
       name: identity.name,
       url: SITE_URL,
       description: identity.tagline,
       ...(identity.logo ? { logo: identity.logo } : {}),
       ...(identity.sameAs.length ? { sameAs: identity.sameAs } : {}),
+      ...(identity.contact.email ? { email: identity.contact.email } : {}),
+      ...(identity.contact.phone ? { telephone: identity.contact.phone } : {}),
+      address: {
+        '@type': 'PostalAddress',
+        ...(identity.contact.city ? { addressLocality: identity.contact.city } : {}),
+        addressCountry: 'NG',
+      },
+      areaServed: { '@type': 'Country', name: 'Nigeria' },
+      ...(identity.contact.phone || identity.contact.email
+        ? {
+            contactPoint: {
+              '@type': 'ContactPoint',
+              contactType: 'customer service',
+              areaServed: 'NG',
+              availableLanguage: 'English',
+              ...(identity.contact.phone ? { telephone: identity.contact.phone } : {}),
+              ...(identity.contact.email ? { email: identity.contact.email } : {}),
+            },
+          }
+        : {}),
     },
     {
       '@context': 'https://schema.org',

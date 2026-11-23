@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, formatCurrency, formatDate } from "@/lib/utils";
+import { categoryPath } from "@/lib/slug";
 
 interface SearchResults {
   products: any[];
@@ -145,6 +146,7 @@ export function GlobalSearch({
           triggerClassName
         )}
         onClick={() => setOpen(true)}
+        aria-label="Search"
       >
         <Search className="h-4 w-4 xl:mr-2 shrink-0" />
         <span className="hidden xl:inline-flex text-sm">
@@ -216,7 +218,7 @@ export function GlobalSearch({
                         iconColor="text-orange-500"
                         title={cat.name}
                         subtitle={`Browse all ${cat.name} products`}
-                        onClick={() => go(`/store?category=${cat.id}`)}
+                        onClick={() => go(categoryPath(cat))}
                       />
                     ))}
                   </ResultSection>

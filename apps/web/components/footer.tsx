@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Zap } from "lucide-react";
 import { SocialMediaLinks } from "./social-media-links";
 import { usePublicSettings } from "@/lib/hooks/use-public-settings";
+import { optimizedImage } from "@/lib/image-url";
 
 // Note: Dynamic CMS pages ([slug]) handle routes like /careers, /shipping, /returns, /faq, /privacy-policy, /terms-of-service, and /cookie-policy
 const footerLinks = {
@@ -47,7 +48,7 @@ export function Footer() {
           <div className="col-span-2 md:col-span-2">
             <Link href="/" className="flex items-center gap-2 mb-4">
               {logo ? (
-                <img src={logo} alt={siteName} className="h-8 w-auto" />
+                <img src={optimizedImage(logo, 128)} alt="" width={32} height={32} className="h-8 w-auto" />
               ) : (
                 <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
                   <Zap className="h-5 w-5 text-white" />

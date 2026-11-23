@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { optimizedImage } from "@/lib/image-url";
 
 export default function CartPage() {
   const { 
@@ -184,7 +185,7 @@ export default function CartPage() {
                           {item.image ? (
                             <div 
                               className="absolute inset-0 bg-cover bg-center"
-                              style={{ backgroundImage: `url('${item.image}')` }}
+                              style={{ backgroundImage: `url('${optimizedImage(item.image, 200)}')` }}
                             />
                           ) : (
                             <div className="flex items-center justify-center h-full text-slate-400">

@@ -82,7 +82,7 @@ export function ShareBlock({ url, title, className, variant = "grid" }: ShareBlo
             asChild
             className={cn("text-white flex items-center justify-center gap-2", link.color, variant === "grid" ? "w-full" : "")}
           >
-            <a href={link.url} target="_blank" rel="noopener noreferrer">
+            <a href={link.url} target="_blank" rel="noopener noreferrer" aria-label={`Share on ${link.name}`}>
               {link.icon}
               <span className={variant === "grid" ? "" : "hidden sm:inline"}>{link.name}</span>
             </a>

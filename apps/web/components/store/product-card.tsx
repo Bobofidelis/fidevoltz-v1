@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { Eye, ShoppingCart, Star, Heart, Check } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import { QuickViewModal } from "./quick-view-modal";
+import { optimizedImage } from "@/lib/image-url";
 
 interface ProductCardProps {
   product: Product;
@@ -122,7 +123,7 @@ export function ProductCard({ product, className, viewMode = "grid" }: ProductCa
                 className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
                 role="img"
                 aria-label={product.name}
-                style={{ backgroundImage: `url('${imageUrl}')` }}
+                style={{ backgroundImage: `url('${optimizedImage(imageUrl, 600)}')` }}
               />
 
               {/* Badges */}
@@ -277,7 +278,7 @@ export function ProductCard({ product, className, viewMode = "grid" }: ProductCa
               className="absolute inset-0 bg-contain bg-center bg-no-repeat transition-transform duration-500 group-hover:scale-105 p-4"
               role="img"
                 aria-label={product.name}
-                style={{ backgroundImage: `url('${imageUrl}')` }}
+                style={{ backgroundImage: `url('${optimizedImage(imageUrl, 600)}')` }}
             />
 
             {/* Badges Overlay */}

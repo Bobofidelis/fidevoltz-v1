@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { publishContentChange, refreshWholeSite } from '@/lib/content-updates';
 
 export async function GET(
   request: NextRequest,
@@ -129,6 +130,9 @@ export async function PUT(
       return updated;
     });
 
+    // Refresh the cached pages, and tell search engines about published tutorials
+    publishContentChange([`/projects/${project.slug}`, '/projects', '/'], { notify: project.status === 'PUBLISHED' });
+
     return NextResponse.json(project);
   } catch (error) {
     console.error("Error updating project:", error);
@@ -151,6 +155,9 @@ export async function DELETE(
     await prisma.projectPost.delete({
       where: { id }
     });
+
+    // Pages show this everywhere (lists, menus, counts): refresh the cached site
+    refreshWholeSite();
 
     return NextResponse.json({ success: true });
   } catch (error) {

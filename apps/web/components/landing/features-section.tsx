@@ -2,6 +2,7 @@ import Link from "next/link";
 import { BookOpen, ShoppingBag, ListChecks, Download, Wrench, MessageCircle, ArrowRight, type LucideIcon } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { PUBLIC_PRODUCT_STATUSES } from "@/lib/catalog";
+import { optimizedImage } from "@/lib/image-url";
 
 interface FeatureCard {
   title: string;
@@ -134,7 +135,7 @@ export async function FeaturesSection() {
                     <div
                       aria-hidden="true"
                       className="absolute inset-0 -z-20 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                      style={{ backgroundImage: `url('${card.image}')` }}
+                      style={{ backgroundImage: `url('${optimizedImage(card.image, 1200)}')` }}
                     />
                     <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-t from-slate-950/90 via-slate-900/55 to-slate-900/25" />
                   </>

@@ -10,6 +10,7 @@ import { formatCurrency, cn } from "@/lib/utils";
 import { useCartStore } from "@/store/cart-store";
 import { toast } from "sonner";
 import Link from "next/link";
+import { optimizedImage } from "@/lib/image-url";
 
 interface QuickViewModalProps {
   product: Product | null;
@@ -72,7 +73,7 @@ export function QuickViewModal({ product, open, onOpenChange }: QuickViewModalPr
           <div className="relative aspect-square rounded-2xl overflow-hidden bg-slate-50 border border-slate-200/80 p-4">
             <div
               className="absolute inset-4 bg-contain bg-center bg-no-repeat transition-transform duration-500 hover:scale-105"
-              style={{ backgroundImage: `url('${imageUrl}')` }}
+              style={{ backgroundImage: `url('${optimizedImage(imageUrl, 800)}')` }}
             />
 
             {/* Badges */}

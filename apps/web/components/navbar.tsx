@@ -29,6 +29,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { GlobalSearch } from "@/components/global-search";
 import { cn } from "@/lib/utils";
+import { optimizedImage } from "@/lib/image-url";
 
 const NAV_LINKS = [
   { href: "/projects", label: "Tutorials" },
@@ -76,7 +77,7 @@ export function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 group">
           {logo ? (
-            <img src={logo} alt={siteName} className="h-8 w-auto" />
+            <img src={optimizedImage(logo, 128)} alt="" width={32} height={32} className="h-8 w-auto" />
           ) : brandingLoading ? (
             // Neutral placeholder so the fallback icon doesn't flash before the real logo loads
             <div className="h-8 w-8 rounded-xl bg-slate-100" />
@@ -126,7 +127,7 @@ export function Navbar() {
 
           {/* Cart */}
           <Button variant="ghost" size="icon" className="relative h-10 w-10 hover:bg-slate-100 rounded-xl" asChild>
-            <Link href="/cart">
+            <Link href="/cart" aria-label={cartCount > 0 ? `Cart, ${cartCount} item${cartCount === 1 ? "" : "s"}` : "Cart"}>
               <ShoppingCart className="h-5 w-5 text-slate-600" />
               {cartCount > 0 && (
                 <span className="absolute top-0 right-0 h-4 w-4 transform translate-x-1/4 -translate-y-1/4 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white text-[11px] font-bold flex items-center justify-center shadow-md">
@@ -139,7 +140,7 @@ export function Navbar() {
           {/* Notifications */}
           {user && (
             <Button variant="ghost" size="icon" className="relative h-10 w-10 hover:bg-slate-100 rounded-xl" asChild>
-              <Link href="/dashboard/notifications">
+              <Link href="/dashboard/notifications" aria-label="Notifications">
                 <Bell className="h-5 w-5 text-slate-600" />
               </Link>
             </Button>
@@ -246,7 +247,7 @@ export function Navbar() {
           {mounted ? (
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
-                <Button size="icon" variant="ghost" className="md:hidden h-9 w-9 hover:bg-slate-100 rounded-lg">
+                <Button size="icon" variant="ghost" className="md:hidden h-9 w-9 hover:bg-slate-100 rounded-lg" aria-label="Open menu">
                   <Menu className="h-5 w-5 text-slate-600" />
                 </Button>
               </SheetTrigger>
@@ -254,7 +255,7 @@ export function Navbar() {
                 <SheetHeader>
                   <SheetTitle className="text-left flex items-center gap-2.5">
                     {logo ? (
-                      <img src={logo} alt={siteName} className="h-8 w-auto" />
+                      <img src={optimizedImage(logo, 128)} alt="" width={32} height={32} className="h-8 w-auto" />
                     ) : (
                       <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
                         <Zap className="h-4 w-4 text-white" />
@@ -327,7 +328,7 @@ export function Navbar() {
               </SheetContent>
             </Sheet>
           ) : (
-            <Button size="icon" variant="ghost" className="md:hidden h-9 w-9">
+            <Button size="icon" variant="ghost" className="md:hidden h-9 w-9" aria-label="Open menu">
               <Menu className="h-5 w-5 text-slate-600" />
             </Button>
           )}

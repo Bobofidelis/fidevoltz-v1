@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import type { ApiResponse } from '@fidevoltz/types';
+import { publishContentChange, refreshWholeSite } from '@/lib/content-updates';
 
 // GET - Get single page
 export async function GET(
@@ -109,6 +110,9 @@ export async function PATCH(
       console.error('[API] Failed to log activity:', logError);
     }
 
+    // Refresh the cached page, and tell search engines about published pages
+    publishContentChange([`/${page.slug}`], { notify: page.isPublished });
+
     return NextResponse.json<ApiResponse>({
       success: true,
       data: page,
@@ -160,6 +164,9 @@ export async function DELETE(
         resourceId: id,
       },
     });
+
+    // Pages show this everywhere (lists, menus, counts): refresh the cached site
+    refreshWholeSite();
 
     return NextResponse.json<ApiResponse>({
       success: true,

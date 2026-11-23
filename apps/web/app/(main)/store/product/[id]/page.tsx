@@ -1,6 +1,7 @@
 "use client";
 
 import { absoluteUrl } from "@/lib/site";
+import { categoryPath } from "@/lib/slug";
 
 import { useParams } from "next/navigation";
 import Link from "next/link";
@@ -39,6 +40,7 @@ import { toast } from "sonner";
 import { formatCurrency, cn } from "@/lib/utils";
 import { ProductReviews } from "@/components/products/product-reviews";
 import { ProductCard } from "@/components/store/product-card";
+import { optimizedImage } from "@/lib/image-url";
 
 interface RecentlyViewedItem {
   id: string;
@@ -213,7 +215,7 @@ export default function ProductDetailPage() {
           {product.category && (
             <>
               <Link 
-                href={`/store?category=${product.categoryId || product.category.name}`} 
+                href={categoryPath(product.category)} 
                 className="hover:text-blue-600 transition-colors"
               >
                 {product.category.name}
@@ -244,7 +246,7 @@ export default function ProductDetailPage() {
                 <div 
                   className="absolute inset-0 bg-contain bg-center bg-no-repeat transition-all duration-150 p-6"
                   style={{
-                    backgroundImage: `url('${images[activeImage]}')`,
+                    backgroundImage: `url('${optimizedImage(images[activeImage], 1000)}')`,
                     transformOrigin: `${mousePosition.x}% ${mousePosition.y}%`,
                     transform: isZoomed ? 'scale(1.8)' : 'scale(1)',
                   }}
@@ -298,7 +300,7 @@ export default function ProductDetailPage() {
                         className="w-full h-full bg-contain bg-center bg-no-repeat"
                         role="img"
                         aria-label={`${product.name} photo`}
-                        style={{ backgroundImage: `url('${img}')` }}
+                        style={{ backgroundImage: `url('${optimizedImage(img, 200)}')` }}
                       />
                     </button>
                   ))}
@@ -318,7 +320,7 @@ export default function ProductDetailPage() {
                     SKU: {product.sku || 'N/A'}
                   </span>
                   <Link 
-                    href={`/store?category=${product.categoryId || product.category?.name}`}
+                    href={product.category ? categoryPath(product.category) : "/store"}
                     className="text-xs font-semibold text-blue-600 hover:underline bg-blue-50 px-2.5 py-1 rounded-md"
                   >
                     {product.category?.name || "Electronics"}
@@ -361,7 +363,7 @@ export default function ProductDetailPage() {
                     <span className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
                       {formatCurrency(Number(product.price))}
                     </span>
-                    <span className="text-xs text-slate-400 ml-2 font-medium">per unit (inc. VAT)</span>
+                    <span className="text-xs text-slate-600 ml-2 font-medium">per unit (inc. VAT)</span>
                   </div>
 
                   {product.originalPrice && product.originalPrice > product.price && (
@@ -400,7 +402,7 @@ export default function ProductDetailPage() {
                   <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
                     <span>Order Quantity</span>
                     {stock > 0 && (
-                      <span className="text-slate-400 font-normal">Max available: {stock}</span>
+                      <span className="text-slate-600 font-normal">Max available: {stock}</span>
                     )}
                   </div>
 
@@ -607,15 +609,15 @@ export default function ProductDetailPage() {
           <section className="mt-8">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
                   <Sparkles className="h-5 w-5 text-blue-600" />
                   Related Hardware Components
-                </h3>
+                </h2>
                 <p className="text-xs text-slate-500">
                   Engineers who viewed this item also checked out
                 </p>
               </div>
-              <Link href={`/store?category=${product.categoryId || product.category?.name}`}>
+              <Link href={product.category ? categoryPath(product.category) : "/store"}>
                 <Button variant="ghost" size="sm" className="text-xs text-blue-600 hover:text-blue-700">
                   View More &rarr;
                 </Button>
@@ -635,10 +637,10 @@ export default function ProductDetailPage() {
           <section className="mt-8 pt-8 border-t border-slate-200">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                <h2 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
                   <Clock className="h-4 w-4 text-slate-500" />
                   Recently Viewed Components
-                </h3>
+                </h2>
                 <p className="text-xs text-slate-500">
                   Items you previously inspected
                 </p>
@@ -654,7 +656,7 @@ export default function ProductDetailPage() {
                 >
                   <div
                     className="aspect-square rounded-xl bg-slate-50 bg-contain bg-center bg-no-repeat mb-2 group-hover:scale-105 transition-transform"
-                    style={{ backgroundImage: `url('${item.image}')` }}
+                    style={{ backgroundImage: `url('${optimizedImage(item.image, 400)}')` }}
                   />
                   <p className="text-xs font-semibold text-slate-800 line-clamp-1 group-hover:text-blue-600 transition-colors">
                     {item.name}
@@ -674,7 +676,7 @@ export default function ProductDetailPage() {
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-3.5 z-40 md:hidden shadow-[0_-4px_16px_rgba(0,0,0,0.08)]">
         <div className="flex items-center gap-3">
           <div className="flex flex-col shrink-0">
-            <span className="text-[11px] text-slate-400 uppercase font-semibold">Unit Price</span>
+            <span className="text-[11px] text-slate-600 uppercase font-semibold">Unit Price</span>
             <span className="text-lg font-extrabold text-slate-900">
               {formatCurrency(Number(product.price))}
             </span>

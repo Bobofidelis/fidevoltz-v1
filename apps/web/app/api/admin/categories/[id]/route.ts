@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { z } from 'zod';
+import { refreshWholeSite } from '@/lib/content-updates';
 
 const updateCategorySchema = z.object({
   name: z.string().min(1, 'Name is required').optional(),
@@ -133,6 +134,9 @@ export async function PUT(
       },
     });
 
+    // Pages show this everywhere (lists, menus, counts): refresh the cached site
+    refreshWholeSite();
+
     return NextResponse.json({ success: true, data: updatedCategory });
   } catch (error: any) {
     console.error('[CATEGORY_PUT]', error);
@@ -186,6 +190,9 @@ export async function DELETE(
     await prisma.category.delete({
       where: { id },
     });
+
+    // Pages show this everywhere (lists, menus, counts): refresh the cached site
+    refreshWholeSite();
 
     return NextResponse.json({ success: true, message: 'Category deleted successfully' });
   } catch (error: any) {

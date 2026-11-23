@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, List, Clock, TrendingUp, Star, Tag, Gauge, Layers } from "lucide-react";
 import { AdSlot } from "@/components/ads/AdSlot";
+import { optimizedImage } from "@/lib/image-url";
+import { topicPath } from "@/lib/slug";
 
 // ─────────────────────────────────────────────
 // Shared data: one request for the whole page, not one per widget
@@ -100,7 +102,7 @@ function PostRow({ post, showMeta = "date" }: { post: SidebarProject; showMeta?:
           role="img"
           aria-label={post.title}
           className="w-16 h-14 rounded-lg bg-cover bg-center shrink-0 border border-slate-200 group-hover:border-blue-300 transition-colors"
-          style={{ backgroundImage: `url(${post.featuredImage})` }}
+          style={{ backgroundImage: `url(${optimizedImage(post.featuredImage, 160)})` }}
         />
       ) : (
         <div className="w-16 h-14 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 shrink-0 flex items-center justify-center">
@@ -328,7 +330,7 @@ export function CategoriesWidget({ title = "Categories" }: { title?: string }) {
         {categories.map((cat) => (
           <Link
             key={cat.name}
-            href={`/projects?category=${encodeURIComponent(cat.name)}`}
+            href={topicPath(cat.name)}
             className="flex justify-between items-center px-3 py-2 rounded-lg hover:bg-slate-50 group transition-colors"
           >
             <span className="text-sm text-slate-800 group-hover:text-blue-600 flex items-center gap-2 transition-colors">

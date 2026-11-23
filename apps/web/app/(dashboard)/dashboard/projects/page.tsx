@@ -334,7 +334,10 @@ export default function ProjectsPage() {
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuItem asChild>
-                          <Link href={`/projects/${project.slug}`} target="_blank">
+                          <Link
+                            href={project.status === "PUBLISHED" ? `/projects/${project.slug}` : `/api/preview?path=/projects/${project.slug}`}
+                            target="_blank"
+                          >
                             <Eye className="mr-2 h-4 w-4" />
                             View Live
                           </Link>

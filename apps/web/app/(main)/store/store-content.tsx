@@ -30,6 +30,7 @@ import { TrustBadges } from "@/components/store/trust-badges";
 import { CategoryCards, CategoryItem } from "@/components/store/category-cards";
 import { NewArrivals } from "@/components/store/new-arrivals";
 import { formatCurrency, cn } from "@/lib/utils";
+import { optimizedImage } from "@/lib/image-url";
 
 const POPULAR_SEARCH_TERMS = [
   "ESP32",
@@ -527,6 +528,8 @@ function StoreContent() {
                     onFocus={() => searchQuery && setShowSuggestions(true)}
                     onKeyDown={handleSearchKeyDown}
                     aria-label="Search the store"
+                    role="combobox"
+                    aria-controls="store-search-suggestions"
                     aria-autocomplete="list"
                     aria-expanded={showSuggestions && !!searchQuery.trim()}
                     className="h-14 pl-12 pr-28 rounded-2xl bg-white/10 border-white/20 text-white placeholder:text-slate-400 focus:bg-white focus:text-slate-900 focus:ring-2 focus:ring-blue-500 shadow-xl backdrop-blur-md text-base transition-all"
@@ -627,15 +630,15 @@ function StoreContent() {
                     >
                       <div 
                         className="w-14 h-14 rounded-xl bg-slate-800 bg-cover bg-center shrink-0 border border-white/10 group-hover:scale-105 transition-transform"
-                        style={{ backgroundImage: `url('${p.image || ''}')` }}
+                        style={{ backgroundImage: `url('${optimizedImage(p.image || '', 160)}')` }}
                       />
                       <div className="flex-1 min-w-0">
                         <span className="text-[11px] uppercase font-bold text-blue-400 tracking-wider block">
                           {p.category?.name || "Hardware"}
                         </span>
-                        <h4 className="text-sm font-semibold text-white group-hover:text-blue-300 transition-colors truncate">
+                        <p className="text-sm font-semibold text-white group-hover:text-blue-300 transition-colors truncate">
                           {p.name}
-                        </h4>
+                        </p>
                         <div className="flex items-center justify-between mt-1">
                           <span className="text-sm font-bold text-white">
                             {formatCurrency(Number(p.price))}

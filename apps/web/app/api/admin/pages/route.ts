@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import type { ApiResponse } from '@fidevoltz/types';
+import { publishContentChange, refreshWholeSite } from '@/lib/content-updates';
 
 // GET - List all pages
 export async function GET(request: NextRequest) {
@@ -26,6 +27,7 @@ export async function GET(request: NextRequest) {
         createdAt: true,
       },
     });
+
 
     return NextResponse.json<ApiResponse>({
       success: true,
@@ -97,6 +99,9 @@ export async function POST(request: NextRequest) {
         metadata: { title: page.title, slug: page.slug },
       },
     });
+
+    // Refresh the cached page, and tell search engines about published pages
+    publishContentChange([`/${page.slug}`], { notify: page.isPublished });
 
     return NextResponse.json<ApiResponse>({
       success: true,

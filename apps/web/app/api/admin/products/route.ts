@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 import { ProductStatus } from '@prisma/client';
+import { publishContentChange, refreshWholeSite } from '@/lib/content-updates';
 
 const createProductSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -104,6 +105,11 @@ export async function POST(request: NextRequest) {
         // Backward compatibility for 'image' field if needed, or just set it to first image
         image: validatedData.images[0] || null,
       },
+    });
+
+    // Refresh the cached pages, and tell search engines about products visible in the store
+    publishContentChange([`/store/product/${product.id}`, '/store', '/'], {
+      notify: product.status === 'ACTIVE' || product.status === 'OUT_OF_STOCK',
     });
 
     return NextResponse.json({ success: true, data: product }, { status: 201 });

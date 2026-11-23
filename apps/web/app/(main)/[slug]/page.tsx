@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { buildPageMetadata } from '@/lib/seo';
+import { buildPageMetadata, descriptionFromPageContent } from '@/lib/seo';
 import { prisma } from '@/lib/prisma';
 import { Metadata } from 'next';
 import { PageRenderer } from '@/components/page-renderer';
@@ -10,6 +10,15 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+// Cached at the edge; refreshed within the hour, or straight away when the page is saved
+export const revalidate = 3600;
+
+// No pages are built ahead of time: each one is rendered on its first visit, then served from cache
+// (refreshed hourly, or instantly when it is edited in the dashboard)
+export function generateStaticParams() {
+  return [];
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   try {
@@ -17,7 +26,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     if (!page) return { title: 'Page Not Found', robots: { index: false } };
     return buildPageMetadata({
       title: page.seoTitle || page.title,
-      description: page.seoDesc || `${page.title} - FideVoltz`,
+      description: page.seoDesc || descriptionFromPageContent(page.content) || `${page.title} - FideVoltz`,
       path: `/${page.slug}`,
       noIndex: !page.isPublished,
     });

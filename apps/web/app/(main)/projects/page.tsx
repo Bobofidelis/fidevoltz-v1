@@ -11,6 +11,7 @@ import { AdSlot } from "@/components/ads/AdSlot";
 import { PublicSidebarRenderer } from "@/components/projects/PublicSidebarRenderer";
 import { getListingSidebar } from "@/lib/sidebar-server";
 import { getSidebarLayout } from "@/lib/sidebar-layout";
+import { optimizedImage, imageSrcSet } from "@/lib/image-url";
 
 interface ProjectsPageProps {
   searchParams: Promise<{
@@ -60,7 +61,7 @@ function ProjectCard({ project, isNew = false }: { project: CardProject; isNew?:
       <Link href={`/projects/${project.slug}`} className="relative block h-44 overflow-hidden flex-shrink-0" tabIndex={-1} aria-hidden="true">
         <div
           className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-          style={{ backgroundImage: `url('${project.featuredImage || FALLBACK_IMAGE}')` }}
+          style={{ backgroundImage: `url('${optimizedImage(project.featuredImage || FALLBACK_IMAGE, 640)}')` }}
         />
         {isNew && (
           <Badge className="absolute top-3 left-3 bg-blue-600 text-white border-none shadow-sm">New</Badge>
@@ -155,20 +156,30 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
   const isFiltered = !!(query || difficulty || tag || (category && category !== "All"));
 
   // The newest tutorials get their own section, and are left out of the full list below so nothing repeats
-  const latestProjects: CardProject[] = isFiltered
-    ? []
-    : await prisma.projectPost.findMany({
+  // Independent lookups run together (one database round trip instead of several in a row)
+  const [latestProjects, distinctCats, sidebarBlocks]: [CardProject[], { category: string }[], Awaited<ReturnType<typeof getListingSidebar>>] =
+    await Promise.all([
+      isFiltered
+        ? Promise.resolve([])
+        : prisma.projectPost.findMany({
+            where: { status: "PUBLISHED" },
+            orderBy: { publishedAt: "desc" },
+            take: 3,
+            select: CARD_SELECT,
+          }),
+      prisma.projectPost.findMany({
+        select: { category: true },
         where: { status: "PUBLISHED" },
-        orderBy: { publishedAt: "desc" },
-        take: 3,
-        select: CARD_SELECT,
-      });
+        distinct: ["category"],
+      }),
+      getListingSidebar(),
+    ]);
   if (latestProjects.length > 0) {
     where.id = { notIn: latestProjects.map((l) => l.id) };
   }
 
   // Fetch Data
-  const [projects, totalProjects, sidebarBlocks] = await Promise.all([
+  const [projects, totalProjects] = await Promise.all([
     prisma.projectPost.findMany({
       where,
       orderBy: { publishedAt: "desc" },
@@ -177,18 +188,12 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
       select: CARD_SELECT,
     }),
     prisma.projectPost.count({ where }),
-    getListingSidebar(),
   ]);
 
   const totalPages = Math.ceil(totalProjects / limit);
 
   // Get unique real categories from DB (excludes difficulty values)
   const difficultyLevels = ["Beginner", "Intermediate", "Advanced"];
-  const distinctCats = await prisma.projectPost.findMany({
-    select: { category: true },
-    where: { status: "PUBLISHED" },
-    distinct: ["category"]
-  });
 
   const dbCategories = distinctCats
     .map(c => c.category)
@@ -219,7 +224,16 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
     <div className="min-h-screen bg-slate-50">
       {/* Hero Section */}
       <section className="bg-slate-900 text-white py-8 md:py-10 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1600')] bg-cover bg-center opacity-10" />
+        <img
+          src={optimizedImage("https://images.unsplash.com/photo-1550751827-4bd374c3f58b", 1280)}
+          srcSet={imageSrcSet("https://images.unsplash.com/photo-1550751827-4bd374c3f58b", [640, 960, 1280, 1920])}
+          sizes="100vw"
+          alt=""
+          aria-hidden="true"
+          fetchPriority="high"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover opacity-10"
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/90 to-transparent" />
         <div className="container px-4 md:px-6 lg:px-8 relative z-10">
           <Badge className="mb-3 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border-blue-500/20 px-3 py-1">

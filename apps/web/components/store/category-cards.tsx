@@ -147,7 +147,7 @@ export function CategoryCards({
               <p
                 className={cn(
                   "text-xs mt-0.5",
-                  selectedCategory === null ? "text-blue-100" : "text-slate-500 font-medium"
+                  selectedCategory === null ? "text-white" : "text-slate-500 font-medium"
                 )}
               >
                 {totalProductsCount} items
@@ -191,7 +191,7 @@ export function CategoryCards({
                   <p
                     className={cn(
                       "text-xs mt-0.5",
-                      isSelected ? "text-blue-100" : "text-slate-500 font-medium"
+                      isSelected ? "text-white" : "text-slate-500 font-medium"
                     )}
                   >
                     {cat.count} {cat.count === 1 ? "item" : "items"}

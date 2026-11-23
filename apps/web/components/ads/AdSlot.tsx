@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { usePageAds, trackAdClick, trackAdImpression } from "@/lib/hooks/use-ads";
+import { optimizedImage } from "@/lib/image-url";
 
 type AdZone = "HEADER" | "SIDEBAR_LEFT" | "SIDEBAR_RIGHT" | "CONTENT_TOP" | "CONTENT_MIDDLE" | "CONTENT_BOTTOM" | "FOOTER" | "POPUP";
 
@@ -105,11 +106,11 @@ export function AdSlot({ page, zone, className = "", framed = false }: AdSlotPro
           role="button"
           tabIndex={0}
           onKeyDown={(e) => e.key === 'Enter' && handleClick()}
-          aria-label={`Advertisement: ${ad.title || 'Click to learn more'}`}
         >
           {ad.imageUrl && (
             <img
-              src={ad.imageUrl}
+              src={optimizedImage(ad.imageUrl, 800)}
+              decoding="async"
               alt={ad.title || "Advertisement"}
               className="w-full max-h-[300px] object-cover"
               loading="lazy"
@@ -131,7 +132,7 @@ export function AdSlot({ page, zone, className = "", framed = false }: AdSlotPro
             </div>
           )}
           {/* Ad indicator */}
-          <div className="absolute top-2 right-2 bg-black/40 text-white text-[11px] font-bold px-1.5 py-0.5 rounded uppercase tracking-widest">
+          <div className="absolute top-2 right-2 bg-black/70 text-white text-[11px] font-bold px-1.5 py-0.5 rounded uppercase tracking-widest">
             Ad
           </div>
         </div>
