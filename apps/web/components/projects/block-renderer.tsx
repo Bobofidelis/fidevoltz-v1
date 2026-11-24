@@ -63,9 +63,15 @@ interface Block {
 interface BlockRendererProps {
   blocks: Block[];
   slug?: string;
+  /** Tutorial title: describes photos that have no alt text of their own */
+  title?: string;
 }
 
-export function BlockRenderer({ blocks, slug }: BlockRendererProps) {
+// Alt text is plain words: captions can contain formatting, and long captions make poor descriptions
+const plainAlt = (text: unknown) =>
+  String(text || '').replace(/<[^>]*>/g, ' ').replace(/&[a-z#0-9]+;/gi, ' ').replace(/\s+/g, ' ').trim().slice(0, 125);
+
+export function BlockRenderer({ blocks, slug, title }: BlockRendererProps) {
   if (!blocks || !Array.isArray(blocks)) {
     return null;
   }
@@ -74,14 +80,14 @@ export function BlockRenderer({ blocks, slug }: BlockRendererProps) {
     <div className="space-y-4 text-lg leading-relaxed text-slate-700">
       {blocks.map((block) => (
         <div key={block.id}>
-          {renderBlock(block, slug)}
+          {renderBlock(block, slug, title)}
         </div>
       ))}
     </div>
   );
 }
 
-function renderBlock(block: Block, slug?: string) {
+function renderBlock(block: Block, slug?: string, pageTitle?: string) {
   switch (block.type) {
     case "text": {
       const processedHtml = renderMathInHtml(sanitizeHtml(block.content ? demoteH1(block.content.toString()) : ""));
@@ -215,7 +221,7 @@ function renderBlock(block: Block, slug?: string) {
                 src={optimizedImage(u, 1200)}
                 loading="lazy"
                 decoding="async"
-                alt={block.content.alt || `Project Image ${idx + 1}`}
+                alt={plainAlt(block.content.alt) || (pageTitle ? `${pageTitle}${urls.length > 1 ? ` (photo ${idx + 1})` : ''}` : `Project photo ${idx + 1}`)}
                 className={`w-full object-cover rounded-xl shadow-md border border-slate-100 ${imgClass} ${layout === "masonry" ? "mb-3 break-inside-avoid" : ""}`}
               />
             ))}

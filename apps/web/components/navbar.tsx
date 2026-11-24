@@ -77,7 +77,7 @@ export function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 group">
           {logo ? (
-            <img src={optimizedImage(logo, 128)} alt="" width={32} height={32} className="h-8 w-auto" />
+            <img src={optimizedImage(logo, 128)} alt={`${siteName} logo`} width={32} height={32} className="h-8 w-auto" />
           ) : brandingLoading ? (
             // Neutral placeholder so the fallback icon doesn't flash before the real logo loads
             <div className="h-8 w-8 rounded-xl bg-slate-100" />
@@ -255,7 +255,7 @@ export function Navbar() {
                 <SheetHeader>
                   <SheetTitle className="text-left flex items-center gap-2.5">
                     {logo ? (
-                      <img src={optimizedImage(logo, 128)} alt="" width={32} height={32} className="h-8 w-auto" />
+                      <img src={optimizedImage(logo, 128)} alt={`${siteName} logo`} width={32} height={32} className="h-8 w-auto" />
                     ) : (
                       <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
                         <Zap className="h-4 w-4 text-white" />

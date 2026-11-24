@@ -50,7 +50,7 @@ async function getCategory(slug: string) {
       ? `Shop ${name.toLowerCase()} in Nigeria: ${products.length} ${products.length === 1 ? 'product' : 'products'} including ${products
           .slice(0, 3)
           .map((p) => p.name)
-          .join(', ')}. Every part is tested before dispatch and delivered nationwide.`
+          .join(', ')}. Order online and we deliver across Nigeria.`
       : `${name} for electronics projects, coming soon to the FideVoltz store.`);
 
   return { category, name, intro, products, others };

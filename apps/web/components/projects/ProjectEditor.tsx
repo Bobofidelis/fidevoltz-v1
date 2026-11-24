@@ -1099,8 +1099,12 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                           <AccordionContent className="pb-6 pt-2 space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div className="space-y-2">
-                                <Label className="text-slate-700">Meta Title</Label>
-                                <Input className="bg-slate-50" value={block.content.metaTitle || ""} onChange={(e) => updateBlock(block.id, { ...block.content, metaTitle: e.target.value })} placeholder="Optimal SEO Title" />
+                                <div className="flex items-baseline justify-between gap-2">
+                                  <Label className="text-slate-700">Meta Title</Label>
+                                  <SeoLength value={block.content.metaTitle} max={60} />
+                                </div>
+                                <Input className="bg-slate-50" value={block.content.metaTitle || ""} onChange={(e) => updateBlock(block.id, { ...block.content, metaTitle: e.target.value })} placeholder="Short title for Google, e.g. ESP32 Prepaid Energy Meter with Blynk" />
+                                <p className="text-xs text-slate-500">Shown in search results instead of the headline. Up to 60 characters; leave empty to use the headline.</p>
                               </div>
                               <div className="space-y-2">
                                 <Label className="text-slate-700">SEO Tags / Keywords</Label>
@@ -1118,8 +1122,12 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
                                 />
                               </div>
                               <div className="space-y-2 md:col-span-2">
-                                <Label className="text-slate-700">Meta Description (150-160 chars)</Label>
-                                <Textarea className="bg-slate-50" value={block.content.metaDescription || ""} onChange={(e) => updateBlock(block.id, { ...block.content, metaDescription: e.target.value })} placeholder="Brief description for search engines..." />
+                                <div className="flex items-baseline justify-between gap-2">
+                                  <Label className="text-slate-700">Meta Description</Label>
+                                  <SeoLength value={block.content.metaDescription} max={155} min={70} />
+                                </div>
+                                <Textarea className="bg-slate-50" value={block.content.metaDescription || ""} onChange={(e) => updateBlock(block.id, { ...block.content, metaDescription: e.target.value })} placeholder="One or two sentences on what the reader will build and learn..." />
+                                <p className="text-xs text-slate-500">The snippet under the title in search results. Aim for 70 to 155 characters.</p>
                               </div>
                             </div>
                           </AccordionContent>
@@ -1551,5 +1559,16 @@ export function ProjectEditor({ initialData }: ProjectEditorProps) {
       </Tabs>
     </form>
     </div>
+  );
+}
+
+/** Live character count for search titles/descriptions: green when it fits, amber when too short, red when too long */
+function SeoLength({ value, max, min = 0 }: { value?: string; max: number; min?: number }) {
+  const length = (value || "").trim().length;
+  const tone = length > max ? "text-red-600" : length > 0 && length < min ? "text-amber-600" : "text-emerald-700";
+  return (
+    <span className={`text-xs font-medium tabular-nums ${length ? tone : "text-slate-500"}`} aria-live="polite">
+      {length}/{max}
+    </span>
   );
 }

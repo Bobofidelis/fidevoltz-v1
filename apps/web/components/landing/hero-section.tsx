@@ -24,8 +24,7 @@ export function HeroSection() {
           src={optimizedImage(HERO_IMAGE, 1280)}
           srcSet={imageSrcSet(HERO_IMAGE, [640, 960, 1280, 1920])}
           sizes="100vw"
-          alt=""
-          aria-hidden="true"
+          alt="Electronics tutorials and components from FideVoltz"
           fetchPriority="high"
           decoding="async"
           className="absolute inset-0 h-full w-full object-cover opacity-30"

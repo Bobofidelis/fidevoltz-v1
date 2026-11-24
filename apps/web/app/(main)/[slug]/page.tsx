@@ -5,6 +5,25 @@ import { Metadata } from 'next';
 import { PageRenderer } from '@/components/page-renderer';
 import { PublicSidebarRenderer } from "@/components/projects/PublicSidebarRenderer";
 import { getSidebarLayout } from "@/lib/sidebar-layout";
+import { JsonLd } from '@/components/seo/json-ld';
+
+/** Questions and answers from the page's FAQ blocks, marked up so search engines and AI assistants can quote them */
+function faqJsonLd(blocks: any[]) {
+  const questions = blocks
+    .filter((b) => b?.type === 'faq')
+    .flatMap((b) => (b.categories || []).flatMap((c: any) => c.questions || []))
+    .filter((q: any) => q?.q?.trim() && q?.a?.trim());
+  if (!questions.length) return null;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: questions.map((q: any) => ({
+      '@type': 'Question',
+      name: q.q.trim(),
+      acceptedAnswer: { '@type': 'Answer', text: q.a.trim() },
+    })),
+  };
+}
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -68,10 +87,13 @@ export default async function DynamicPage({ params }: PageProps) {
   const layout = getSidebarLayout(sidebarBlocks);
 
   // A page needs exactly one <h1>: its hero, a heading written in the content, or else the page title
+  const faqData = faqJsonLd(blocks);
+  const structuredData = faqData ? <JsonLd data={faqData} /> : null;
   const hasTitle = pageHasTitle(blocks);
   const titleHeader = hasTitle ? null : (
     <header className="bg-slate-900 text-white">
-      <div className="container px-4 md:px-6 lg:px-8 py-6 md:py-8">
+      {/* Lines up with the content box below: full width beside a sidebar, centred otherwise */}
+      <div className={sidebarBlocks.length > 0 ? 'container px-4 md:px-6 lg:px-8 py-6 md:py-8' : 'container max-w-5xl mx-auto px-4 py-6 md:py-8'}>
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{page.title}</h1>
       </div>
     </header>
@@ -95,6 +117,7 @@ export default async function DynamicPage({ params }: PageProps) {
 
     return (
       <div className="min-h-screen bg-slate-50">
+        {structuredData}
         {titleHeader}
         {heroBlock && <PageRenderer content={[heroBlock]} />}
         <div className="py-6">
@@ -120,6 +143,7 @@ export default async function DynamicPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      {structuredData}
       {titleHeader}
       <div className="container max-w-5xl mx-auto px-4 py-6">
         <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">

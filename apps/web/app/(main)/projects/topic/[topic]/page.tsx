@@ -114,7 +114,7 @@ export default async function TopicPage({ params }: { params: Promise<{ topic: s
                   <div className="relative h-44 overflow-hidden bg-slate-100">
                     <img
                       src={optimizedImage(t.featuredImage || FALLBACK_IMAGE, 640)}
-                      alt=""
+                      alt={t.title}
                       loading="lazy"
                       decoding="async"
                       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"

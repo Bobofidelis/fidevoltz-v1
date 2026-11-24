@@ -228,8 +228,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
           src={optimizedImage("https://images.unsplash.com/photo-1550751827-4bd374c3f58b", 1280)}
           srcSet={imageSrcSet("https://images.unsplash.com/photo-1550751827-4bd374c3f58b", [640, 960, 1280, 1920])}
           sizes="100vw"
-          alt=""
-          aria-hidden="true"
+          alt="Electronics tutorials and DIY projects"
           fetchPriority="high"
           decoding="async"
           className="absolute inset-0 h-full w-full object-cover opacity-10"

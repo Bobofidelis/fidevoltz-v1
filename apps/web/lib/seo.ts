@@ -49,7 +49,11 @@ export const getSiteIdentity = cache(async () => {
 });
 
 /** Strip HTML/markup and cut at a word boundary, for meta descriptions (about 160 characters) */
-export function toMetaDescription(text: string | null | undefined, max = 160) {
+/** Longest title / description search engines show in full (Bing flags anything longer) */
+export const MAX_TITLE_LENGTH = 60;
+export const MAX_DESCRIPTION_LENGTH = 155;
+
+export function toMetaDescription(text: string | null | undefined, max = MAX_DESCRIPTION_LENGTH) {
   const clean = (text || '')
     .replace(/<[^>]*>/g, ' ')
     .replace(/\$\$?[^$]*\$\$?/g, ' ')
@@ -114,22 +118,25 @@ export async function buildPageMetadata(seo: PageSeo): Promise<Metadata> {
   const identity = await getSiteIdentity();
   const image = seo.image ? absoluteUrl(seo.image) : identity.logo;
   // Built here rather than via the layout template: a nested layout with its own title resets the template
-  const fullTitle = seo.absoluteTitle
-    ? seo.title
-    : seo.title.toLowerCase().includes(identity.name.toLowerCase())
-      ? seo.title
-      : `${seo.title} | ${identity.name}`;
-  const socialTitle = seo.title;
+  // Search engines show about 60 characters: add "| Brand" only when it still fits, so the words that matter aren't cut off
+  const title = seo.title.replace(/\s+/g, ' ').trim();
+  const branded = `${title} | ${identity.name}`;
+  const fullTitle =
+    seo.absoluteTitle || title.toLowerCase().includes(identity.name.toLowerCase()) || branded.length > MAX_TITLE_LENGTH
+      ? title
+      : branded;
+  const socialTitle = title;
+  const description = toMetaDescription(seo.description);
 
   return {
     title: { absolute: fullTitle },
-    description: seo.description,
+    description,
     ...(seo.keywords?.length ? { keywords: seo.keywords } : {}),
     alternates: { canonical: seo.path },
     ...(seo.noIndex ? { robots: { index: false, follow: true } } : {}),
     openGraph: {
       title: socialTitle,
-      description: seo.description,
+      description,
       url: seo.path,
       siteName: identity.name,
       locale: 'en_NG',
@@ -142,7 +149,7 @@ export async function buildPageMetadata(seo: PageSeo): Promise<Metadata> {
     twitter: {
       card: image ? 'summary_large_image' : 'summary',
       title: socialTitle,
-      description: seo.description,
+      description,
       ...(image ? { images: [image] } : {}),
     },
   };

@@ -330,17 +330,18 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
   return (
     <div className="border-b border-slate-200 last:border-0">
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full py-4 flex justify-between items-center text-left hover:text-blue-600 transition-colors"
+        aria-expanded={isOpen}
+        className="w-full py-4 flex justify-between items-center gap-4 text-left hover:text-blue-600 transition-colors"
       >
         <span className="font-semibold text-slate-900">{question}</span>
-        <ChevronDown className={`h-5 w-5 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`h-5 w-5 shrink-0 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
-      {isOpen && (
-        <div className="pb-4 text-slate-700 leading-relaxed">
-          {answer}
-        </div>
-      )}
+      {/* Always in the page (hidden until opened) so search engines can read the answer */}
+      <div hidden={!isOpen} className="pb-4 text-slate-700 leading-relaxed whitespace-pre-line">
+        {answer}
+      </div>
     </div>
   );
 }
@@ -364,8 +365,7 @@ export function PageRenderer({ content, fluid = false }: PageRendererProps) {
           src={optimizedImage(block.backgroundImage, 1280)}
           srcSet={imageSrcSet(block.backgroundImage, [640, 960, 1280, 1920])}
           sizes="100vw"
-          alt=""
-          aria-hidden="true"
+          alt={block.title || ''}
           fetchPriority="high"
           decoding="async"
           className="absolute inset-0 h-full w-full object-cover opacity-10"

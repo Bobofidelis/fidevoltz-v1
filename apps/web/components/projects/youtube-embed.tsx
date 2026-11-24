@@ -31,7 +31,7 @@ export function YouTubeEmbed({ videoId, title = "YouTube video" }: { videoId: st
     >
       <img
         src={`https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`}
-        alt=""
+        alt={`${title} (video)`}
         loading="lazy"
         decoding="async"
         className="absolute inset-0 h-full w-full object-cover"

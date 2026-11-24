@@ -197,8 +197,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
           src={optimizedImage(project.featuredImage || 'https://images.unsplash.com/photo-1518770660439-4636190af475', 1280)}
           srcSet={imageSrcSet(project.featuredImage || 'https://images.unsplash.com/photo-1518770660439-4636190af475', [640, 960, 1280, 1920])}
           sizes="100vw"
-          alt=""
-          aria-hidden="true"
+          alt={project.title}
           fetchPriority="high"
           decoding="async"
           className="absolute inset-0 h-full w-full object-cover"
@@ -286,7 +285,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                <AdSlot page={`projects/${project.slug}`} zone="CONTENT_TOP" className="w-full" />
 
               <div id="article-content" className="bg-white rounded-xl p-5 md:p-7 shadow-sm border border-slate-100">
-                 <BlockRenderer blocks={blocks} slug={project.slug} />
+                 <BlockRenderer blocks={blocks} slug={project.slug} title={project.title.trim()} />
               </div>
 
               {/* Content Bottom Ad */}

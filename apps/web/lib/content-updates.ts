@@ -9,6 +9,8 @@ export function publishContentChange(paths: string[], { notify }: { notify: bool
   for (const path of new Set(paths)) revalidatePath(path);
   revalidatePath('/sitemap.xml');
   revalidatePath('/llms.txt');
+  // The Help Center shows the questions from the FAQ page
+  if (paths.includes('/faq')) revalidatePath('/help');
   // Category and topic landing pages list these items
   if (paths.some((p) => p.startsWith('/store'))) revalidatePath('/store/category/[slug]', 'page');
   if (paths.some((p) => p.startsWith('/projects'))) revalidatePath('/projects/topic/[topic]', 'page');
