@@ -70,18 +70,18 @@ export function HeroSection() {
 
           <SlideUp delay={0.3}>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/projects">
-                <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-100 group">
+              <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-100 group" asChild>
+                <Link href="/projects">
                   Explore Tutorials
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Button>
-              </Link>
-              <Link href="/store">
-                <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-100 group">
+                </Link>
+              </Button>
+              <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-100 group" asChild>
+                <Link href="/store">
                   Browse Products
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           </SlideUp>
         </div>

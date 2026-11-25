@@ -20,9 +20,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Plus, MoreVertical, Eye, Trash2, Play, Pause, Loader2, ArrowLeft } from "lucide-react";
+import { Plus, MoreVertical, Eye, Trash2, Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { useAds, useDeleteAd, useUpdateAd } from "@/lib/hooks/use-ads";
+import { useAds, useDeleteAd } from "@/lib/hooks/use-ads";
 import { formatDistanceToNow } from "date-fns";
 
 export default function AdsManagementPage() {

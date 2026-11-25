@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useCartStore, FREE_SHIPPING_THRESHOLD } from "@/store/cart-store";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, CheckSquare, Square, Tag, Loader2, Info, AlertCircle } from "lucide-react";
+import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, CheckSquare, Tag, Loader2, Info, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { formatNaira } from "@/lib/utils/currency";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -35,6 +35,15 @@ export default function CartPage() {
     clearCart
   } = useCartStore();
 
+  // Hooks must run on every render, before the empty-cart early return (otherwise removing
+  // the last item crashes the page with "Rendered fewer hooks than expected")
+  const [couponCode, setCouponCode] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponFeedback, setCouponFeedback] = useState<{
+    type: "info" | "error";
+    message: string;
+  } | null>(null);
+
   if (items.length === 0) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -46,12 +55,12 @@ export default function CartPage() {
           <p className="text-slate-600 mb-5 max-w-md mx-auto">
             Looks like you haven't added any items to your cart yet. Start shopping to fill it up!
           </p>
-          <Link href="/store">
-            <Button size="lg" className="bg-slate-900 hover:bg-slate-800">
+          <Button size="lg" className="bg-slate-900 hover:bg-slate-800" asChild>
+            <Link href="/store">
               Browse Products
               <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </div>
     );
@@ -66,12 +75,6 @@ export default function CartPage() {
   
   const shippingProgress = Math.min((subtotal / FREE_SHIPPING_THRESHOLD) * 100, 100);
 
-  const [couponCode, setCouponCode] = useState("");
-  const [couponLoading, setCouponLoading] = useState(false);
-  const [couponFeedback, setCouponFeedback] = useState<{
-    type: "info" | "error";
-    message: string;
-  } | null>(null);
 
   const handleApplyCoupon = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -377,20 +380,20 @@ export default function CartPage() {
                       </form>
                     </div>
 
-                    <Link href="/checkout">
-                      <Button size="lg" className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-md">
+                    <Button size="lg" className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-md" asChild>
+                      <Link href="/checkout">
                         Proceed to Checkout
                         <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   </>
                 )}
 
-                <Link href="/store" className="block mt-4">
-                  <Button variant="ghost" className="w-full text-slate-600 hover:text-slate-900 hover:bg-slate-50">
+                <Button variant="ghost" className="w-full text-slate-600 hover:text-slate-900 hover:bg-slate-50" asChild>
+                  <Link href="/store" className="block mt-4">
                     Continue Shopping
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </CardContent>
             </Card>
           </div>

@@ -1,5 +1,3 @@
-"use client";
-
 // Light build of the syntax highlighter with only the languages tutorials use.
 // The full build ships ~300 languages to every reader, which made tutorial pages slow.
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';

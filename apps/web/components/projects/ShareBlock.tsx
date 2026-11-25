@@ -22,7 +22,7 @@ export function ShareBlock({ url, title, className, variant = "grid" }: ShareBlo
     {
       name: "WhatsApp",
       url: `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`,
-      color: "bg-[#25D366] hover:bg-[#128C7E]",
+      color: "bg-[#0E7A6D] hover:bg-[#075E54]",
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21" />
@@ -44,7 +44,7 @@ export function ShareBlock({ url, title, className, variant = "grid" }: ShareBlo
     {
       name: "Facebook",
       url: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
-      color: "bg-[#1877F2] hover:bg-[#0C63D4]",
+      color: "bg-[#0C63D4] hover:bg-[#0A52B0]",
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />

@@ -1,12 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Image as ImageIcon, Video, Music, ExternalLink, Trash2, Check, FileText, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
-import { Badge } from '@/components/ui/badge';
 
 interface MediaGridProps {
   mediaType?: 'IMAGE' | 'VIDEO' | 'AUDIO' | 'DOCUMENT';

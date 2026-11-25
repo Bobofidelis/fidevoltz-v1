@@ -30,18 +30,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { 
-  Edit, 
-  Plus, 
-  Trash2, 
-  AlertTriangle, 
-  Package, 
-  Search, 
-  X, 
-  Loader2, 
-  ChevronLeft, 
+import {
+  Edit,
+  Plus,
+  Trash2,
+  AlertTriangle,
+  Package,
+  Search,
+  X,
+  Loader2,
+  ChevronLeft,
   ChevronRight,
-  Filter
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { toast } from 'sonner';

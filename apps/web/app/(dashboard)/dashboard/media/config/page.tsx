@@ -15,7 +15,6 @@ export default function MediaConfigPage() {
   const [provider, setProvider] = useState<'CLOUDINARY' | 'AWS_S3'>('CLOUDINARY');
   const [config, setConfig] = useState<any>({});
   const [loading, setLoading] = useState(false);
-  const [testing, setTesting] = useState(false);
   const [activeProvider, setActiveProvider] = useState<any>(null);
   const [savedConfigId, setSavedConfigId] = useState<string | null>(null);
 

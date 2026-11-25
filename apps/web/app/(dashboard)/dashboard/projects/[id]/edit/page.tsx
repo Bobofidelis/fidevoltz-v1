@@ -3,7 +3,6 @@ import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { ProjectEditor } from "@/components/projects/ProjectEditor";
-import { RoleGuard } from "@/components/guards/role-guard";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";

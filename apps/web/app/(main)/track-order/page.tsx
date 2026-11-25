@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, Package, Truck, CheckCircle2, Clock, AlertCircle, Loader2, ArrowRight } from "lucide-react";
+import { Search, Package, CheckCircle2, Clock, AlertCircle, Loader2, ArrowRight } from "lucide-react";
 import { formatNaira } from "@/lib/utils/currency";
 import Link from "next/link";
 
@@ -235,12 +235,12 @@ export default function TrackOrderPage() {
                   <Badge className={`text-sm px-3 py-1 font-medium ${STATUS_COLORS[trackingResult.status] || "bg-slate-100 text-slate-700"}`}>
                     {trackingResult.status}
                   </Badge>
-                  <Link href={`/orders/${trackingResult.id}`}>
-                    <Button variant="outline" size="sm" className="gap-1.5">
+                  <Button variant="outline" size="sm" className="gap-1.5" asChild>
+                    <Link href={`/orders/${trackingResult.id}`}>
                       View Details
                       <ArrowRight className="h-3.5 w-3.5" />
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 </div>
               </div>
 

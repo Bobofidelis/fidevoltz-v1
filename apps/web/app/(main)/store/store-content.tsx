@@ -6,19 +6,13 @@ import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Search, 
-  Sparkles, 
-  Zap, 
-  ShieldCheck, 
-  Truck, 
-  Cpu, 
-  Layers, 
-  Send, 
-  ArrowRight,
+import {
+  Search,
+  Sparkles,
+  Zap,
+  Send,
   TrendingUp,
-  Star,
-  CheckCircle2
+  CheckCircle2,
 } from "lucide-react";
 import { useApiQuery } from "@/lib/hooks/use-api-query";
 import type { Product, PaginatedResponse } from "@fidevoltz/types";
@@ -29,7 +23,7 @@ import { SearchSuggestions, MAX_SUGGESTIONS } from "@/components/store/search-su
 import { TrustBadges } from "@/components/store/trust-badges";
 import { CategoryCards, CategoryItem } from "@/components/store/category-cards";
 import { NewArrivals } from "@/components/store/new-arrivals";
-import { formatCurrency, cn } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 import { optimizedImage } from "@/lib/image-url";
 
 const POPULAR_SEARCH_TERMS = [
@@ -73,7 +67,7 @@ function StoreContent() {
   });
 
   // Fetch categories from public database
-  const { data: categoriesData, isLoading: categoriesLoading } = useApiQuery<
+  const { data: categoriesData } = useApiQuery<
     { id: string; name: string; slug?: string; _count?: { products: number } }[]
   >({
     endpoint: "/api/categories",

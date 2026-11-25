@@ -84,7 +84,7 @@ export async function POST(
     await sendEmail(submission.email, `Re: ${submission.subject}`, replyHtml);
 
     // Find or create user account for the submitter
-    let recipientUser = await prisma.user.findUnique({
+    const recipientUser = await prisma.user.findUnique({
       where: { email: submission.email },
     });
 

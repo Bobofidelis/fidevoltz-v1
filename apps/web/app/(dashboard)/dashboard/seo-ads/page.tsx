@@ -34,9 +34,7 @@ import {
   Link as LinkIcon,
   FileText,
   Layers,
-  ShieldCheck,
   FileCode,
-  Share2,
 } from "lucide-react";
 import { useAdAnalytics, useSEOMetrics } from "@/lib/hooks/use-ads";
 import { BarChart } from "@/components/analytics/BarChart";

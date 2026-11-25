@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import type { ApiResponse } from '@fidevoltz/types';
-import { publishContentChange, refreshWholeSite } from '@/lib/content-updates';
+import { publishContentChange } from '@/lib/content-updates';
 
 // GET - List all pages
 export async function GET(request: NextRequest) {

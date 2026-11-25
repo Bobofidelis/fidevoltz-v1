@@ -1,5 +1,6 @@
 'use client';
 
+import Link from "next/link";
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -113,9 +114,9 @@ export function MediaPicker({
           <Alert>
             <AlertDescription>
               No media provider configured. Please configure a provider in{' '}
-              <a href="/dashboard/media/config" className="underline font-medium">
+              <Link href="/dashboard/media/config" className="underline font-medium">
                 settings
-              </a>{' '}
+              </Link>{' '}
               before uploading media.
             </AlertDescription>
           </Alert>

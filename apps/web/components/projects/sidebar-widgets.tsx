@@ -413,11 +413,11 @@ export function CtaWidget({
       <CardContent className="p-5">
         <h3 className="text-lg font-bold mb-2">{title}</h3>
         {text && <p className="text-sm text-slate-300 mb-4 leading-relaxed">{text}</p>}
-        <Link href={safeHref}>
-          <Button variant="secondary" className="w-full font-semibold">
+        <Button variant="secondary" className="w-full font-semibold" asChild>
+          <Link href={safeHref}>
             {buttonText}
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </CardContent>
     </Card>
   );

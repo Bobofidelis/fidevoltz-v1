@@ -37,7 +37,6 @@ export async function GET(request: NextRequest) {
     
     // Create the full where clause for date filtering
     const dateWhere = Object.keys(dateFilter).length > 0 ? { createdAt: dateFilter } : {};
-    const dateWhereOrder = Object.keys(dateFilter).length > 0 ? { order: { createdAt: dateFilter } } : {};
 
     // Run all queries in parallel for better performance
     const [

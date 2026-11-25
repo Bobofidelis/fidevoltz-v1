@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 import { ProductStatus } from '@prisma/client';
-import { publishContentChange, refreshWholeSite } from '@/lib/content-updates';
+import { publishContentChange } from '@/lib/content-updates';
 
 const createProductSchema = z.object({
   name: z.string().min(1, 'Name is required'),

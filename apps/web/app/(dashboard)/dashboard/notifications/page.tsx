@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from 'react';
-import { useSession } from 'next-auth/react';
 import { useNotifications, useMarkAllAsRead } from '@/lib/hooks/use-notifications';
 import { NotificationsList } from '@/components/notifications/notifications-list';
 import { NotificationFilters } from '@/components/notifications/notification-filters';
@@ -11,7 +10,6 @@ import { Bell, CheckCheck, Loader2 } from 'lucide-react';
 import { NotificationType } from '@prisma/client';
 
 export default function NotificationsPage() {
-  const { data: session } = useSession();
   const [selectedType, setSelectedType] = useState<NotificationType | 'ALL'>('ALL');
   const [selectedRead, setSelectedRead] = useState<'all' | 'unread' | 'read'>('all');
   

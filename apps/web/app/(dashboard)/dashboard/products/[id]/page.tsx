@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
-import { ArrowLeft, Upload, Plus, X, Save } from "lucide-react";
+import { ArrowLeft, Plus, X, Save } from "lucide-react";
 import { MediaPicker } from "@/components/media/MediaPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

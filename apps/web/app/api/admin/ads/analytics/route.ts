@@ -15,9 +15,6 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const { searchParams } = new URL(request.url);
-    const period = searchParams.get('period') || '30'; // days
-
     // Get overall analytics
     const totalAds = await prisma.advertisement.count();
     const activeAds = await prisma.advertisement.count({ where: { status: 'ACTIVE' } });

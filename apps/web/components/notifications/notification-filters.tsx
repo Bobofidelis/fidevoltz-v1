@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from 'react';
 import { NotificationType } from '@prisma/client';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';

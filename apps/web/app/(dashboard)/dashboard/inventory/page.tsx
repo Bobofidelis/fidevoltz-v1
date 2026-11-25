@@ -12,7 +12,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertTriangle, Package, CheckCircle, Search, Filter } from 'lucide-react';
+import { AlertTriangle, Package, CheckCircle, Search } from 'lucide-react';
 import { ProductStatus } from '@prisma/client';
 
 export const revalidate = 0; // Dynamic data

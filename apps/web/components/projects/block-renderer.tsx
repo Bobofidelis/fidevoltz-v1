@@ -1,8 +1,7 @@
-"use client";
-
+// Rendered on the server: readers get finished HTML (text, formulas, highlighted code) without
+// downloading the Markdown, KaTeX and highlighter libraries. Interactive bits are small client components.
 import { cn } from "@/lib/utils";
-import { Copy, Check, Package, ShoppingCart, Info, AlertTriangle, Lightbulb, ShieldAlert } from "lucide-react";
-import { useState } from "react";
+import { Check, Package, ShoppingCart, Info, AlertTriangle, Lightbulb, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { AdSlot } from "@/components/ads/AdSlot";
@@ -14,6 +13,7 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import { CodeHighlighter } from './code-highlighter';
+import { CopyCodeButton } from './copy-code-button';
 import { YouTubeEmbed } from './youtube-embed';
 import { sanitizeHtml } from '@/lib/sanitize';
 import katex from 'katex';
@@ -151,7 +151,7 @@ function renderBlock(block: Block, slug?: string, pageTitle?: string) {
           </div>
           <div className="flex-1 space-y-2">
             {title && (
-              <h4
+              <h3
                 className="font-bold text-lg"
                 dangerouslySetInnerHTML={{
                   __html: richText(title)
@@ -179,7 +179,9 @@ function renderBlock(block: Block, slug?: string, pageTitle?: string) {
       );
     
     case "image": {
-      const urls = block.content.urls || (block.content.url ? [block.content.url] : []);
+      const urls: string[] = (block.content.urls || (block.content.url ? [block.content.url] : [])).filter(
+        (u: unknown): u is string => typeof u === "string" && u.trim() !== ""
+      );
       if (urls.length === 0) return null;
 
       const sizeClasses: Record<string, string> = {
@@ -323,12 +325,12 @@ function renderBlock(block: Block, slug?: string, pageTitle?: string) {
             </div>
           </div>
           <div className="relative z-10 mt-5 pt-8 border-t border-slate-700/50 flex justify-center md:justify-end">
-            <Link href={block.content.productLink || "#"}>
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-8 shadow-lg shadow-blue-900/50 h-14 text-lg w-full md:w-auto">
+            <Button size="lg" className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-8 shadow-lg shadow-blue-900/50 h-14 text-lg w-full md:w-auto" asChild>
+              <Link href={block.content.productLink || "#"}>
                 <ShoppingCart className="mr-3 w-5 h-5" />
                 {block.content.buttonText || "Buy the Complete Kit"}
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
       );
@@ -489,27 +491,11 @@ function renderBlock(block: Block, slug?: string, pageTitle?: string) {
 }
 
 function CodeBlock({ language, code }: { language: string, code: string }) {
-  const [copied, setCopied] = useState(false);
-
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   return (
     <div className="my-6 relative group rounded-lg overflow-hidden border border-slate-800 bg-[#1e1e1e] shadow-xl">
       <div className="flex items-center justify-between px-4 py-2 bg-[#2d2d2d] border-b border-slate-700">
-        <span className="text-xs font-semibold text-slate-400 uppercase">{language}</span>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="h-6 w-6 text-slate-400 hover:text-white"
-          onClick={copyToClipboard}
-          aria-label={copied ? "Code copied" : "Copy code"}
-        >
-          {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-        </Button>
+        <span className="text-xs font-semibold text-slate-300 uppercase">{language}</span>
+        <CopyCodeButton code={code} />
       </div>
       <div className="overflow-x-auto text-sm">
         <CodeHighlighter language={language} code={code} />

@@ -96,11 +96,11 @@ export function ProjectSidebar({ project, showAd = true }: ProjectSidebarProps) 
           <p className="text-sm text-slate-300 mb-4 leading-relaxed">
             Don't have the time or tools? Our team of experts can build this custom project for you to your exact specs.
           </p>
-          <Link href={`/contact?type=service&project=${project.slug}`}>
-            <Button variant="secondary" className="w-full font-semibold">
+          <Button variant="secondary" className="w-full font-semibold" asChild>
+            <Link href={`/contact?type=service&project=${project.slug}`}>
               Request Build Service
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </CardContent>
       </Card>
 

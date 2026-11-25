@@ -52,9 +52,9 @@ export default function OrdersPage() {
         <ShoppingBag className="h-16 w-16 mx-auto mb-4 text-slate-300" />
         <h2 className="text-2xl font-bold mb-2">Sign in to view orders</h2>
         <p className="text-slate-500 mb-6">You need to be logged in to see your order history.</p>
-        <Link href="/auth/login?callbackUrl=/orders">
-          <Button size="lg">Sign In</Button>
-        </Link>
+        <Button size="lg" asChild>
+          <Link href="/auth/login?callbackUrl=/orders">Sign In</Link>
+        </Button>
       </div>
     );
   }
@@ -79,9 +79,9 @@ export default function OrdersPage() {
             <Package className="h-14 w-14 mx-auto mb-4 text-slate-300" />
             <h3 className="text-lg font-semibold mb-2">No orders yet</h3>
             <p className="text-slate-500 mb-6">Start shopping to see your orders here</p>
-            <Link href="/store">
-              <Button>Browse Store</Button>
-            </Link>
+            <Button asChild>
+              <Link href="/store">Browse Store</Link>
+            </Button>
           </CardContent>
         </Card>
       ) : (
@@ -123,12 +123,12 @@ export default function OrdersPage() {
                       <DollarSign className="h-4 w-4 text-slate-400" />
                       {formatNaira(total)}
                     </div>
-                    <Link href={`/orders/${order.id}`}>
-                      <Button variant="outline" size="sm" className="gap-1.5">
+                    <Button variant="outline" size="sm" className="gap-1.5" asChild>
+                      <Link href={`/orders/${order.id}`}>
                         <Eye className="h-3.5 w-3.5" />
                         View Details
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   </div>
                 </CardContent>
               </Card>

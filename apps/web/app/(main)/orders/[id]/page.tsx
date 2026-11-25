@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Package, Truck, Clock, MapPin, ArrowLeft, ExternalLink } from "lucide-react";
+import { CheckCircle2, Package, Truck, MapPin, ArrowLeft } from "lucide-react";
 import { formatNaira } from "@/lib/utils/currency";
 import Link from "next/link";
 
@@ -63,18 +63,18 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
     <div className="container mx-auto py-10 px-4">
       <div className="max-w-3xl mx-auto space-y-5">
         <div className="flex items-center justify-between">
-          <Link href="/orders">
-            <Button variant="ghost" size="sm" className="gap-2 text-slate-600">
+          <Button variant="ghost" size="sm" className="gap-2 text-slate-600" asChild>
+            <Link href="/orders">
               <ArrowLeft className="h-4 w-4" />
               Back to My Orders
-            </Button>
-          </Link>
-          <Link href={`/track-order?id=${order.id}`}>
-            <Button variant="outline" size="sm" className="gap-2">
+            </Link>
+          </Button>
+          <Button variant="outline" size="sm" className="gap-2" asChild>
+            <Link href={`/track-order?id=${order.id}`}>
               <Truck className="h-4 w-4" />
               Track Order
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
 
         <div className="text-center space-y-2">

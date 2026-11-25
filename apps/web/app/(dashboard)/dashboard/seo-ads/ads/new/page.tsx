@@ -20,7 +20,6 @@ import { MediaPicker } from "@/components/media/MediaPicker";
 import { PlacementManager } from "@/components/ads/PlacementManager";
 import { Loader2, ArrowLeft, Eye, Upload } from "lucide-react";
 import Link from "next/link";
-import { toast } from "sonner";
 
 export default function CreateAdPage() {
   const router = useRouter();

@@ -84,10 +84,10 @@ export function CategoryCards({
     <div className="relative mb-6">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
+          <h2 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-blue-600" />
             Explore by Category
-          </h3>
+          </h2>
           <p className="text-xs text-slate-600">
             Browse verified electronics components by discipline
           </p>

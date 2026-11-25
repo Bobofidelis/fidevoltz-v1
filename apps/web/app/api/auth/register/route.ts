@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     const settings = await prisma.siteSettings.findMany({
       where: {
         key: {
-          in: ['general.allowRegistration', 'general.requireEmailVerification']
+          in: ['general.allowRegistration']
         }
       }
     });
@@ -20,7 +20,6 @@ export async function POST(request: NextRequest) {
     }, {});
 
     const allowRegistration = settingsMap['general.allowRegistration'] !== false && settingsMap['general.allowRegistration'] !== 'false';
-    const requireEmailVerification = settingsMap['general.requireEmailVerification'] === true || settingsMap['general.requireEmailVerification'] === 'true';
 
     if (!allowRegistration) {
       return NextResponse.json<ApiResponse>(

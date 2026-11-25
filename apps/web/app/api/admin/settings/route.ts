@@ -166,7 +166,6 @@ export async function POST(request: NextRequest) {
       // General
       { key: 'general.maintenanceMode', value: false, category: 'general', description: 'Maintenance mode enabled' },
       { key: 'general.allowRegistration', value: true, category: 'general', description: 'Allow new user registration' },
-      { key: 'general.requireEmailVerification', value: true, category: 'general', description: 'Require email verification' },
     ];
 
     const results = await Promise.all(

@@ -26,7 +26,6 @@ import {
   FolderTree
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { usePublicSettings } from "@/lib/hooks/use-public-settings";
 
@@ -76,7 +75,6 @@ export function DashboardSidebar({ className, onNavClick }: DashboardSidebarProp
   const pathname = usePathname();
   const { data: session } = useSession();
   const user = session?.user;
-  const router = useRouter();
 
   const handleLogout = () => {
     signOut({ callbackUrl: "/" });

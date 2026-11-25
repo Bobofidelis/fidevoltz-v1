@@ -14,18 +14,9 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from '@/components/ui/card';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, ArrowLeft, Save, Eye, Globe, Lock, FileText, Search } from 'lucide-react';
+import { Loader2, ArrowLeft, Save, Globe, Lock, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
 

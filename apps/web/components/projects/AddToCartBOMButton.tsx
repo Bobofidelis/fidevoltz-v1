@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { ShoppingCart, Loader2 } from "lucide-react";
 import { useCartStore } from "@/store/cart-store";
 import { toast } from "sonner";
-import Link from "next/link";
 
 interface AddToCartBOMButtonProps {
   item: any;

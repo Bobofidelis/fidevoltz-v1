@@ -47,6 +47,7 @@ export function NewArrivals({ products }: NewArrivalsProps) {
             size="icon"
             onClick={() => scroll('left')}
             className="h-8 w-8 rounded-full hover:bg-slate-100 border-slate-200"
+            aria-label="Scroll new arrivals left"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -55,6 +56,7 @@ export function NewArrivals({ products }: NewArrivalsProps) {
             size="icon"
             onClick={() => scroll('right')}
             className="h-8 w-8 rounded-full hover:bg-slate-100 border-slate-200"
+            aria-label="Scroll new arrivals right"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>

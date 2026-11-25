@@ -28,9 +28,9 @@ export default function ProfilePage() {
         <User className="h-16 w-16 mx-auto mb-4 text-slate-300" />
         <h2 className="text-2xl font-bold mb-2">Sign in to view your profile</h2>
         <p className="text-slate-500 mb-6">You need to be logged in to access your account settings.</p>
-        <Link href="/auth/login?callbackUrl=/profile">
-          <Button size="lg">Sign In</Button>
-        </Link>
+        <Button size="lg" asChild>
+          <Link href="/auth/login?callbackUrl=/profile">Sign In</Link>
+        </Button>
       </div>
     );
   }
@@ -99,12 +99,12 @@ export default function ProfilePage() {
               </div>
 
               <div className="pt-4 border-t flex flex-col sm:flex-row gap-3">
-                <Link href="/dashboard/profile">
-                  <Button className="w-full sm:w-auto">Edit Profile</Button>
-                </Link>
-                <Link href="/dashboard/settings">
-                  <Button variant="outline" className="w-full sm:w-auto">Change Password</Button>
-                </Link>
+                <Button className="w-full sm:w-auto" asChild>
+                  <Link href="/dashboard/profile">Edit Profile</Link>
+                </Button>
+                <Button variant="outline" className="w-full sm:w-auto" asChild>
+                  <Link href="/dashboard/settings">Change Password</Link>
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -122,9 +122,9 @@ export default function ProfilePage() {
                 { label: "Support Tickets", href: "/dashboard/my-tickets" },
                 { label: "My Reviews", href: "/dashboard/my-reviews" },
               ].map((link) => (
-                <Link key={link.href} href={link.href}>
-                  <Button variant="outline" className="w-full text-sm h-auto py-2">{link.label}</Button>
-                </Link>
+                <Button variant="outline" className="w-full text-sm h-auto py-2" asChild>
+                  <Link key={link.href} href={link.href}>{link.label}</Link>
+                </Button>
               ))}
             </CardContent>
           </Card>

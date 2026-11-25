@@ -325,19 +325,19 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
               {/* Pagination */}
               {totalPages > 1 && (
                 <nav aria-label="Pagination" className="flex justify-center items-center gap-2 pt-4">
-                  <Link href={pageHref(Math.max(1, page - 1))} aria-label="Previous page" aria-disabled={page === 1} className={page === 1 ? "pointer-events-none opacity-50" : ""}>
-                    <Button variant="outline" tabIndex={-1} className="w-10 h-10 p-0 rounded-full">
+                  <Button variant="outline" tabIndex={-1} className="w-10 h-10 p-0 rounded-full" asChild>
+                    <Link href={pageHref(Math.max(1, page - 1))} aria-label="Previous page" aria-disabled={page === 1} className={page === 1 ? "pointer-events-none opacity-50" : ""}>
                       <ArrowRight className="h-4 w-4 rotate-180" />
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                   <span className="flex items-center px-4 h-10 text-sm font-medium text-slate-700 bg-white border rounded-full">
                     Page {page} of {totalPages}
                   </span>
-                  <Link href={pageHref(Math.min(totalPages, page + 1))} aria-label="Next page" aria-disabled={page === totalPages} className={page === totalPages ? "pointer-events-none opacity-50" : ""}>
-                    <Button variant="outline" tabIndex={-1} className="w-10 h-10 p-0 rounded-full">
+                  <Button variant="outline" tabIndex={-1} className="w-10 h-10 p-0 rounded-full" asChild>
+                    <Link href={pageHref(Math.min(totalPages, page + 1))} aria-label="Next page" aria-disabled={page === totalPages} className={page === totalPages ? "pointer-events-none opacity-50" : ""}>
                       <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 </nav>
               )}
             </section>

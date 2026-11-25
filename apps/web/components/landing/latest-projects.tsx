@@ -1,12 +1,10 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { FadeIn } from "@/components/ui/motion";
 import Link from "next/link";
 import { ArrowRight, Clock, TrendingUp } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { parseBlocks, readingMinutes } from "@/lib/reading-time";
-import type { ProjectPost } from "@fidevoltz/types";
 import { optimizedImage } from "@/lib/image-url";
 
 export async function LatestProjects() {
@@ -47,11 +45,11 @@ export async function LatestProjects() {
             <p className="text-lg text-slate-700 mb-5">
               No projects available yet. Check back soon for exciting tutorials and guides!
             </p>
-            <Link href="/projects">
-              <Button size="lg" className="bg-slate-900 hover:bg-slate-800">
+            <Button size="lg" className="bg-slate-900 hover:bg-slate-800" asChild>
+              <Link href="/projects">
                 View All Projects
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
@@ -66,12 +64,12 @@ export async function LatestProjects() {
             <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-1">Latest Tutorials</h2>
             <p className="text-slate-700">Newest step-by-step builds</p>
           </div>
-          <Link href="/projects">
-            <Button variant="outline" className="group border-slate-300 hover:bg-slate-900 hover:text-white hover:border-slate-900">
+          <Button variant="outline" className="group border-slate-300 hover:bg-slate-900 hover:text-white hover:border-slate-900" asChild>
+            <Link href="/projects">
               View All Tutorials
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -126,12 +124,12 @@ export async function LatestProjects() {
                       )}
                     </div>
                     
-                    <Link href={`/projects/${project.slug}`}>
-                      <Button variant="ghost" size="sm" className="group/btn hover:bg-slate-100">
+                    <Button variant="ghost" size="sm" className="group/btn hover:bg-slate-100" asChild>
+                      <Link href={`/projects/${project.slug}`}>
                         Read
                         <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   </div>
                 </CardContent>
               </Card>

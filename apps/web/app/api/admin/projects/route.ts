@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { publishContentChange, refreshWholeSite } from '@/lib/content-updates';
+import { publishContentChange } from '@/lib/content-updates';
 
 // GET /api/admin/projects - List all projects
 export async function GET(request: NextRequest) {

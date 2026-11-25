@@ -11,10 +11,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { 
-  User, Lock, Bell, Eye, Globe, Settings as SettingsIcon,
-  Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin,
-  Youtube, MessageCircle, Send, Palette, Loader2, Store, PanelRight
+import {
+  User,
+  Lock,
+  Bell,
+  Globe,
+  Settings as SettingsIcon,
+  Mail,
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin,
+  Youtube,
+  MessageCircle,
+  Send,
+  Palette,
+  Loader2,
+  Store,
+  PanelRight,
 } from "lucide-react";
 import { WhatsAppSettings } from "@/components/admin/whatsapp-settings";
 import { StorefrontSettings } from "@/components/admin/storefront-settings";
@@ -103,7 +117,6 @@ export default function SettingsPage() {
   const [generalSettings, setGeneralSettings] = useState({
     maintenanceMode: false,
     allowRegistration: true,
-    requireEmailVerification: true,
   });
 
 
@@ -207,7 +220,6 @@ export default function SettingsPage() {
         setGeneralSettings({
           maintenanceMode: general['general.maintenanceMode'] ?? false,
           allowRegistration: general['general.allowRegistration'] ?? true,
-          requireEmailVerification: general['general.requireEmailVerification'] ?? true,
         });
       }
     }
@@ -275,7 +287,6 @@ export default function SettingsPage() {
     const settings = [
       { key: 'general.maintenanceMode', value: generalSettings.maintenanceMode, category: 'general' },
       { key: 'general.allowRegistration', value: generalSettings.allowRegistration, category: 'general' },
-      { key: 'general.requireEmailVerification', value: generalSettings.requireEmailVerification, category: 'general' },
     ];
     await updateSiteSettings.mutateAsync(settings);
   };
@@ -772,21 +783,6 @@ export default function SettingsPage() {
                     checked={generalSettings.allowRegistration}
                     onCheckedChange={(checked) =>
                       setGeneralSettings({ ...generalSettings, allowRegistration: checked })
-                    }
-                  />
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label>Require Email Verification</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Require users to verify their email before accessing the site
-                    </p>
-                  </div>
-                  <Switch
-                    checked={generalSettings.requireEmailVerification}
-                    onCheckedChange={(checked) =>
-                      setGeneralSettings({ ...generalSettings, requireEmailVerification: checked })
                     }
                   />
                 </div>

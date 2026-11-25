@@ -3,8 +3,8 @@
 import { PageForm } from '@/components/dashboard/pages/page-form';
 import { useQuery } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
-import { notFound, useParams } from 'next/navigation';
-import { useMemo, use } from 'react';
+import { notFound } from 'next/navigation';
+import { use } from 'react';
 
 export default function EditPagePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);

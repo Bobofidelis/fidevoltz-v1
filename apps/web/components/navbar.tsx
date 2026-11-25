@@ -236,11 +236,11 @@ export function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Link href={`/auth/login?returnUrl=${encodeURIComponent(pathname)}`} className="hidden md:block ml-1">
-              <Button size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-sm">
+            <Button size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-sm" asChild>
+              <Link href={`/auth/login?returnUrl=${encodeURIComponent(pathname)}`} className="hidden md:block ml-1">
                 Sign In
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           )}
 
           {/* Mobile menu */}
@@ -317,12 +317,10 @@ export function Navbar() {
                     </>
                   )}
                   {!user && (
-                    <Link
-                      href={`/auth/login?returnUrl=${encodeURIComponent(pathname)}`}
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600">Sign In</Button>
-                    </Link>
+                    <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600" asChild>
+                      <Link href={`/auth/login?returnUrl=${encodeURIComponent(pathname)}`}
+                      onClick={() => setMobileOpen(false)}>Sign In</Link>
+                    </Button>
                   )}
                 </div>
               </SheetContent>

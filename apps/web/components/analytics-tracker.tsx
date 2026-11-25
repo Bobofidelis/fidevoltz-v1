@@ -26,7 +26,7 @@ function TrackerInner() {
     // Don't track dashboard admin traffic — keeps public analytics clean
     if (pathname.startsWith('/dashboard')) return;
 
-    let startTime = Date.now();
+    const startTime = Date.now();
     let isTracked = false;
 
     const trackPageview = () => {

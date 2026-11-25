@@ -164,9 +164,9 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
               <p className="text-sm text-gray-600 mb-2">
                 Please sign in to write a review
               </p>
-              <Link href="/auth/login">
-                <Button>Sign In</Button>
-              </Link>
+              <Button asChild>
+                <Link href="/auth/login">Sign In</Link>
+              </Button>
             </div>
           )}
         </CardContent>

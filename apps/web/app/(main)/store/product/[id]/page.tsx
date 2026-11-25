@@ -5,33 +5,28 @@ import { categoryPath } from "@/lib/slug";
 
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  ShoppingCart, 
-  Star, 
-  Heart, 
-  Share2, 
-  ArrowLeft, 
-  Check, 
-  Plus, 
-  Minus, 
-  Truck, 
-  ShieldCheck, 
-  Headphones,
-  RotateCcw,
-  FileText, 
-  Download, 
-  Settings, 
-  Loader2, 
-  Package, 
+import {
+  ShoppingCart,
+  Star,
+  Heart,
+  ArrowLeft,
+  Plus,
+  Minus,
+  Truck,
+  ShieldCheck,
+  FileText,
+  Download,
+  Settings,
+  Loader2,
+  Package,
   Copy,
-  ExternalLink,
   Clock,
-  Sparkles
+  Sparkles,
 } from "lucide-react";
 import { useApiQuery } from "@/lib/hooks/use-api-query";
 import type { Product, PaginatedResponse } from "@fidevoltz/types";
@@ -60,9 +55,8 @@ export default function ProductDetailPage() {
   const [isZoomed, setIsZoomed] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [recentlyViewed, setRecentlyViewed] = useState<RecentlyViewedItem[]>([]);
-  const [shareDropdownOpen, setShareDropdownOpen] = useState(false);
 
-  const { addItem, isInCart, getItemQuantity } = useCartStore();
+  const { addItem } = useCartStore();
 
   // Fetch product detail
   const { data: product, isLoading } = useApiQuery<Product>({
@@ -132,9 +126,9 @@ export default function ProductDetailPage() {
         <p className="text-slate-500 max-w-md text-sm">
           This hardware component doesn't exist or may have been unlisted from our catalog.
         </p>
-        <Link href="/store">
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white">Back to Electronics Store</Button>
-        </Link>
+        <Button className="bg-blue-600 hover:bg-blue-700 text-white" asChild>
+          <Link href="/store">Back to Electronics Store</Link>
+        </Button>
       </div>
     );
   }
@@ -182,19 +176,16 @@ export default function ProductDetailPage() {
   const handleCopyLink = () => {
     navigator.clipboard.writeText(currentUrl);
     toast.success("Product link copied to clipboard!");
-    setShareDropdownOpen(false);
   };
 
   const handleShareWhatsApp = () => {
     const text = encodeURIComponent(`Check out ${product.name} on FideVoltz Store: ${currentUrl}`);
     window.open(`https://api.whatsapp.com/send?text=${text}`, "_blank");
-    setShareDropdownOpen(false);
   };
 
   const handleShareTwitter = () => {
     const text = encodeURIComponent(`Check out ${product.name} on @fidevoltz:`);
     window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(currentUrl)}`, "_blank");
-    setShareDropdownOpen(false);
   };
 
   // Related products (filter out current product)
@@ -263,7 +254,7 @@ export default function ProductDetailPage() {
                       Low Stock: {stock} Left
                     </Badge>
                   ) : (
-                    <Badge className="bg-emerald-600 hover:bg-emerald-700 px-3 py-1 text-xs text-white shadow-xs">
+                    <Badge className="bg-emerald-700 hover:bg-emerald-800 px-3 py-1 text-xs text-white shadow-xs">
                       In Stock
                     </Badge>
                   )}
@@ -483,7 +474,7 @@ export default function ProductDetailPage() {
                       variant="ghost"
                       size="sm"
                       onClick={handleShareWhatsApp}
-                      className="h-8 px-2 text-xs text-emerald-600 hover:bg-emerald-50"
+                      className="h-8 px-2 text-xs text-emerald-700 hover:bg-emerald-50"
                     >
                       WhatsApp
                     </Button>
@@ -492,7 +483,7 @@ export default function ProductDetailPage() {
                       variant="ghost"
                       size="sm"
                       onClick={handleShareTwitter}
-                      className="h-8 px-2 text-xs text-sky-600 hover:bg-sky-50"
+                      className="h-8 px-2 text-xs text-sky-700 hover:bg-sky-50"
                     >
                       Twitter / X
                     </Button>
@@ -617,11 +608,11 @@ export default function ProductDetailPage() {
                   Engineers who viewed this item also checked out
                 </p>
               </div>
-              <Link href={product.category ? categoryPath(product.category) : "/store"}>
-                <Button variant="ghost" size="sm" className="text-xs text-blue-600 hover:text-blue-700">
+              <Button variant="ghost" size="sm" className="text-xs text-blue-600 hover:text-blue-700" asChild>
+                <Link href={product.category ? categoryPath(product.category) : "/store"}>
                   View More &rarr;
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">

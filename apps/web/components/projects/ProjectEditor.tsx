@@ -3,23 +3,20 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { 
-  Plus, 
-  Trash2, 
-  GripVertical, 
-  Type, 
-  Image as ImageIcon, 
-  Code, 
-  Video, 
-  ArrowUp, 
-  ArrowDown, 
+import {
+  Plus,
+  Trash2,
+  Type,
+  Image as ImageIcon,
+  Code,
+  Video,
   X,
   FileText,
   Search,
   ShoppingCart,
   Package,
   Upload,
-  Table2
+  Table2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,7 +28,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Switch } from "@/components/ui/switch";
 import { MediaPicker } from "@/components/media/MediaPicker";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { SymbolInput } from "@/components/ui/symbol-picker";

@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from 'react';
 import { useUserDetails, useUserActivity, useUserMessages, useUpdateUser } from '@/lib/hooks/use-admin-users';
 import {
   Dialog,
@@ -14,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatDistanceToNow } from 'date-fns';
-import { Mail, Edit, MessageSquare, Activity, ShoppingBag, Calendar, DollarSign } from 'lucide-react';
+import { Edit, MessageSquare, Activity, ShoppingBag, Calendar, DollarSign } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Role } from '@prisma/client';
 
@@ -30,7 +29,6 @@ export function UserDetailsModal({ userId, onClose, onEdit, onMessage }: UserDet
   const { data: activities } = useUserActivity(userId);
   const { data: messages } = useUserMessages(userId);
   const updateUser = useUpdateUser();
-  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
 
   if (isLoading || !user) {
     return (

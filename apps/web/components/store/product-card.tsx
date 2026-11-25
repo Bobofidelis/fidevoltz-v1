@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -82,8 +81,8 @@ export function ProductCard({ product, className, viewMode = "grid" }: ProductCa
     setShowQuickView(true);
   };
 
-  // Stock status pill / dot component
-  const StockStatus = () => {
+  // Stock status pill (a value, not a component defined during render, so React doesn't remount it)
+  const stockStatus = (() => {
     if (isOutOfStock) {
       return (
         <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100">
@@ -106,7 +105,7 @@ export function ProductCard({ product, className, viewMode = "grid" }: ProductCa
         In stock
       </span>
     );
-  };
+  })();
 
   /* ================= LIST VIEW LAYOUT ================= */
   if (viewMode === "list") {
@@ -148,7 +147,8 @@ export function ProductCard({ product, className, viewMode = "grid" }: ProductCa
                   "absolute top-2.5 right-2.5 z-10 h-8 w-8 rounded-full flex items-center justify-center transition-all bg-white/90 backdrop-blur-xs shadow-xs hover:bg-white hover:scale-110",
                   isWishlisted ? "text-rose-500" : "text-slate-400 hover:text-slate-700"
                 )}
-                aria-label="Save to wishlist"
+                aria-label={isWishlisted ? "Remove from wishlist" : "Save to wishlist"}
+                aria-pressed={isWishlisted}
               >
                 <Heart
                   className={cn("h-4 w-4", isWishlisted && "fill-rose-500")}
@@ -168,7 +168,7 @@ export function ProductCard({ product, className, viewMode = "grid" }: ProductCa
                       {product.brand || "Generic"}
                     </span>
                   </div>
-                  <StockStatus />
+                  {stockStatus}
                 </div>
 
                 <h3 className="font-bold text-slate-900 text-lg leading-snug group-hover:text-blue-600 transition-colors line-clamp-1 mb-2">
@@ -303,7 +303,8 @@ export function ProductCard({ product, className, viewMode = "grid" }: ProductCa
                 "absolute top-2.5 right-2.5 z-10 h-8 w-8 rounded-full flex items-center justify-center transition-all bg-white/90 backdrop-blur-xs shadow-xs hover:bg-white hover:scale-110",
                 isWishlisted ? "text-rose-500" : "text-slate-400 hover:text-slate-700"
               )}
-              aria-label="Save to wishlist"
+              aria-label={isWishlisted ? "Remove from wishlist" : "Save to wishlist"}
+                aria-pressed={isWishlisted}
             >
               <Heart
                 className={cn("h-4 w-4", isWishlisted && "fill-rose-500")}
@@ -334,6 +335,7 @@ export function ProductCard({ product, className, viewMode = "grid" }: ProductCa
                 )}
                 onClick={handleAddToCart}
                 disabled={isOutOfStock}
+                aria-label={isOutOfStock ? `${product.name} is out of stock` : `Add ${product.name} to cart`}
               >
                 {addedAnimation ? (
                   <Check className="h-3.5 w-3.5" />
@@ -369,7 +371,7 @@ export function ProductCard({ product, className, viewMode = "grid" }: ProductCa
 
               {/* Stock status indicator */}
               <div className="mb-2.5">
-                <StockStatus />
+                {stockStatus}
               </div>
             </div>
 

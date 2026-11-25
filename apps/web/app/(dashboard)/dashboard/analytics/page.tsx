@@ -5,9 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
-  DollarSign, TrendingUp, Users, ShoppingCart, 
-  BarChart3, Download, Loader2, Package, Globe, LayoutDashboard, FileText
+import {
+  DollarSign,
+  TrendingUp,
+  Users,
+  ShoppingCart,
+  BarChart3,
+  Download,
+  Loader2,
+  Globe,
+  LayoutDashboard,
+  FileText,
 } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { 
@@ -16,9 +24,8 @@ import {
 } from "@/lib/hooks/use-overview";
 import { LineChart } from "@/components/analytics/LineChart";
 import { AreaChart } from "@/components/analytics/AreaChart";
-import { BarChart } from "@/components/analytics/BarChart";
 import { PieChart } from "@/components/analytics/PieChart";
-import { StatCardSkeleton, ChartSkeleton, TableSkeleton } from "@/components/dashboard/SkeletonLoader";
+import { StatCardSkeleton, ChartSkeleton } from "@/components/dashboard/SkeletonLoader";
 import { format } from "date-fns";
 import { toast } from "sonner";
 

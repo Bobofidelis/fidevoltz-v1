@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Cpu, Handshake, Heart, Rocket } from "lucide-react";
+import { ArrowRight, Cpu, Handshake, Heart } from "lucide-react";
 import Link from "next/link";
 import { FadeIn } from "@/components/ui/motion";
 
@@ -66,12 +66,12 @@ export function ServicesSection() {
                     {service.description}
                   </p>
                   
-                  <Link href={service.href}>
-                    <Button className="w-full group/btn" variant="outline">
+                  <Button className="w-full group/btn" variant="outline" asChild>
+                    <Link href={service.href}>
                       {service.action}
                       <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 </div>
               </FadeIn>
             );

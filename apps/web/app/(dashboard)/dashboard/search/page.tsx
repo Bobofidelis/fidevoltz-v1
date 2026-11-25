@@ -95,11 +95,11 @@ function SearchPageContent() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">
-              {results.length} result{results.length !== 1 ? 's' : ''} for "{searchQuery}"
+              {isLoading ? `Searching for "${searchQuery}"...` : `${results.length} result${results.length !== 1 ? 's' : ''} for "${searchQuery}"`}
             </h3>
           </div>
 
-          {results.length === 0 ? (
+          {isLoading && results.length === 0 ? null : results.length === 0 ? (
             <Card>
               <CardContent className="py-16 text-center">
                 <Search className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />

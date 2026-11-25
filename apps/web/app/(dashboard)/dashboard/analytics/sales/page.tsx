@@ -19,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { DollarSign, ShoppingCart, TrendingUp, Users, ArrowLeft, Calendar } from "lucide-react";
+import { DollarSign, ShoppingCart, TrendingUp, ArrowLeft, Calendar } from "lucide-react";
 import { MetricCard } from "@/components/analytics/MetricCard";
 import { LineChart } from "@/components/analytics/LineChart";
 import { BarChart } from "@/components/analytics/BarChart";

@@ -161,6 +161,7 @@ export function FeaturedProducts() {
                           variant="ghost" 
                           size="sm" 
                           className="hover:bg-slate-100"
+                          aria-label={`Add ${product.name} to cart`}
                           onClick={() => {
                             addItem(product as any, 1);
                             toast.success(`${product.name} added to cart!`);
@@ -183,11 +184,11 @@ export function FeaturedProducts() {
         </div>
 
         <div className="text-center mt-5">
-          <Link href="/store">
-            <Button size="lg" className="bg-slate-900 hover:bg-slate-800 text-white">
+          <Button size="lg" className="bg-slate-900 hover:bg-slate-800 text-white" asChild>
+            <Link href="/store">
               Browse All Products
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </div>
     </section>

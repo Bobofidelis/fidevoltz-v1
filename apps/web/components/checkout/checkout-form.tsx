@@ -7,13 +7,13 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCartStore } from "@/store/cart-store";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { FadeIn } from "@/components/ui/motion";
 import { formatNaira } from "@/lib/utils/currency";
-import { MapPin, CreditCard, CheckCircle2, ChevronRight, Check, Plus } from "lucide-react";
+import { CreditCard, CheckCircle2, ChevronRight, Check, Plus } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
 const addressSchema = z.object({
