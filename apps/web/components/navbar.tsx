@@ -237,7 +237,7 @@ export function Navbar() {
             </DropdownMenu>
           ) : (
             <Button size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-sm" asChild>
-              <Link href={`/auth/login?returnUrl=${encodeURIComponent(pathname)}`} className="hidden md:block ml-1">
+              <Link href={`/auth/login?returnUrl=${encodeURIComponent(pathname)}`} className="hidden md:inline-flex ml-1">
                 Sign In
               </Link>
             </Button>

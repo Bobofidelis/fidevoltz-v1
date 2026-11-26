@@ -111,7 +111,7 @@ export default async function DynamicPage({ params }: PageProps) {
     );
     const mainElement = (
       <div className="min-w-0 bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-        <PageRenderer content={bodyBlocks} fluid />
+        <PageRenderer content={bodyBlocks} fluid pageTitle={page.title} />
       </div>
     );
 
@@ -147,7 +147,7 @@ export default async function DynamicPage({ params }: PageProps) {
       {titleHeader}
       <div className="container max-w-5xl mx-auto px-4 py-6">
         <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-          <PageRenderer content={blocks} />
+          <PageRenderer content={blocks} pageTitle={page.title} />
         </div>
       </div>
     </div>

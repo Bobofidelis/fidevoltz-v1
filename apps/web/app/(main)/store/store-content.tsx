@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -182,8 +182,13 @@ function StoreContent() {
   }, [allProducts]);
 
   // Filter States
-  const searchParams = useSearchParams();
-  const categoryParam = searchParams.get("category");
+  // Old links like /store?category=Sensors still pre-select a category. Read in the browser after the
+  // first render (not with useSearchParams, which made Next.js skip server rendering of the whole store,
+  // leaving search engines a page with no products or heading).
+  const [categoryParam, setCategoryParam] = useState<string | null>(null);
+  useEffect(() => {
+    setCategoryParam(new URLSearchParams(window.location.search).get("category"));
+  }, []);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);

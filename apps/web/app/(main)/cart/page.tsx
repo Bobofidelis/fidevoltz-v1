@@ -390,7 +390,7 @@ export default function CartPage() {
                 )}
 
                 <Button variant="ghost" className="w-full text-slate-600 hover:text-slate-900 hover:bg-slate-50" asChild>
-                  <Link href="/store" className="block mt-4">
+                  <Link href="/store" className="mt-4">
                     Continue Shopping
                   </Link>
                 </Button>

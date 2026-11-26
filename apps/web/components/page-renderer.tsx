@@ -23,6 +23,8 @@ interface PageRendererProps {
   content: Block[];
   /** Fill the width of the card the content sits in (pages with a sidebar) instead of a centred narrow column */
   fluid?: boolean;
+  /** Page title: describes photos that have no alt text or caption of their own */
+  pageTitle?: string;
 }
 
 export const IconMap: { [key: string]: any } = {
@@ -346,7 +348,10 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
   );
 }
 
-export function PageRenderer({ content, fluid = false }: PageRendererProps) {
+export function PageRenderer({ content, fluid = false, pageTitle = '' }: PageRendererProps) {
+  // Every image needs a description for search engines and screen readers
+  const photoAlt = (img: any, i: number, count: number) =>
+    String(img?.alt || img?.caption || '').trim() || [pageTitle, count > 1 ? `photo ${i + 1}` : 'photo'].filter(Boolean).join(', ');
   if (!content || !Array.isArray(content)) return null;
 
   // Section wrapper: a centred container normally, or the full width of the card when fluid
@@ -554,14 +559,14 @@ export function PageRenderer({ content, fluid = false }: PageRendererProps) {
                 <div className={wrap("max-w-4xl")}>
                   {images.length === 1 ? (
                     <figure className="space-y-3">
-<img src={optimizedImage(images[0].url, 1200)} alt={images[0].alt || ''} loading="lazy" decoding="async" className="w-full rounded-xl shadow-md object-cover" />
+<img src={optimizedImage(images[0].url, 1200)} alt={photoAlt(images[0], 0, 1)} loading="lazy" decoding="async" className="w-full rounded-xl shadow-md object-cover" />
                       {images[0].caption && <figcaption className="text-center text-sm text-slate-500 italic">{images[0].caption}</figcaption>}
                     </figure>
                   ) : (
                     <div className={`grid gap-4 ${images.length === 2 ? 'sm:grid-cols-2' : 'sm:grid-cols-2 md:grid-cols-3'}`}>
                       {images.map((img: any, i: number) => (
                         <figure key={i} className="space-y-2">
-<img src={optimizedImage(img.url, 640)} alt={img.alt || ''} loading="lazy" decoding="async" className="w-full h-48 md:h-64 rounded-xl shadow-sm object-cover" />
+<img src={optimizedImage(img.url, 640)} alt={photoAlt(img, i, images.length)} loading="lazy" decoding="async" className="w-full h-48 md:h-64 rounded-xl shadow-sm object-cover" />
                           {img.caption && <figcaption className="text-center text-xs text-slate-500 italic">{img.caption}</figcaption>}
                         </figure>
                       ))}
