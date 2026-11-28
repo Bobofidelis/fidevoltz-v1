@@ -1,7 +1,7 @@
 // Light build of the syntax highlighter with only the languages tutorials use.
 // The full build ships ~300 languages to every reader, which made tutorial pages slow.
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
-import vscDarkPlus from 'react-syntax-highlighter/dist/esm/styles/prism/vsc-dark-plus';
+import './code-dark.css';
 import arduino from 'react-syntax-highlighter/dist/esm/languages/prism/arduino';
 import bash from 'react-syntax-highlighter/dist/esm/languages/prism/bash';
 import c from 'react-syntax-highlighter/dist/esm/languages/prism/c';
@@ -51,10 +51,12 @@ export function CodeHighlighter({
 }) {
   return (
     <SyntaxHighlighter
-      style={vscDarkPlus}
+      // Colours come from code-dark.css classes instead of an inline style on every token,
+      // which made long tutorials several hundred KB heavier
+      useInlineStyles={false}
       language={resolveLanguage(language)}
       PreTag="div"
-      className={className}
+      className={['code-dark', className].filter(Boolean).join(' ')}
       customStyle={rounded ? undefined : { margin: 0, borderRadius: 0, background: '#1e1e1e' }}
     >
       {code}

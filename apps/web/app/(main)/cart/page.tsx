@@ -219,6 +219,7 @@ export default function CartPage() {
                               size="sm"
                               className="text-slate-400 hover:text-red-500 -mt-2 -mr-2"
                               onClick={() => removeItem(item.productId)}
+                              aria-label={`Remove ${item.name} from cart`}
                             >
                               <Trash2 className="h-5 w-5" />
                             </Button>
@@ -233,6 +234,7 @@ export default function CartPage() {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => decrementQuantity(item.productId)}
+                                  aria-label={`Decrease quantity of ${item.name}`}
                                   disabled={item.quantity <= 1}
                                   className="h-8 w-8 p-0 text-slate-600 hover:bg-slate-100"
                                 >
@@ -253,6 +255,7 @@ export default function CartPage() {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => incrementQuantity(item.productId)}
+                                  aria-label={`Increase quantity of ${item.name}`}
                                   disabled={item.quantity >= item.stockQuantity}
                                   className="h-8 w-8 p-0 text-slate-600 hover:bg-slate-100"
                                 >
