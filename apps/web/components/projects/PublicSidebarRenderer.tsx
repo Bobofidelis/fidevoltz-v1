@@ -1,5 +1,6 @@
-"use client";
-
+// Server component: picks which widget to show. The widgets themselves are client components;
+// keeping this file on the server stops it pulling the tutorial renderer (KaTeX, Markdown,
+// code highlighting) into every reader's browser.
 import {
   TableOfContents,
   LatestPostsWidget,
